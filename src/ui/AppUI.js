@@ -4,11 +4,12 @@ import { G } from '../core/Globals.js';
 import { GroundBounce } from '../materials/GroundBounce.js';
 
 // Binds the Tidewater UI (panel + HUD) to the running app.
+// Lake conditions: wind waves on a short fetch, no ocean swell, ripples lapping the shore
 const SEA = {
-	Calm: { wind: 3.5, fetch: 40, chop: 0.75, swell: 0.28, surf: 0.18, period: 11, whitecaps: 0.2 },
-	Breezy: { wind: 7, fetch: 120, chop: 0.9, swell: 0.48, surf: 0.34, period: 9, whitecaps: 0.5 },
-	Choppy: { wind: 12, fetch: 300, chop: 1.05, swell: 0.68, surf: 0.56, period: 8.5, whitecaps: 0.75 },
-	Storm: { wind: 20, fetch: 900, chop: 1.2, swell: 1.0, surf: 0.9, period: 12, whitecaps: 1 },
+	Still: { wind: 1.2, fetch: 3, chop: 0.6, swell: 0, surf: 0.008, period: 1.6, whitecaps: 0, icon: 'calm' },
+	'Light air': { wind: 3.5, fetch: 3, chop: 0.75, swell: 0, surf: 0.02, period: 2.0, whitecaps: 0.1, icon: 'breezy' },
+	Breezy: { wind: 7, fetch: 4, chop: 0.9, swell: 0, surf: 0.05, period: 2.6, whitecaps: 0.35, icon: 'choppy' },
+	Windy: { wind: 12, fetch: 5, chop: 1.05, swell: 0, surf: 0.09, period: 3.2, whitecaps: 0.7, icon: 'storm' },
 };
 
 export class AppUI {
@@ -78,23 +79,23 @@ export class AppUI {
 
 		const clarity = () => {
 
-			// scale absorption/scattering around the tropical defaults
+			// scale absorption/scattering around the lake's defaults (clear, faintly tea-tinted water)
 			const k = 1 / Math.max( 0.2, s.clarity );
-			G.waterAbsorption.value.set( 0.42, 0.075, 0.035 ).multiplyScalar( 0.6 + 0.4 * k );
-			G.waterScattering.value.set( 0.012, 0.018, 0.024 ).multiplyScalar( k * k );
+			G.waterAbsorption.value.set( 0.46, 0.1, 0.12 ).multiplyScalar( 0.6 + 0.4 * k );
+			G.waterScattering.value.set( 0.009, 0.013, 0.011 ).multiplyScalar( k * k );
 
 		};
 
 		// ---------------------------------------------------------------- Ocean
-		const ocean = ui.addTab( 'ocean', 'Ocean', 'ocean' );
+		const ocean = ui.addTab( 'ocean', 'Lake', 'ocean' );
 		const sea = ocean.addFolder( 'Sea state', { icon: 'wind' } );
 		sea.addPresets( {
-			label: 'Conditions', active: 'Breezy',
+			label: 'Conditions', active: 'Light air',
 			presets: Object.keys( SEA ).map( ( k ) => ( {
-				label: k, icon: k.toLowerCase(),
+				label: k, icon: SEA[ k ].icon,
 				apply: () => {
 
-					const p = SEA[ k ];
+					const { icon, ...p } = SEA[ k ];
 					Object.assign( s, p );
 					spectrum();
 					whitecaps();
@@ -112,9 +113,9 @@ export class AppUI {
 
 		} } );
 		sea.addSlider( { label: 'Wind direction', object: s, key: 'windDir', min: 0, max: 360, step: 1, unit: '°', onChange: spectrum } );
-		sea.addSlider( { label: 'Fetch', object: s, key: 'fetch', min: 5, max: 2000, log: true, unit: 'km', tooltip: 'Distance the wind has blown over open water: longer fetch, longer and higher waves.', onChange: spectrum } );
+		sea.addSlider( { label: 'Fetch', object: s, key: 'fetch', min: 0.5, max: 20, log: true, unit: 'km', tooltip: 'Distance the wind has blown over open water: longer fetch, longer and higher waves.', onChange: spectrum } );
 		sea.addSlider( { label: 'Choppiness', object: s, key: 'chop', min: 0, max: 1.6, step: 0.01, tooltip: 'Horizontal displacement: sharp crests, wide troughs.', onChange: ( v ) => { fft.choppiness.value = v; } } );
-		sea.addSlider( { label: 'Ocean swell', object: s, key: 'swell', min: 0, max: 2, step: 0.01, onChange: spectrum } );
+
 		sea.addSlider( { label: 'Whitecaps', object: s, key: 'whitecaps', min: 0, max: 1, step: 0.01, onChange: whitecaps } );
 		const water = ocean.addFolder( 'Water', { icon: 'droplet' } );
 		water.addSlider( { label: 'Clarity', object: s, key: 'clarity', min: 0.3, max: 2, step: 0.01, tooltip: 'Lower = more suspended sediment and plankton (greener, murkier).', onChange: clarity } );
@@ -122,8 +123,8 @@ export class AppUI {
 		// ---------------------------------------------------------------- Shore
 		const shoreTab = ui.addTab( 'shore', 'Shore', 'shore' );
 		const surf = shoreTab.addFolder( 'Surf', { icon: 'wave' } );
-		surf.addSlider( { label: 'Wave height', object: s, key: 'surf', min: 0, max: 1.4, step: 0.01, unit: 'm', format: ( v ) => `${ ( v * 2 ).toFixed( 2 ) } m`, onChange: ( v ) => { shore.amplitude.value = v; } } );
-		surf.addSlider( { label: 'Wave period', object: s, key: 'period', min: 5, max: 16, step: 0.1, unit: 's', onChange: ( v ) => { shore.period.value = v; } } );
+		surf.addSlider( { label: 'Wave height', object: s, key: 'surf', min: 0, max: 0.3, step: 0.005, unit: 'm', format: ( v ) => `${ ( v * 2 ).toFixed( 2 ) } m`, onChange: ( v ) => { shore.amplitude.value = v; } } );
+		surf.addSlider( { label: 'Wave period', object: s, key: 'period', min: 1, max: 6, step: 0.1, unit: 's', onChange: ( v ) => { shore.period.value = v; } } );
 		surf.addSlider( { label: 'Breaking depth ratio', object: s, key: 'gamma', min: 0.5, max: 1.1, step: 0.01, tooltip: 'Waves break when height exceeds this fraction of the depth.', onChange: ( v ) => { shore.gamma.value = v; } } );
 		surf.addSlider( { label: 'Curl', object: s, key: 'curl', min: 0, max: 1.5, step: 0.01, onChange: ( v ) => { shore.curl.value = v; } } );
 		if ( app.breakers ) {

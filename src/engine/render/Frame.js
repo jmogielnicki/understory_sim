@@ -47,9 +47,9 @@ const FRAME_FIELDS = {
 	horizonColor: [ 'vec3f', new Color( 0.6, 0.7, 0.8 ) ],
 	cameraWaterHeight: [ 'f32', 0 ],
 	// Water optical properties (per meter).
-	waterAbsorption: [ 'vec3f', new Vector3( 0.42, 0.075, 0.035 ) ],
+	waterAbsorption: [ 'vec3f', new Vector3( 0.46, 0.1, 0.12 ) ],
 	windSpeed: [ 'f32', 7 ], // m/s at 10 m height
-	waterScattering: [ 'vec3f', new Vector3( 0.012, 0.018, 0.024 ) ],
+	waterScattering: [ 'vec3f', new Vector3( 0.009, 0.013, 0.011 ) ],
 	envIntensity: [ 'f32', 1 ],
 	// direction the wind blows toward
 	windDir: [ 'vec2f', new Vector2( 0.35, 0.94 ).normalize() ],

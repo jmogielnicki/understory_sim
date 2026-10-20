@@ -26,6 +26,20 @@ export const VIEWS = {
 	underwater: { p: [ 330, - 2.0, - 160 ], yaw: Math.PI * 0.8, pitch: - 0.1, time: 13.0 },
 	// the shallows from above
 	shallows: { p: [ 390, 3.0, - 230 ], yaw: Math.PI, pitch: - 0.6, time: 12.0 },
+	// the village from over the cove, looking up the hillsides
+	villageAerial: { p: [ 375, 62, - 170 ], yaw: - 0.05, pitch: - 0.32, time: 15.5 },
+	// the layout view: from the hill above the village, out over it to the lake and the islands
+	villageLayout: { p: [ 400, 105, - 560 ], yaw: Math.PI + 0.12, pitch: - 0.36, time: 15.5 },
+	// on the green, looking up at the first rows of homes
+	green: { p: [ 330, 1.7, - 304 ], agl: true, yaw: - 0.15, pitch: 0.06, time: 16.0 },
+	// in front of a home (A1b), its terrace and arches
+	homeFront: { p: [ 321, 1.7, - 318 ], agl: true, yaw: 0.08, pitch: 0.08, time: 15.5 },
+	// from the dock, the communal buildings
+	towers: { p: [ 401, 1.7, - 232 ], agl: true, yaw: 0.9, pitch: 0.12, time: 16.5 },
+	// the great hall (T1) from its forecourt
+	hall: { p: [ 350.5, 1.7, - 256 ], agl: true, yaw: 0.15, pitch: 0.28, time: 15.0 },
+	// by the pond, toward the bridge and the homes west of the stream
+	pond: { p: [ 254, 1.7, - 298 ], agl: true, yaw: 0.85, pitch: 0.0, time: 16.0 },
 	// the top of the Rattlesnake cliffs (outside the walkable area: the far terrain), looking south
 	summit: { p: [ - 140, 30, - 790 ], agl: true, yaw: Math.PI * 0.9, pitch: - 0.18, time: 14.0 },
 };

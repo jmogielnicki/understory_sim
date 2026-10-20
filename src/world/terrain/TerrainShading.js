@@ -45,30 +45,32 @@ function f( x ) {
 }
 
 // ---- palette (sRGB picked from photo references, stored linear)
+// New Hampshire granite: grey with a faint pink of feldspar, pale lichen crusts, a dark stain ring at
+// the lake's waterline and a brown film of algae below it
 export const PALETTE = {
-	rockDark: srgb( 0.15, 0.145, 0.135 ),
-	rockMid: srgb( 0.3, 0.285, 0.265 ),
-	rockLight: srgb( 0.48, 0.455, 0.42 ),
-	rockWarm: srgb( 0.44, 0.37, 0.30 ),
-	lichenPale: srgb( 0.70, 0.70, 0.64 ),
-	lichenOrange: srgb( 0.78, 0.50, 0.20 ),
-	blackZone: srgb( 0.075, 0.075, 0.07 ),
-	barnacle: srgb( 0.78, 0.76, 0.70 ),
-	algae: srgb( 0.20, 0.27, 0.10 ),
-	coralline: srgb( 0.62, 0.44, 0.46 ),
-	moss: srgb( 0.19, 0.29, 0.08 ),
+	rockDark: srgb( 0.24, 0.23, 0.22 ),
+	rockMid: srgb( 0.43, 0.42, 0.4 ),
+	rockLight: srgb( 0.62, 0.6, 0.57 ),
+	rockWarm: srgb( 0.56, 0.48, 0.42 ),
+	lichenPale: srgb( 0.73, 0.75, 0.68 ),
+	lichenOrange: srgb( 0.6, 0.62, 0.4 ),
+	blackZone: srgb( 0.13, 0.12, 0.1 ),
+	barnacle: srgb( 0.6, 0.58, 0.54 ),
+	algae: srgb( 0.25, 0.23, 0.12 ),
+	coralline: srgb( 0.31, 0.25, 0.15 ),
+	moss: srgb( 0.18, 0.28, 0.07 ),
 	mossDry: srgb( 0.3, 0.34, 0.14 ),
 };
 
-// ---- tropical meadow (tall guinea / elephant grass)
+// ---- summer meadow (timothy, fescue, clover; wildflowers are plants)
 // The tone is shared by the terrain and the grass field (blade base colour): both evaluate it from
 // the same inputs, so the geometric grass fades into the ground without a visible boundary.
 export const MEADOW = {
-	lush: srgb( 0.13, 0.2, 0.05 ),
-	green: srgb( 0.25, 0.32, 0.1 ),
-	olive: srgb( 0.36, 0.37, 0.14 ),
-	yellow: srgb( 0.5, 0.46, 0.2 ),
-	straw: srgb( 0.62, 0.54, 0.33 ),
+	lush: srgb( 0.12, 0.2, 0.05 ),
+	green: srgb( 0.23, 0.32, 0.1 ),
+	olive: srgb( 0.33, 0.37, 0.14 ),
+	yellow: srgb( 0.46, 0.45, 0.2 ),
+	straw: srgb( 0.58, 0.53, 0.33 ),
 	soil: srgb( 0.17, 0.13, 0.08 ),
 };
 
@@ -194,7 +196,7 @@ fn terrainRockSurface( p: vec3f, N: vec3f, h: f32, mcr: f32, seed: f32, mossAmou
 	col = col * ( 1.0 - stain * 0.4 ) * ( smoothstep( 0.35, 0.2, stainS ) * steep * 0.12 + 1.0 );
 
 	// lichens on the dry upper faces
-	let dry = smoothstep( 2.6, 4.0, h );
+	let dry = smoothstep( 0.6, 1.5, h );
 	let lichen = smoothstep( 0.6, 0.78, mid.y ) * smoothstep( 0.2, 0.7, N.y ) * dry * smoothstep( 0.45, 0.65, mcr );
 	col = mix( col, PAL_lichenPale, lichen * 0.45 );
 	col = mix( col, PAL_lichenOrange, smoothstep( 0.8, 0.88, mid.y ) * dry * smoothstep( 0.5, 0.8, N.y ) * 0.3 );
@@ -202,24 +204,24 @@ fn terrainRockSurface( p: vec3f, N: vec3f, h: f32, mcr: f32, seed: f32, mossAmou
 	// moss / grass on ledges and tops, ferns hanging along the bedding planes of steep faces
 	let ledge = smoothstep( 0.55, 0.7, strata ) * steep * strataAA * smoothstep( 0.4, 0.6, mid.w + ( mcr - 0.5 ) * 0.4 );
 	let moss = max( smoothstep( 0.62, 0.9, N.y + ( big.x - 0.5 ) * 0.5 + ( mcr - 0.5 ) * 0.3 ), ledge * 0.8 )
-		* smoothstep( 2.5, 5.0, h ) * mossAmount;
+		* smoothstep( 0.4, 1.2, h ) * mossAmount;
 	col = mix( col, mix( PAL_moss, PAL_mossDry, mid.w ), moss * 0.9 );
 
-	// shoreline zonation: black lichen band (splash zone), barnacles and algae in the intertidal
-	let splash = smoothstep( 0.5, 1.0, h ) * smoothstep( 2.8, 1.8, h + mid.w * 1.2 ) * smoothstep( 0.35, 0.6, mcr + mid.w * 0.3 );
-	col = mix( col, PAL_blackZone, splash * 0.55 );
+	// shoreline zonation: the lake's dark stain ring just above the waterline, a brown algae film below
+	let splash = smoothstep( 0.0, 0.15, h ) * smoothstep( 0.9, 0.45, h + mid.w * 0.4 ) * smoothstep( 0.3, 0.55, mcr + mid.w * 0.3 );
+	col = mix( col, PAL_blackZone, splash * 0.5 );
 	// sun-bleached, weathered upper faces
-	col = mix( col, PAL_rockLight, smoothstep( 0.35, 0.95, N.y ) * smoothstep( 1.5, 3.0, h ) * 0.3 );
-	let inter = smoothstep( -0.7, -0.2, h ) * smoothstep( 0.7, 0.2, h );
-	let barn = smoothstep( 0.62, 0.72, fine.z ) * inter * fineK;
+	col = mix( col, PAL_rockLight, smoothstep( 0.35, 0.95, N.y ) * smoothstep( 0.5, 1.5, h ) * 0.3 );
+	let inter = smoothstep( -0.7, -0.2, h ) * smoothstep( 0.25, 0.0, h );
+	let barn = 0.0;
 	col = mix( col, PAL_algae, inter * smoothstep( 0.4, 0.6, mid.y ) * 0.6 );
 	col = mix( col, PAL_barnacle, barn * 0.8 );
-	// below the water: algae films and pink coralline crusts
+	// below the water: algae films, browner in patches
 	let sub = smoothstep( -0.3, -1.2, h );
 	col = mix( col, mix( PAL_algae, PAL_coralline, smoothstep( 0.45, 0.7, mid.w ) ), sub * 0.55 );
 
-	// wet below the swash line (dark, glossy)
-	let wet = smoothstep( 1.0, 0.25, h + mid.w * 0.3 );
+	// wet at the waterline (dark, glossy)
+	let wet = smoothstep( 0.35, 0.05, h + mid.w * 0.15 );
 	col = col * mix( 1.0, 0.55, wet );
 
 	var r: RockSurface;

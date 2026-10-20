@@ -25,7 +25,7 @@ import { FarTerrain } from './world/FarTerrain.js';
 import { computeShoreField } from './world/ShoreField.js';
 import { WORLD } from './world/WorldLayout.js';
 import { Colliders } from './world/Colliders.js';
-import { Village } from './world/Village.js';
+import { Settlement } from './world/Settlement.js';
 import { Reef } from './world/Reef.js';
 import { BoatModel } from './world/BoatModel.js';
 import { Rocks } from './world/Rocks.js';
@@ -137,9 +137,10 @@ export class App {
 		await progress( 0.06, 'Shaping the hills…' );
 		this.terrainData = await TerrainData.load();
 		this.colliders = new Colliders();
-		// the village flattens building pads into the heightmap: build it before any terrain
-		// data is derived (shore field, GPU textures, meshes)
-		this.village = null;
+		// the village shapes the ground (terraces, roof mounds, the stream and the pond): build it before any
+		// terrain data is derived (shore field, GPU textures, meshes)
+		await progress( 0.12, 'Building the village…' );
+		this.village = qs.has( 'noVillage' ) ? null : new Settlement( { scene, terrain: this.terrainData, colliders: this.colliders } );
 		this.vegetation = null;
 
 		await progress( 0.19, 'Filling the lake…' );
@@ -162,7 +163,13 @@ export class App {
 
 		// ---------------------------------------------------------------- ocean
 		await progress( 0.3, 'Simulating the ocean…' );
-		this.fft = new OceanFFT( renderer );
+		// a lake: short wind waves on a few kilometres of fetch, no ocean swell. The cascades are scaled down
+		// to the lake's chop (peak wavelengths of a few metres) and the dispersion feels ~20 m of depth.
+		this.fft = new OceanFFT( renderer, {
+			sizes: [ 113, 29.3, 7.1, 1.73 ], depth: 20, choppiness: 0.75,
+			local: { windSpeed: 3.5, windDirection: 40, fetch: 3, spreadBlend: 0.8, swell: 0 },
+			swell: { scale: 0, windSpeed: 2, windDirection: 40, fetch: 3, spreadBlend: 1.0, swell: 0, shortWavesFade: 0.1 },
+		} );
 		this.foamTexture = createFoamTexture( renderer );
 		this.oceanLOD = new CDLOD( { gridSize: Number( qs.get( 'G' ) || 32 ), leafSize: 8, levels: 12, minY: - 25, maxY: 25 } );
 		this.surface = new WaterSurface( { fft: this.fft, cdlod: this.oceanLOD, foamTexture: this.foamTexture } );
@@ -170,6 +177,9 @@ export class App {
 		this.seaDetail = new SeaDetail();
 		this.surface.detail = this.seaDetail;
 		this.shore = new ShoreWaves( this.terrainGPU );
+		// ripples lapping at the shore rather than surf
+		this.shore.amplitude.value = 0.02;
+		this.shore.period.value = 2.0;
 		this.surface.shore = this.shore;
 		this.caustics = qs.has( 'noCaustics' ) ? null : new Caustics( renderer, this.fft );
 		if ( this.caustics ) this.caustics.detail = this.seaDetail;
