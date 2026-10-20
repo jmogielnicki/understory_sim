@@ -8,24 +8,32 @@ import { G } from '../engine/render/Frame.js';
 import { bakeTerrainMaps, buildShadowHeights } from './terrain/TerrainBake.js';
 import { getDetailTexture } from './terrain/DetailTextures.js';
 import { detailBinding } from './terrain/TerrainShading.js';
+import { NO_WATER } from './TerrainData.js';
 
 // GPU-side terrain data shared by every shader that needs ground height:
-// ocean (depth attenuation / hiding under land), shore waves, terrain mesh,
-// particles, water queries.
+// the lake (depth attenuation / hiding under land), terrain meshes, particles, water queries.
 //
-// Textures (all over the terrain domain unless noted):
-//   heightTexture  R32F   exact heights, bilinear filtering done manually (heightAt)
+// Textures (all over the near terrain domain unless noted):
+//   heightTexture  R32F array, 2048^2 x 4 layers, bilinear filtering done manually (heightAt):
+//                  0 the near grid (exact heights), 1 the mid grid (8 km, 4 m), 2 the far grid (32 km, 16 m),
+//                  3 over the far domain: the height of the water surface (0 = Squam Lake, other lakes and
+//                  ponds at their own level, NO_WATER = -60 where there is none)
+//                  (one binding: every lit material and post pass reads it, under the per-stage texture budget)
 //   normalTexture  RGBA8  macro normal xz (encoded), rock mask, baked ambient occlusion (mipmapped)
 //   splatTexture   RGBA8  loose sand, worn ground / paths, gullies (land) or seagrass (seabed),
 //                         seabed rubble / the eroded beach scarp face on land (mipmapped)
 //   detailTexture  RGBA8  512^2 tileable detail heights (rock, soil, sand, fbm), see DetailTextures
-//   shadowHeightTexture R16F 512^2 (4 m) heights with max-mips (input of the sun shadow bake)
-//   sunShadowTexture    RGBA16F storage 512^2: 'shadow top' height and occluder distance toward the
-//                       key light, re-baked on the GPU when G.sunDir moves (updateSunShadow)
+//   shadowHeightTexture R16F 1024^2 over the mid domain (8 m) with max-mips, farShadowHeightTexture the
+//                       same over the far domain (32 m): inputs of the sun shadow bake
+//   sunShadowTexture    RGBA16F storage array 1024^2 x 2: 'shadow top' height and occluder distance toward
+//                       the key light, re-baked on the GPU when G.sunDir moves (updateSunShadow); layer 0
+//                       over the mid domain (8 m), layer 1 over the far domain (32 m)
 //
 // WGSL module (`terrainGPU.module`, prefix `terrain`), usable from any stage unless noted:
 //   terrainUvOf( xz: vec2f ) -> vec2f                   domain uv (0..1) of a world xz
-//   terrainHeightAt( xz: vec2f ) -> f32                 exact bilinear height (-90 outside the domain)
+//   terrainHeightAt( xz: vec2f ) -> f32                 exact bilinear height (near, else mid, else far grid)
+//   terrainWaterLevelAt( xz: vec2f ) -> f32             height of the water surface (NO_WATER where there is none)
+//   terrainInNear( xz: vec2f ) -> bool                  inside the near (detailed) domain
 //   terrainNormalRock( xz: vec2f ) -> vec4f             macro normal xz (-1..1), rock mask, AO — fragment only
 //                                                       (implicit derivatives); terrainNormalRockLevel( xz, level )
 //   terrainNormalAt( xz: vec2f ) -> vec3f               unit macro normal (mip 0, any stage)
@@ -33,14 +41,14 @@ import { detailBinding } from './terrain/TerrainShading.js';
 //                                                       terrainSplatLevel( xz, level )
 //   terrainShoreSample( xz: vec2f ) -> vec4f            shore field (T, dirX, dirZ, exposure), bilinear
 //   terrainSunShadowAt( P: vec3f ) -> f32               heightfield sun shadow: 0 in the hills' shadow .. 1 lit
-// Bindings: terrainParams (TerrainParams: origin, size, res, shoreRes, sunBake, sunBaked), terrainHeightTex,
-// terrainNormalTex, terrainSplatTex, terrainDetailTex (tileable: sample with smpLinearRepeat / smpAnisoRepeat),
-// terrainShoreTex, terrainSunShadowTex.
-const SUN_N = 512;
+// Bindings: terrainParams (TerrainParams: origin, size, res, shoreRes, sunBake, sunBaked, midSize, farSize,
+// gridRes, noWater), terrainHeightTex (array), terrainNormalTex, terrainSplatTex, terrainDetailTex
+// (tileable: sample with smpLinearRepeat / smpAnisoRepeat), terrainShoreTex, terrainSunShadowTex (array).
+const SUN_N = 1024; // texels per side of both sun shadow layers (8 m over the mid domain, 32 m over the far one)
 const SUN_T0 = 24; // m: nearer occluders are left to the shadow map / N.L
 const SUN_DT0 = 6;
-const SUN_GROWTH = 1.22;
-const SUN_STEPS = 24; // reaches ~3 km
+const SUN_GROWTH = 1.2;
+const SUN_STEPS = 32; // reaches ~13 km: the Squam Range shades the lake at sunset
 
 function dataTexture( data, width, height, format, label, mips = false ) {
 
@@ -59,8 +67,6 @@ export class TerrainGPU {
 		const res = terrain.res;
 		const t0 = performance.now();
 
-		// heights: R32F, loaded with manual bilinear filtering (no sampler / float filtering needed)
-		this.heightTexture = dataTexture( terrain.heights, res, res, 'r32float', 'terrainHeights' );
 
 		const maps = bakeTerrainMaps( terrain );
 		// trilinear, clamp to edge (smpLinearClamp), linear data (no colour space)
@@ -68,18 +74,43 @@ export class TerrainGPU {
 		this.splatTexture = dataTexture( maps.splat, res, res, 'rgba8unorm', 'terrainSplat', true );
 		this.detailTexture = getDetailTexture();
 
-		// coarse heights for the sun shadow march (half float is filterable everywhere)
-		const sh = buildShadowHeights( terrain, 4 );
-		const st = new Texture( { label: 'terrainShadowHeights', width: sh.levels[ 0 ].width, height: sh.levels[ 0 ].height, format: 'r16float', mips: sh.levels.length, usage: [ 'sample', 'copyDst' ] } );
-		st.getGPU();
-		sh.levels.forEach( ( l, i ) => st.upload( l.data, { mip: i, width: l.width, height: l.height } ) );
-		this.shadowHeightTexture = st;
+		// heights: R32F array (near, mid, far, water level), loaded with manual bilinear filtering (no sampler /
+		// float filtering needed); the near grid blends into the mid one at its edge, the mid into the far one
+		const mid = terrain.mid, far = terrain.far, w = terrain.water;
+		const n = res * res;
+		if ( mid.res !== res || far.res !== res || w.res !== res ) throw new Error( 'TerrainGPU: the grids must share one resolution' );
+		const layers = new Float32Array( n * 4 );
+		layers.set( terrain.heights, 0 );
+		layers.set( mid.heights, n );
+		layers.set( far.heights, 2 * n );
+		for ( let k = 0; k < n; k ++ ) layers[ 3 * n + k ] = terrain.waterLevels[ w.ids[ k ] ];
+		this.heightTexture = new Texture( { label: 'terrainHeights', width: res, height: res, depth: 4, dimension: '2d-array', format: 'r32float', usage: [ 'sample', 'copyDst' ], data: layers } );
+		this.heightTexture.getGPU();
+
+		// coarse heights for the sun shadow march (half float is filterable everywhere): the mid grid at
+		// 8 m, the far grid at 32 m
+		const shadowTex = ( sh, label ) => {
+
+			const st = new Texture( { label, width: sh.levels[ 0 ].width, height: sh.levels[ 0 ].height, format: 'r16float', mips: sh.levels.length, usage: [ 'sample', 'copyDst' ] } );
+			st.getGPU();
+			sh.levels.forEach( ( l, i ) => st.upload( l.data, { mip: i, width: l.width, height: l.height } ) );
+			return st;
+
+		};
+
+		const sh = buildShadowHeights( mid, 2 );
+		const shf = buildShadowHeights( far, 2 );
+		this.shadowHeightTexture = shadowTex( sh, 'terrainShadowHeights' );
+		this.farShadowHeightTexture = shadowTex( shf, 'terrainFarShadowHeights' );
 		this.shadowTexel = sh.texel;
+		this.farShadowTexel = shf.texel;
 		this.maxHeight = sh.maxHeight;
 
 		this.size = terrain.size;
 		this.origin = terrain.origin;
 		this.res = res;
+		this.midSize = mid.size;
+		this.farSize = far.size;
 
 		this.uniforms = new UniformBlock( 'TerrainParams', {
 			origin: [ 'f32', terrain.origin ],
@@ -88,6 +119,10 @@ export class TerrainGPU {
 			shoreRes: [ 'f32', 1 ],
 			sunBake: [ 'vec3f', new Vector3( 0, 1, 0 ) ],
 			sunBaked: [ 'f32', 0 ], // 0 until the first bake: everything lit
+			midSize: [ 'f32', mid.size ],
+			farSize: [ 'f32', far.size ],
+			gridRes: [ 'f32', mid.res ], // mid and far grids (and the water map)
+			noWater: [ 'f32', NO_WATER ],
 		}, { label: 'terrainParams' } );
 		// three-style handles (terOrigin / terSize / terSunBake / terSunBaked)
 		this.uOrigin = this.uniforms.fields.origin;
@@ -127,47 +162,55 @@ export class TerrainGPU {
 
 	// ------------------------------------------------------------ heightfield sun shadow
 
-	// World-space shadow map of the terrain for the key light: for every 4 m cell the lowest height
-	// that still sees the light past the terrain (max over the march of h(q) - t * tan(elevation))
-	// and the distance to that occluder (penumbra width). One texture fetch gives soft, long hill
-	// shadows for any point - terrain, rocks, buildings, plants - far beyond the shadow map range.
+	// World-space shadow maps of the terrain for the key light: for every cell the lowest height that still
+	// sees the light past the terrain (max over the march of h(q) - t * tan(elevation)) and the distance to
+	// that occluder (penumbra width). One texture fetch gives soft, long hill shadows for any point -
+	// terrain, rocks, buildings, plants - far beyond the shadow map range. Two maps: the mid domain at 8 m
+	// (everything near the lake) and the far domain at 64 m (the far terrain). The march reads the 8 m
+	// heights of the mid grid, and the 32 m heights of the far grid once it leaves the mid domain.
 	_initSunShadow() {
 
 		// nearest + textureLoad (manual bilinear in terrainSunShadowAt): no sampler needed, every lit
 		// material includes this lookup
-		this.sunShadowTexture = new Texture( { label: 'terrainSunShadow', width: SUN_N, height: SUN_N, format: 'rgba16float', usage: [ 'sample', 'storage' ] } );
+		this.sunShadowTexture = new Texture( { label: 'terrainSunShadow', width: SUN_N, height: SUN_N, depth: 2, dimension: '2d-array', format: 'rgba16float', usage: [ 'sample', 'storage' ] } );
 		this.uSunBake = this.uniforms.fields.sunBake;
 		this.uSunBaked = this.uniforms.fields.sunBaked;
 		this._sunBaked = false;
 
-		const invTexel = 1 / this.shadowTexel;
-		this.sunShadowKernel = new ComputeKernel( {
-			label: 'Terrain Sun Shadow',
+		const N = SUN_N;
+		const kernel = ( layer, size, label ) => new ComputeKernel( {
+			label,
 			modules: [ commonModule ],
 			bindings: {
 				terrainParams: { uniform: this.uniforms },
 				terrainShadowHeights: { texture: this.shadowHeightTexture },
+				terrainFarShadowHeights: { texture: this.farShadowHeightTexture },
 				terrainSunShadowOut: { storageTexture: this.sunShadowTexture, access: 'write' },
 			},
 			workgroupSize: [ 8, 8, 1 ],
 			code: /* wgsl */`
 @compute @workgroup_size( WG_X, WG_Y, WG_Z )
 fn main( @builtin( global_invocation_id ) gid: vec3u ) {
-	if ( gid.x >= ${ SUN_N }u || gid.y >= ${ SUN_N }u ) { return; }
+	if ( gid.x >= ${ N }u || gid.y >= ${ N }u ) { return; }
 	let ij = vec2f( gid.xy );
-	let xz = ( ij + 0.5 ) / ${ SUN_N }.0 * terrainParams.size + terrainParams.origin;
+	let xz = ( ij + 0.5 ) / ${ N }.0 * ${ size.toFixed( 1 ) } - ${ ( size / 2 ).toFixed( 1 ) };
 	let L = terrainParams.sunBake;
 	let lxz = max( length( L.xz ), 1e-4 );
 	let dir = L.xz / lxz;
 	let tanEl = L.y / lxz;
 	var top = -1e4;
 	var occ = 0.0;
-	var t = f32( ${ SUN_T0 } );
-	var dt = f32( ${ SUN_DT0 } );
+	var t = f32( ${ SUN_T0 } ) * ${ ( size / 8192 ).toFixed( 4 ) };
+	var dt = f32( ${ SUN_DT0 } ) * ${ Math.max( 1, size / 8192 ).toFixed( 4 ) };
 	for ( var i = 0; i < ${ SUN_STEPS }; i++ ) {
 		let q = xz + dir * t;
-		let uv = ( q - terrainParams.origin ) / terrainParams.size;
-		let hq = textureSampleLevel( terrainShadowHeights, smpLinearClamp, uv, log2( max( dt * ${ invTexel.toFixed( 8 ) }, 1.0 ) ) ).x;
+		let midUv = q / terrainParams.midSize + 0.5;
+		var hq: f32;
+		if ( all( midUv > vec2f( 0.0 ) ) && all( midUv < vec2f( 1.0 ) ) ) {
+			hq = textureSampleLevel( terrainShadowHeights, smpLinearClamp, midUv, log2( max( dt / ${ this.shadowTexel.toFixed( 4 ) }, 1.0 ) ) ).x;
+		} else {
+			hq = textureSampleLevel( terrainFarShadowHeights, smpLinearClamp, q / terrainParams.farSize + 0.5, log2( max( dt / ${ this.farShadowTexel.toFixed( 4 ) }, 1.0 ) ) ).x;
+		}
 		let v = hq - t * tanEl;
 		if ( v > top ) {
 			top = v;
@@ -176,14 +219,16 @@ fn main( @builtin( global_invocation_id ) gid: vec3u ) {
 		dt *= ${ SUN_GROWTH };
 		t += dt;
 	}
-	textureStore( terrainSunShadowOut, vec2u( gid.xy ), vec4f( top, occ, 0.0, 1.0 ) );
+	textureStore( terrainSunShadowOut, vec2u( gid.xy ), ${ layer }, vec4f( top, occ, 0.0, 1.0 ) );
 }
 `,
 		} );
+		this.sunShadowKernel = kernel( 0, this.terrain.mid.size, 'Terrain Sun Shadow' );
+		this.farSunShadowKernel = kernel( 1, this.terrain.far.size, 'Terrain Far Sun Shadow' );
 
 	}
 
-	// Re-bake the sun shadow map when the key light moved (cheap: ~6 M texture fetches).
+	// Re-bake the sun shadow maps when the key light moved (cheap: ~10 M texture fetches).
 	// `renderer` is unused (kept for the call sites); the dispatch records into the frame encoder.
 	updateSunShadow( renderer, force = false ) {
 
@@ -191,6 +236,7 @@ fn main( @builtin( global_invocation_id ) gid: vec3u ) {
 		if ( ! force && this._sunBaked && L.angleTo( this.uSunBake.value ) < 0.0015 ) return false;
 		this.uSunBake.value.copy( L );
 		this.sunShadowKernel.dispatch( [ SUN_N / 8, SUN_N / 8, 1 ] );
+		this.farSunShadowKernel.dispatch( [ SUN_N / 8, SUN_N / 8, 1 ] );
 		this._sunBaked = true;
 		this.uSunBaked.value = 1;
 		return true;
@@ -222,22 +268,45 @@ fn terrainUvOf( xz: vec2f ) -> vec2f {
 	return ( xz - terrainParams.origin ) / terrainParams.size;
 }
 
-// exact bilinear height at world xz (matches TerrainData.heightAt)
-fn terrainHeightAt( xz: vec2f ) -> f32 {
-	let res = terrainParams.res;
-	let f = ( xz - terrainParams.origin ) / terrainParams.size * res - 0.5;
+// manual bilinear value from one layer of the height array (a grid centred on the origin), clamped at its edge
+fn terrainGridHeight( layer: i32, xz: vec2f, size: f32, res: f32 ) -> f32 {
+	let f = ( xz / size + 0.5 ) * res - 0.5;
 	let fc = clamp( f, vec2f( 0.0 ), vec2f( res - 1.001 ) );
 	let i = floor( fc );
 	let t = fract( fc );
 	let ii = vec2i( i );
-	let a = textureLoad( terrainHeightTex, ii, 0 ).x;
-	let b = textureLoad( terrainHeightTex, ii + vec2i( 1, 0 ), 0 ).x;
-	let c = textureLoad( terrainHeightTex, ii + vec2i( 0, 1 ), 0 ).x;
-	let d = textureLoad( terrainHeightTex, ii + vec2i( 1, 1 ), 0 ).x;
-	let h = mix( mix( a, b, t.x ), mix( c, d, t.x ), t.y );
-	// outside the domain: deep ocean floor
-	let outside = f.x < 0.0 || f.y < 0.0 || f.x > res - 1.0 || f.y > res - 1.0;
-	return select( h, -90.0, outside );
+	let a = textureLoad( terrainHeightTex, ii, layer, 0 ).x;
+	let b = textureLoad( terrainHeightTex, ii + vec2i( 1, 0 ), layer, 0 ).x;
+	let c = textureLoad( terrainHeightTex, ii + vec2i( 0, 1 ), layer, 0 ).x;
+	let d = textureLoad( terrainHeightTex, ii + vec2i( 1, 1 ), layer, 0 ).x;
+	return mix( mix( a, b, t.x ), mix( c, d, t.x ), t.y );
+}
+
+fn terrainInNear( xz: vec2f ) -> bool {
+	let f = ( xz - terrainParams.origin ) / terrainParams.size * terrainParams.res - 0.5;
+	return all( f >= vec2f( 0.0 ) ) && all( f <= vec2f( terrainParams.res - 1.0 ) );
+}
+
+// exact bilinear height at world xz (matches TerrainData.heightAt): the near grid, else the mid grid,
+// else the far grid (the finer grids blend into the coarser ones at their edges)
+fn terrainHeightAt( xz: vec2f ) -> f32 {
+	if ( terrainInNear( xz ) ) {
+		return terrainGridHeight( 0, xz - ( terrainParams.origin + terrainParams.size * 0.5 ), terrainParams.size, terrainParams.res );
+	}
+	let gr = terrainParams.gridRes;
+	let midEdge = terrainParams.midSize * 0.5 - terrainParams.midSize / gr;
+	if ( all( abs( xz ) < vec2f( midEdge ) ) ) {
+		return terrainGridHeight( 1, xz, terrainParams.midSize, gr );
+	}
+	return terrainGridHeight( 2, xz, terrainParams.farSize, gr );
+}
+
+// height of the water surface (0: the lake; other lakes at their own level; terrainParams.noWater where
+// there is none: below every terrain height)
+fn terrainWaterLevelAt( xz: vec2f ) -> f32 {
+	let uv = xz / terrainParams.farSize + 0.5;
+	let inside = all( uv > vec2f( 0.0 ) ) && all( uv < vec2f( 1.0 ) );
+	return select( terrainParams.noWater, terrainGridHeight( 3, xz, terrainParams.farSize, terrainParams.gridRes ), inside );
 }
 
 // filtered normal (xz components), rock mask, ambient occlusion
@@ -281,15 +350,19 @@ fn terrainShoreSample( xz: vec2f ) -> vec4f {
 }
 
 // 0 (in the terrain's shadow) .. 1 (lit) for a world position, soft penumbra that widens with the
-// occluder distance
+// occluder distance (the 8 m map over the mid domain, the 64 m map beyond)
 fn terrainSunShadowAt( P: vec3f ) -> f32 {
+	let midUv = P.xz / terrainParams.midSize + 0.5;
+	let inMid = all( midUv > vec2f( 0.002 ) ) && all( midUv < vec2f( 0.998 ) );
+	let layer = select( 1, 0, inMid );
+	let uv = select( P.xz / terrainParams.farSize + 0.5, midUv, inMid );
 	let N = f32( textureDimensions( terrainSunShadowTex ).x );
-	let st = clamp( terrainUvOf( P.xz ) * N - 0.5, vec2f( 0.0 ), vec2f( N - 1.001 ) );
+	let st = clamp( uv * N - 0.5, vec2f( 0.0 ), vec2f( N - 1.001 ) );
 	let i = vec2i( floor( st ) );
 	let t = fract( st );
 	let s = mix(
-		mix( textureLoad( terrainSunShadowTex, i, 0 ), textureLoad( terrainSunShadowTex, i + vec2i( 1, 0 ), 0 ), t.x ),
-		mix( textureLoad( terrainSunShadowTex, i + vec2i( 0, 1 ), 0 ), textureLoad( terrainSunShadowTex, i + vec2i( 1, 1 ), 0 ), t.x ),
+		mix( textureLoad( terrainSunShadowTex, i, layer, 0 ), textureLoad( terrainSunShadowTex, i + vec2i( 1, 0 ), layer, 0 ), t.x ),
+		mix( textureLoad( terrainSunShadowTex, i + vec2i( 0, 1 ), layer, 0 ), textureLoad( terrainSunShadowTex, i + vec2i( 1, 1 ), layer, 0 ), t.x ),
 		t.y
 	);
 	let w = s.y * 0.012 + 0.35;

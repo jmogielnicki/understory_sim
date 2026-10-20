@@ -274,7 +274,7 @@ fn hazeRay( uv: vec2f ) -> HazeRay {
 // texture is half float, filterable; the materials keep the loads: they are short of samplers)
 fn hazeTerrainSun( P: vec3f ) -> f32 {
 #if HZ_TERRAIN
-	let s = textureSampleLevel( terrainSunShadowTex, smpLinearClamp, terrainUvOf( P.xz ), 0.0 );
+	let s = textureSampleLevel( terrainSunShadowTex, smpLinearClamp, P.xz / terrainParams.midSize + 0.5, 0, 0.0 );
 	let w = s.y * 0.012 + 0.35;
 	return mix( 1.0, smoothstep( -w, w, P.y - s.x ), terrainParams.sunBaked );
 #else

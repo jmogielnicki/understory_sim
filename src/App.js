@@ -21,6 +21,7 @@ import { Environment } from './sky/Environment.js';
 import { TerrainData } from './world/TerrainData.js';
 import { TerrainGPU } from './world/TerrainGPU.js';
 import { Terrain } from './world/Terrain.js';
+import { FarTerrain } from './world/FarTerrain.js';
 import { computeShoreField } from './world/ShoreField.js';
 import { WORLD } from './world/WorldLayout.js';
 import { Colliders } from './world/Colliders.js';
@@ -108,7 +109,7 @@ export class App {
 
 		this.input = new Input( engine.domElement );
 		this.fly = new FlyCamera( camera, engine.domElement, this.input );
-		this.fly.setPose( new Vector3( 20, 6, - 20 ), Math.PI * 0.9, - 0.12 );
+		this.fly.setPose( new Vector3( 420, 30, - 330 ), Math.PI * 0.95, - 0.12 );
 
 		// ---------------------------------------------------------------- sky
 		await progress( 0.04, 'Building the atmosphere…' );
@@ -132,36 +133,27 @@ export class App {
 
 		this.environment = new Environment( renderer, scene, this.sky );
 
-		// ---------------------------------------------------------------- island
-		await progress( 0.06, 'Shaping the island…' );
-		this.terrainData = new TerrainData();
+		// ---------------------------------------------------------------- the lake and its hills
+		await progress( 0.06, 'Shaping the hills…' );
+		this.terrainData = await TerrainData.load();
 		this.colliders = new Colliders();
 		// the village flattens building pads into the heightmap: build it before any terrain
 		// data is derived (shore field, GPU textures, meshes)
-		await progress( 0.12, 'Building the village…' );
-		this.village = new Village( { scene, terrain: this.terrainData, colliders: this.colliders } );
-		if ( ! qs.has( 'noVeg' ) ) {
+		this.village = null;
+		this.vegetation = null;
 
-			await progress( 0.14, 'Planting the island…' );
-			this.vegetation = new Vegetation( { scene, terrain: this.terrainData, village: this.village } );
-			useStaticVelocity( this.vegetation.group );
-
-		}
-
-		await progress( 0.19, 'Rolling in the swell…' );
+		await progress( 0.19, 'Filling the lake…' );
 		this.shoreField = computeShoreField( this.terrainData, { res: 512, swellDir: [ WORLD.swellDir.x, WORLD.swellDir.y ] } );
 		this.terrainGPU = new TerrainGPU( this.terrainData, this.shoreField );
 		// terrain and rocks apply the heightfield sun shadow (long hill shadows) in their own lighting
 		this.terrain = new Terrain( { scene, terrainData: this.terrainData, terrainGPU: this.terrainGPU, renderer } );
-		this.rocks = new Rocks( { scene, terrain: this.terrain, village: this.village, colliders: this.colliders } );
-		// driftwood (CC0 photoscans), wrack, pebbles and village clutter
-		this.debris = new Debris( { scene, terrain: this.terrain, village: this.village, vegetation: this.vegetation, rocks: this.rocks, colliders: this.colliders } );
+		// the land beyond the walkable area, to the horizon
+		this.farTerrain = new FarTerrain( { scene, terrainData: this.terrainData, terrainGPU: this.terrainGPU } );
+		this.rocks = null;
+		this.debris = null;
 		// these apply the heightfield sun shadow in their own lighting model (see UnderwaterLighting)
 		this.terrain.mesh.material.appliesHillShadow = true;
-		this.rocks.material.appliesHillShadow = true;
-
-		await progress( 0.23, 'Growing the reef…' );
-		this.reef = new Reef( { scene, terrain: this.terrainData, shoreField: this.shoreField } );
+		this.reef = null;
 
 		this.boat = new BoatModel();
 		scene.add( this.boat.group );
@@ -171,7 +163,6 @@ export class App {
 		// ---------------------------------------------------------------- ocean
 		await progress( 0.3, 'Simulating the ocean…' );
 		this.fft = new OceanFFT( renderer );
-		if ( this.reef.setOcean ) this.reef.setOcean( this.fft ); // coral / sea fan sway follows the simulated swell
 		this.foamTexture = createFoamTexture( renderer );
 		this.oceanLOD = new CDLOD( { gridSize: Number( qs.get( 'G' ) || 32 ), leafSize: 8, levels: 12, minY: - 25, maxY: 25 } );
 		this.surface = new WaterSurface( { fft: this.fft, cdlod: this.oceanLOD, foamTexture: this.foamTexture } );
@@ -183,7 +174,7 @@ export class App {
 		this.caustics = qs.has( 'noCaustics' ) ? null : new Caustics( renderer, this.fft );
 		if ( this.caustics ) this.caustics.detail = this.seaDetail;
 
-		if ( ! qs.has( 'noSim' ) ) {
+		if ( qs.has( 'shoreSim' ) ) {
 
 			this.shoreSim = new ShoreSim( renderer, { terrainGPU: this.terrainGPU, shore: this.shore } );
 			this.surface.shoreSim = this.shoreSim;
@@ -213,7 +204,7 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 			if ( o.material ) for ( const mat of Array.isArray( o.material ) ? o.material : [ o.material ] ) mat.underwaterLighting = m;
 
 		} );
-		underwaterMode( this.village.group, 'lite' );
+		if ( this.village ) underwaterMode( this.village.group, 'lite' );
 		underwaterMode( this.boat.group, 'lite' );
 		if ( this.vegetation ) underwaterMode( this.vegetation.group, 'none' );
 
@@ -232,11 +223,11 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 		// lanterns, lamp posts, path lights, lit windows, the boat's cabin / navigation lights and the
 		// flashlight (L): nearest few packed into one small uniform array each frame
 		this.localLights = new LocalLights();
-		addVillageLights( this.localLights, this.village );
+		if ( this.village ) addVillageLights( this.localLights, this.village );
 		addBoatLights( this.localLights, this.boat );
 		// rough, large or heavily overdrawn surfaces (ground, rocks, debris, foliage) take the local
 		// lights as Lambert only; the village, pier and boat get the full BRDF (glints on wet wood, metal)
-		for ( const root of [ this.terrain.mesh, this.rocks.group, this.debris && this.debris.group, this.vegetation && this.vegetation.group ] ) if ( root ) root.traverse( ( o ) => {
+		for ( const root of [ this.terrain.mesh, this.farTerrain.mesh, this.rocks && this.rocks.group, this.debris && this.debris.group, this.vegetation && this.vegetation.group ] ) if ( root ) root.traverse( ( o ) => {
 
 			if ( o.material ) for ( const m of Array.isArray( o.material ) ? o.material : [ o.material ] ) m.localLightsCheap = true;
 
@@ -267,7 +258,8 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 		// nearly so: camera-only reprojection of the real world position is what the temporal resolve needs.
 		// ( the water material writes its own velocity + waterline mask outputs )
 		useStaticVelocity( this.terrain.mesh );
-		useStaticVelocity( this.rocks.group );
+		useStaticVelocity( this.farTerrain.mesh );
+		if ( this.rocks ) useStaticVelocity( this.rocks.group );
 		scene.add( this.ocean );
 
 		this.query = new WaterQuery( renderer, this.surface );
@@ -279,41 +271,21 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 		// spray.emit() / emitAlongPoints() for boat bow spray and splashes)
 		this.spray = new Spray( renderer, { query: this.query, terrain: this.terrainGPU, sceneCopy: this.sceneRenderer.opaqueCopy, clouds: this.clouds } );
 		scene.add( this.spray.mesh );
-		if ( this.reef.setSpray ) this.reef.setSpray( this.spray ); // splashes of leaping fish
-		this.breakers = new Breakers( renderer, {
-			surface: this.surface, shore: this.shore, terrainData: this.terrainData, sky: this.sky,
-			spray: this.spray, clouds: this.clouds,
-		} );
-		scene.add( this.breakers.mesh );
+		// (no plunging surf on the lake: Breakers stays out)
+		this.breakers = null;
 		// dust, pollen, salt aerosol, seed fluff and gnats drifting around the camera
 		this.airMotes = new AirMotes( { terrain: this.terrainGPU, clouds: this.clouds, csm: this.csm, reversedDepth: true } );
 		scene.add( this.airMotes.mesh );
 		this.boatCtl = new BoatController( { model: this.boat, query: this.query, terrain: this.terrainData, colliders: this.colliders } );
 		this.boatSpray = new BoatSpray( { boat: this.boatCtl, spray: this.spray } );
-		// humpback cruising the deep water around the island (model fetched from public/models/whale)
-		this.whale = new Whale( { scene, terrain: this.terrainData, query: this.query, spray: this.spray } );
-		try {
-
-			await this.whale.load();
-			if ( this.reef && this.reef.setWhale ) this.reef.setWhale( this.whale ); // escort fish, foam and slick
-
-		} catch ( e ) {
-
-			console.warn( 'whale model failed to load', e );
-			this.whale = null;
-
-		}
+		this.whale = null;
 
 		// interactive wake around the boat (Kelvin pattern, bow/stern waves, prop wash foam)
 		this.wake = new WakeSim( renderer, { terrainGPU: this.terrainGPU, boat: this.boatCtl, colliders: this.colliders } );
 		this.surface.wake = this.wake;
 		this.player = new Player( { camera, input: this.input, terrain: this.terrainData, colliders: this.colliders, query: this.query, boat: this.boatCtl, reef: this.reef } );
 		// birds, beach crabs, sanderlings (after spray / query / boat, which they use)
-		this.wildlife = new Wildlife( {
-			scene, renderer, terrain: this.terrainData, terrainGPU: this.terrainGPU, shore: this.shore,
-			village: this.village, colliders: this.colliders, vegetation: this.vegetation, boat: this.boatCtl, boatModel: this.boat,
-			query: this.query, spray: this.spray, csm: this.csm,
-		} );
+		this.wildlife = null;
 		this.freeCam = qs.has( 'fly' );
 
 		// ---------------------------------------------------------------- post
@@ -339,17 +311,8 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 		// recorded field recordings (public/audio, credits in public/audio/CREDITS.md); ?noAudio turns it off
 		this.audio = qs.has( 'noAudio' ) ? null : new SoundScape();
 		this.player.audio = this.audio;
-		// the fishing game (rod, bites, catch, cooler, fish stand)
-		this.game = new Game( this );
-		// the lanterns at Joe's fish stand and Marta's chandlery (lit from dusk like the village lamps);
-		// positions are in each stall's frame (x right, z toward the customer), turned by its yaw
-		for ( const [ s, lx, ly, lz ] of [ [ STAND, - 0.9, 1.85, 0.1 ], [ CHANDLERY, - 0.75, 1.58, - 1.45 ] ] ) {
-
-			const c = Math.cos( s.yaw ), sn = Math.sin( s.yaw );
-			const x = s.x + lx * c + lz * sn, z = s.z - lx * sn + lz * c;
-			this.localLights.add( { position: new Vector3( x, this.terrainData.heightAt( s.x, s.z ) + ly, z ), color: new Color( 1.0, 0.72, 0.42 ), intensity: 5 * 1.5, range: 11, kind: 'lantern', flicker: 0.08 } );
-
-		}
+		// (the fishing game is not part of Understory: src/game stays in the source, unused)
+		this.game = null;
 
 		this.boatCtl.onSlam = ( s ) => this.audio && this.audio.hullSlap( s );
 		engine.domElement.addEventListener( 'click', () => {
@@ -626,7 +589,7 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 		this.wake.update( dt );
 		if ( this.freeCam ) this.fly.update( dt );
 		else this.player.update( dt );
-		this.game.update( dt );
+		if ( this.game ) this.game.update( dt );
 		this.updateSun();
 
 		this.atmosphere.update( dt, this.camera.position.y );
@@ -654,7 +617,7 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 		this.airMotes.update( dt, this.camera, this.cameraWaterHeight ?? 0 );
 		if ( this.shoreSim ) this.shoreSim.update();
 		this.underwaterLighting.update( this.camera );
-		this.breakers.update( this.camera );
+		if ( this.breakers ) this.breakers.update( this.camera );
 		this.spray.update();
 		if ( this.clouds ) this.clouds.update( dt, this.camera );
 		this.environment.update( dt );
@@ -662,14 +625,15 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 		// ---- world
 		this.oceanLOD.update( this.camera );
 		this.terrain.update( this.camera );
-		this.rocks.update( this.camera );
-		this.debris.update( this.camera );
-		this.reef.update( dt, this.camera.position );
-		this.village.update( dt );
+		this.farTerrain.update( this.camera );
+		if ( this.rocks ) this.rocks.update( this.camera );
+		if ( this.debris ) this.debris.update( this.camera );
+		if ( this.reef ) this.reef.update( dt, this.camera.position );
+		if ( this.village ) this.village.update( dt );
 		if ( this.vegetation ) this.vegetation.update( dt, this.camera );
 		if ( this.whale ) this.whale.update( dt, this.camera );
 		this.boat.update( dt );
-		this.wildlife.update( dt, this.camera, this.freeCam ? null : this.player );
+		if ( this.wildlife ) this.wildlife.update( dt, this.camera, this.freeCam ? null : this.player );
 		this.localLights.update( this.camera, dt );
 
 		// ---- render

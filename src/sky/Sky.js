@@ -255,7 +255,7 @@ struct SkyOut {
 }
 
 // Simple solar position model. Returns direction toward the sun (world: +x east, -z north, +y up).
-export function sunDirectionFromTime( hours, latitudeDeg = 24, declinationDeg = 6, out = new Vector3() ) {
+export function sunDirectionFromTime( hours, latitudeDeg = 43.78, declinationDeg = 15, out = new Vector3() ) {
 
 	const phi = MathUtils.degToRad( latitudeDeg );
 	const dec = MathUtils.degToRad( declinationDeg );

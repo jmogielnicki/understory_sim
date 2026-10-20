@@ -1,36 +1,42 @@
 import * as THREE from '../engine/index.js';
 
-// Shared world layout. Coordinates in meters, y up, sea level y = 0.
-// The open ocean lies to the south (+z); the island to the north (-z).
-// Sun rises in the east (+x) and sets in the west (-x).
+// Shared world layout. Coordinates in metres, x east, z south, y up; y = 0 is the surface of Squam Lake.
+// The world origin lies 650 m south and 150 m east of 43°46'40.49"N 71°32'30.87"W (see
+// tools/terrain/build_terrain.py): Rattlesnake Mountain rises to the north (-z), the open lake and its
+// islands lie to the south (+z). The village sits on the south-facing slope above a sheltered cove on the
+// north shore. Sun rises in the east (+x) and sets in the west (-x).
 export const WORLD = {
-	terrainSize: 2048, // heightmap domain, centered at origin
+	terrainSize: 2048, // near (detailed) terrain domain, centred at the origin
 	terrainRes: 2048,
 
-	// Central sandy beach inside the bay, shoreline near z ≈ -42 at x = 0.
-	beach: { xMin: - 150, xMax: 170 },
+	// the cove below the village: its head (the shore) is near z = -245 between x = 320 and 420
+	cove: { center: new THREE.Vector3( 370, 0, - 195 ), radius: 70 },
 
+	// the village dock, out from the cove head into ~3 m of water
 	pier: {
-		x: 55,
-		zStart: - 64, // on dry sand
-		zEnd: 40, // end of pier (~4 m depth)
-		deckHeight: 2.3, // deck surface above sea level
-		width: 2.6,
-		headWidth: 14, // T-shaped platform at the end
-		headDepth: 7,
+		x: 400,
+		zStart: - 252, // on the bank
+		zEnd: - 205, // end of the dock (~3 m deep)
+		deckHeight: 0.75, // deck surface above the lake
+		width: 1.8,
+		headWidth: 7, // T-shaped platform at the end
+		headDepth: 3.6,
 	},
 
-	// Where the boat is moored: east side of the pier head, bow pointing south.
-	boatDock: { position: new THREE.Vector3( 64.5, 0, 36.5 ), heading: 0 },
+	// where the boat is moored: east side of the dock head, bow pointing south
+	boatDock: { position: new THREE.Vector3( 405.5, 0, - 206 ), heading: 0 },
 
-	village: { center: new THREE.Vector3( 40, 0, - 118 ), radius: 95 },
+	village: { center: new THREE.Vector3( 450, 0, - 340 ), radius: 120 },
 
-	reef: { center: new THREE.Vector3( - 78, 0, 58 ), radius: 58 },
+	// (no reef in the lake: kept far away for the systems that still ask)
+	reef: { center: new THREE.Vector3( 1e5, 0, 1e5 ), radius: 1 },
 
-	spawn: { position: new THREE.Vector3( 18, 0, - 60 ), yaw: Math.PI }, // kept clear of rocks, plants and debris
-	// where the player starts: on the boardwalk up from the pier foot, looking down it toward the pier
-	start: { position: new THREE.Vector3( 53.6, 0, - 77 ), yaw: Math.PI },
+	beach: { xMin: 300, xMax: 420 },
 
-	// Incoming swell direction (unit, travel direction)
-	swellDir: new THREE.Vector2( - 0.12, - 1 ).normalize(),
+	spawn: { position: new THREE.Vector3( 420, 0, - 270 ), yaw: Math.PI },
+	// where the player starts: on the slope above the cove, looking south over the lake
+	start: { position: new THREE.Vector3( 430, 0, - 300 ), yaw: Math.PI },
+
+	// prevailing direction the (small) waves travel: north-westerlies blow down the lake toward the south-east
+	swellDir: new THREE.Vector2( 0.35, 1 ).normalize(),
 };

@@ -1,0 +1,386 @@
+{
+	"about": "Squam Lake, New Hampshire. Heights from USGS 3DEP (public domain); the lake bed is generated (see tools/terrain/build_terrain.py).",
+	"reference": {
+		"lat": 43.777914,
+		"lon": -71.541908,
+		"note": "43\u00b046'40.49\"N 71\u00b032'30.87\"W, transverse Mercator origin"
+	},
+	"center": {
+		"easting": 150.0,
+		"northing": -650.0
+	},
+	"lakeLevel": 170.66,
+	"axes": "x east, z south, y up (m); y = 0 is the surface of Squam Lake",
+	"encoding": {
+		"base": -60.0,
+		"layout": "uint16 little endian, deltas along each row, high byte plane then low byte plane, gzip"
+	},
+	"grids": {
+		"near": {
+			"file": "near.bin.gz",
+			"size": 2048,
+			"res": 2048,
+			"step": 0.01,
+			"min": -20.56,
+			"max": 223.65
+		},
+		"mid": {
+			"file": "mid.bin.gz",
+			"size": 8192,
+			"res": 2048,
+			"step": 0.02,
+			"min": -20.49,
+			"max": 511.29
+		},
+		"far": {
+			"file": "far.bin.gz",
+			"size": 32768,
+			"res": 2048,
+			"step": 0.02,
+			"min": -33.18,
+			"max": 1044.54
+		}
+	},
+	"water": {
+		"file": "water.bin.gz",
+		"res": 2048,
+		"size": 32768,
+		"bodies": [
+			{
+				"id": 1,
+				"name": "Squam Lake",
+				"level": 0.0,
+				"elevation": 170.66
+			},
+			{
+				"id": 2,
+				"level": -17.55,
+				"elevation": 153.11,
+				"area_km2": 39.677,
+				"center": [
+					11288,
+					12440
+				]
+			},
+			{
+				"id": 3,
+				"level": -17.55,
+				"elevation": 153.11,
+				"area_km2": 7.225,
+				"center": [
+					14808,
+					8152
+				]
+			},
+			{
+				"id": 4,
+				"level": -17.55,
+				"elevation": 153.11,
+				"area_km2": 6.046,
+				"center": [
+					5640,
+					14776
+				]
+			},
+			{
+				"id": 5,
+				"level": -6.64,
+				"elevation": 164.02,
+				"area_km2": 3.636,
+				"center": [
+					1256,
+					12600
+				]
+			},
+			{
+				"id": 6,
+				"level": 0.02,
+				"elevation": 170.68,
+				"area_km2": 1.532,
+				"center": [
+					-4968,
+					5544
+				]
+			},
+			{
+				"id": 7,
+				"level": -13.99,
+				"elevation": 156.67,
+				"area_km2": 1.321,
+				"center": [
+					7128,
+					5320
+				]
+			},
+			{
+				"id": 8,
+				"level": 6.77,
+				"elevation": 177.43,
+				"area_km2": 1.078,
+				"center": [
+					-1560,
+					6248
+				]
+			},
+			{
+				"id": 9,
+				"level": -17.55,
+				"elevation": 153.11,
+				"area_km2": 0.672,
+				"center": [
+					11320,
+					5320
+				]
+			},
+			{
+				"id": 10,
+				"level": -17.55,
+				"elevation": 153.11,
+				"area_km2": 0.529,
+				"center": [
+					15976,
+					12232
+				]
+			},
+			{
+				"id": 11,
+				"level": -6.36,
+				"elevation": 164.3,
+				"area_km2": 0.565,
+				"center": [
+					-2392,
+					10344
+				]
+			},
+			{
+				"id": 12,
+				"level": 10.92,
+				"elevation": 181.58,
+				"area_km2": 0.514,
+				"center": [
+					13656,
+					-4904
+				]
+			},
+			{
+				"id": 13,
+				"level": -15.16,
+				"elevation": 155.5,
+				"area_km2": 0.506,
+				"center": [
+					11400,
+					3576
+				]
+			},
+			{
+				"id": 14,
+				"level": 22.78,
+				"elevation": 193.44,
+				"area_km2": 0.457,
+				"center": [
+					10552,
+					-3720
+				]
+			},
+			{
+				"id": 15,
+				"level": -17.55,
+				"elevation": 153.11,
+				"area_km2": 0.42,
+				"center": [
+					10440,
+					5912
+				]
+			},
+			{
+				"id": 16,
+				"level": -10.7,
+				"elevation": 159.96,
+				"area_km2": 0.324,
+				"center": [
+					5512,
+					4024
+				]
+			},
+			{
+				"id": 17,
+				"level": 8.03,
+				"elevation": 178.69,
+				"area_km2": 0.287,
+				"center": [
+					-16104,
+					16136
+				]
+			},
+			{
+				"id": 18,
+				"level": 8.03,
+				"elevation": 178.69,
+				"area_km2": 0.277,
+				"center": [
+					-16184,
+					15208
+				]
+			},
+			{
+				"id": 19,
+				"level": 12.38,
+				"elevation": 183.04,
+				"area_km2": 0.294,
+				"center": [
+					-1512,
+					9080
+				]
+			},
+			{
+				"id": 20,
+				"level": -10.67,
+				"elevation": 159.99,
+				"area_km2": 0.26,
+				"center": [
+					10248,
+					2168
+				]
+			},
+			{
+				"id": 21,
+				"level": -4.24,
+				"elevation": 166.42,
+				"area_km2": 0.212,
+				"center": [
+					7432,
+					12744
+				]
+			},
+			{
+				"id": 22,
+				"level": -17.55,
+				"elevation": 153.11,
+				"area_km2": 0.198,
+				"center": [
+					9736,
+					7304
+				]
+			},
+			{
+				"id": 23,
+				"level": 1.72,
+				"elevation": 172.38,
+				"area_km2": 0.192,
+				"center": [
+					11800,
+					1128
+				]
+			},
+			{
+				"id": 24,
+				"level": 89.53,
+				"elevation": 260.19,
+				"area_km2": 0.189,
+				"center": [
+					-3944,
+					10520
+				]
+			},
+			{
+				"id": 25,
+				"level": 32.16,
+				"elevation": 202.82,
+				"area_km2": 0.186,
+				"center": [
+					3704,
+					-1688
+				]
+			},
+			{
+				"id": 26,
+				"level": 8.03,
+				"elevation": 178.69,
+				"area_km2": 0.15,
+				"center": [
+					-16280,
+					12376
+				]
+			},
+			{
+				"id": 27,
+				"level": 2.72,
+				"elevation": 173.38,
+				"area_km2": 0.159,
+				"center": [
+					2552,
+					-1816
+				]
+			},
+			{
+				"id": 28,
+				"level": -1.23,
+				"elevation": 169.43,
+				"area_km2": 0.178,
+				"center": [
+					4536,
+					2152
+				]
+			},
+			{
+				"id": 29,
+				"level": 136.02,
+				"elevation": 306.68,
+				"area_km2": 0.155,
+				"center": [
+					-4168,
+					-3128
+				]
+			},
+			{
+				"id": 30,
+				"level": -17.55,
+				"elevation": 153.11,
+				"area_km2": 0.136,
+				"center": [
+					16296,
+					14632
+				]
+			},
+			{
+				"id": 31,
+				"level": 8.78,
+				"elevation": 179.44,
+				"area_km2": 0.138,
+				"center": [
+					5816,
+					-2024
+				]
+			},
+			{
+				"id": 32,
+				"level": 78.18,
+				"elevation": 248.84,
+				"area_km2": 0.132,
+				"center": [
+					4680,
+					-4872
+				]
+			},
+			{
+				"id": 33,
+				"level": -17.55,
+				"elevation": 153.11,
+				"area_km2": 0.079,
+				"center": [
+					8312,
+					14344
+				]
+			}
+		]
+	},
+	"shoals": 420,
+	"sources": {
+		"service": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/exportImage",
+		"sha256": {
+			"near": "e3237d6ce2f972eb9925bcf52ccc19b1669dcf8f7862650a017fe8505587aa47",
+			"mid": "5b8e43524adee7a89d6227db84bef02133b85cac77efe85a11d65d10b00c4f13",
+			"far": "8a803f2fbec4f1f2df92364bcbdb9849a90977aaaf5676ab6ec989c6626c33aa"
+		}
+	}
+}

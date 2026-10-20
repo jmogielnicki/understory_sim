@@ -27,6 +27,7 @@ export class CDLOD {
 		maxY = 20,
 		heightBounds = null, // optional (x0,z0,x1,z1) => [minY,maxY]
 		center = null, // optional fixed world bounds for root grid { x, z, size }
+		exclude = null, // optional { x0, z0, x1, z1 }: nodes entirely inside are not drawn (another mesh covers it)
 		prefix = 'cdlod', // WGSL name prefix of this instance's module
 	} = {} ) {
 
@@ -37,6 +38,7 @@ export class CDLOD {
 		this.maxY = maxY;
 		this.heightBounds = heightBounds;
 		this.fixedRoot = center;
+		this.exclude = exclude;
 
 		this.ranges = [];
 		const morph = [];
@@ -286,6 +288,8 @@ fn ${ P }Morph( node: vec4f, grid: vec2f, viewPos: vec3f, y0: f32 ) -> ${ Cap }V
 
 	_select( x, z, size, lod ) {
 
+		const ex = this.exclude;
+		if ( ex && x >= ex.x0 && z >= ex.z0 && x + size <= ex.x1 && z + size <= ex.z1 ) return true;
 		const box = this._bounds( x, z, size );
 		if ( ! this._intersectsSphere( box, this.ranges[ lod ] ) ) return false;
 		if ( ! this._frustum.intersectsBox( box ) ) return true;

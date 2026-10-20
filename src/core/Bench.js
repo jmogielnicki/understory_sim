@@ -3,7 +3,7 @@ import { GPU } from '../engine/gpu/GPU.js';
 import { Texture } from '../engine/gpu/Texture.js';
 import { readTexture } from '../engine/gpu/Readback.js';
 import { G } from './Globals.js';
-import { VIEWS } from './DebugViews.js';
+import { VIEWS, viewPosition } from './DebugViews.js';
 
 // Frame-time benchmark (?bench in the URL; console: `await __bench.run()`).
 //
@@ -17,7 +17,7 @@ import { VIEWS } from './DebugViews.js';
 // the side with the rod out) and 'boatHelm'.
 const MAX = 512;
 const _up = new Vector3( 0, 1, 0 );
-const DEFAULT_VIEWS = [ 'beach', 'pier', 'sunGlitter', 'village', 'underwater', 'aerial', 'palms', 'boatFish' ];
+const DEFAULT_VIEWS = [ 'aerial', 'villageSlope', 'cove', 'lakeNorth', 'sunset', 'forest', 'underwater', 'boatFish' ];
 
 export class Bench {
 
@@ -156,7 +156,7 @@ export class Bench {
 			const b = app.boatCtl, p = app.player;
 			app.setFreeCam( false );
 			b.moored = true; // held on its mooring out in open water (steady heading)
-			b.position.set( 30, 0, 150 );
+			b.position.set( 300, 0, 250 );
 			b.mooring.anchor.copy( b.position );
 			b.quaternion.setFromAxisAngle( _up, 0.6 );
 			b.mooring.heading = 0.6;
@@ -183,7 +183,7 @@ export class Bench {
 		const v = VIEWS[ name ];
 		if ( v.time !== undefined ) app.settings.timeOfDay = v.time;
 		app.setFreeCam( true );
-		app.fly.setPose( new Vector3( ...v.p ), v.yaw, v.pitch );
+		app.fly.setPose( viewPosition( app, v ), v.yaw, v.pitch );
 		app.fly.velocity.set( 0, 0, 0 );
 
 	}
@@ -281,11 +281,12 @@ export class Bench {
 	// the same images, so a shot before and after a change can be compared pixel by pixel.
 	// dt > 0: the clock runs (animated artefacts: noise the temporal filters don't settle); one image per
 	// `every` frames after the first `frames` is uploaded as tag-view-N.bgra when `seq` > 1
-	async shots( views = DEFAULT_VIEWS, { tag = 'shot', frames = 64, url = 'http://127.0.0.1:5190/', dt = 0, seq = 1, every = 1 } = {} ) {
+	async shots( views = DEFAULT_VIEWS, { tag = 'shot', frames = 64, url = 'http://127.0.0.1:5190/', dt = 0, seq = 1, every = 1, size = null } = {} ) {
 
 		const app = this.app;
 		app.engine.stop();
-		this.setSize();
+		const wh = size ? size.split( 'x' ).map( Number ) : [];
+		this.setSize( wh[ 0 ] || undefined, wh[ 1 ] || undefined );
 		const { width, height } = app.engine.canvas;
 		if ( ! this._out || this._out.width !== width || this._out.height !== height ) this._out = new Texture( { width, height, format: GPU.format, usage: [ 'render', 'copySrc', 'sample' ], label: 'bench output' } );
 		G.time.value = 1000;
