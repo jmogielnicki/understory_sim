@@ -40,7 +40,7 @@ const BLADES = 7; // per clump
 const BLADE_TIER = [ 0, 0, 1, 1, 2, 2, 2 ];
 // blades per clump in each tier (coverage compensation)
 const TIER_N = [ 2, 2, 3 ];
-const OATS = 12; // sea oat slots per cell
+const OATS = 26; // lupine (and Queen Anne's lace) slots per cell (the "sea oat" kind)
 const VINES = 28; // creeper slots per cell
 
 const KIND = { GRASS: 0, OAT_STALK: 1, OAT_HEAD: 2, CREEPER: 3, FLOWER: 4 };
@@ -310,8 +310,33 @@ function buildPatch( level, clumps, seed = 7 ) {
 			const qTier = q === 0 ? 0 : 2;
 			// stalk (unit height, scaled in the shader)
 			b.blade( slot, KIND.OAT_STALK, near ? [ 0, 0.3, 0.6, 0.85, 1 ] : [ 0, 0.6, 1 ], near ? 0.0075 : 0.014, dx, dz, lean, hq, 0.2, rnd, [ bx, bz ], qTier );
+			// the white share (shader: fract( rnd * 7.31 ) > 0.82) is Queen Anne's lace: a flat umbel of tiny
+			// florets on top of the stalk (a ring of rays, each ending in a floret cluster), not a spike
+			if ( ( rnd * 7.31 ) % 1 > 0.82 ) {
+
+				const top = [ bx + dx * ( Math.sin( lean ) + 0.2 ) * hq * 1.05, ( Math.cos( lean ) - 0.07 ) * hq * 1.05, bz + dz * ( Math.sin( lean ) + 0.2 ) * hq * 1.05 ];
+				const n = [ 0, 1, 0 ];
+				const slotB = [ 0.99, KIND.OAT_HEAD, rnd, qTier ];
+				const ring = near ? [ [ 0, 1, 0.03 ], [ 0.035, 6, 0.024 ], [ 0.068, 11, 0.022 ] ] : [ [ 0, 1, 0.06 ], [ 0.06, 5, 0.045 ] ];
+				for ( const [ R, count, f ] of ring ) for ( let k = 0; k < count; k ++ ) {
+
+					const a = k / count * Math.PI * 2 + hs[ k % 8 ] * 0.4;
+					const cx = top[ 0 ] + Math.cos( a ) * R, cz = top[ 2 ] + Math.sin( a ) * R;
+					const cy = top[ 1 ] - R * R * 2.5; // a shallow dome
+					const v0 = b.v( [ cx - f, cy, cz - f * 0.3 ], n, [ 0, 0, 0, 0 ], slot, slotB );
+					const v1 = b.v( [ cx + f * 0.3, cy, cz - f ], n, [ 0, 0, 0, 0 ], slot, slotB );
+					const v2 = b.v( [ cx + f, cy, cz + f * 0.3 ], n, [ 0, 0, 0, 0 ], slot, slotB );
+					const v3 = b.v( [ cx - f * 0.3, cy, cz + f ], n, [ 0, 0, 0, 0 ], slot, slotB );
+					b.idx.push( v0, v1, v2, v0, v2, v3 );
+
+				}
+
+				continue;
+
+			}
+
 			// drooping panicle: flat spikelets hanging off the upper stalk
-			const heads = near ? 16 : 5;
+			const heads = near ? 26 : 7;
 			for ( let k = 0; k < heads; k ++ ) {
 
 				// lupine: a dense spike of small pea flowers whorled round the upper half of the stalk
@@ -321,8 +346,8 @@ function buildPatch( level, clumps, seed = 7 ) {
 				const sa = az + k * 2.4 + ( hs[ k % 8 ] - 0.5 ) * 0.5;
 				const sdx = Math.cos( sa ), sdz = Math.sin( sa );
 				const taper = 1 - ( hf - 0.5 ) * 1.1;
-				const cx = bx + dx * out + sdx * 0.012, cz = bz + dz * out + sdz * 0.012;
-				const L = ( near ? 0.05 : 0.09 ) * taper, W = ( near ? 0.02 : 0.035 ) * taper;
+				const cx = bx + dx * out + sdx * 0.016, cz = bz + dz * out + sdz * 0.016;
+				const L = ( near ? 0.075 : 0.12 ) * taper, W = ( near ? 0.03 : 0.05 ) * taper;
 				const n = [ 0, 1, 0 ];
 				const slotB = [ hf, KIND.OAT_HEAD, rnd, qTier ];
 				const a = b.v( [ cx, up + 0.01, cz ], n, [ 0, 0, 0, 0 ], slot, slotB );
@@ -864,12 +889,12 @@ function createGrassMaterial( field ) {
 	let grass = mix( grass0, grass0 * vec3f( 1.3, 1.28, 1.1 ) + vec3f( 0.03, 0.03, 0.015 ), in.vs.vVegGust * smoothstep( 0.15, 0.9, hf ) * 0.6 );
 	let oatStalk = mix( ${ C( 0x3c5524 ) }, ${ C( 0x56702f ) }, hf );
 	let lupineSp = fract( rnd * 7.31 );
-	var oatHead = mix( ${ C( 0x4a3f9e ) }, ${ C( 0x7c5cc4 ) }, fract( rnd * 3.7 ) );
+	var oatHead = mix( ${ C( 0x5e4fc4 ) }, ${ C( 0x9378e0 ) }, fract( rnd * 3.7 ) );
 	oatHead = select( oatHead, mix( ${ C( 0xb8679e ) }, ${ C( 0xd48cb8 ) }, rnd ), lupineSp > 0.68 );
 	// white: white lupines and Queen Anne's lace among them
 	oatHead = select( oatHead, ${ C( 0xf1ede4 ) }, lupineSp > 0.82 );
 	// the buds at the tip of the spike stay green
-	oatHead = mix( oatHead, ${ C( 0x56702f ) }, smoothstep( 0.93, 1.0, hf ) * 0.7 );
+	oatHead = mix( oatHead, ${ C( 0x56702f ) }, smoothstep( 0.93, 1.0, hf ) * 0.7 * select( 1.0, 0.0, lupineSp > 0.82 ) );
 	let centre = in.vs.vVegGrass2.y; // 1 at leaf / flower centre
 	let vine = mix( mix( ${ C( 0x2e5219 ) }, ${ C( 0x4a7328 ) }, rnd ), ${ C( 0x7a8f4a ) }, centre * 0.3 ) * select( vec3f( 1.0 ), vec3f( 1.25, 1.05, 0.8 ), hf < 0.075 );
 	let flower = mix( ${ C( 0xf3f0e8 ) }, ${ C( 0xe2a823 ) }, smoothstep( 0.55, 0.9, centre ) );

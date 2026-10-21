@@ -70,6 +70,8 @@ export const VIEWS = {
 	hamlet: { p: [ 400.5, 1.8, - 212 ], agl: true, yaw: 2.05, pitch: 0.02, time: 17.0 },
 	// the gardens west of the halls, toward the pond
 	westGardens: { p: [ 299, 3.2, - 259 ], agl: true, yaw: 1.13, pitch: - 0.14, time: 16.0 },
+	// the meadow on the slope between rows 1 and 2, looking east along it with the sun behind
+	meadow: { p: [ 330, 1.5, - 357 ], agl: true, yaw: - 1.45, pitch: - 0.12, time: 16.0 },
 	// the top row of hillside A from the walk behind row 3
 	row4: { p: [ 380, 1.7, - 427 ], agl: true, yaw: 0.1, pitch: 0.08, time: 15.5 },
 	// hillside B's upper rows from the gardens' side

@@ -87,8 +87,9 @@ Each is easy to reverse; the file or setting is named.
 - **The green.** Shaded as a dense mown lawn (fresh, even green to the ground, no tussocks, little relief)
   instead of tall-meadow sward, which made it read as dark olive carpet (`Terrain.setLawn`).
 - **Ground flora.** Knee-high meadow grass on the roofs and in the clearing, a short mown lawn on the green,
-  drifts of lupine (purple-blue, some pink and white) through the meadows and crowding round the homes, daisies
-  and clover in the lawn. Tidewater's tropical grass kinds were repurposed (dune grass → lawn, sea oats →
+  drifts of tall lupine (full spikes, blue-violet, some pink) and Queen Anne's lace (flat white umbels) through
+  the meadows and crowding round the homes, daisies and clover in the lawn. About twice the flowering stalks of
+  the first pass, which left the meadows looking bare against the references. Tidewater's tropical grass kinds were repurposed (dune grass → lawn, sea oats →
   lupines, beach creeper → daisies).
 - **Vines** spill over the arch crowns and wall tops, with small purple and white flowers; terracotta pots
   with shrubs and ferns on the terraces, shrubs and ferns along the foot of each terrace wall.
@@ -118,6 +119,6 @@ Each is easy to reverse; the file or setting is named.
 
 ## Performance
 
-On this Mac (headless Chrome), 2560 x 1267: about 18-22 ms of GPU time per frame across the benchmark views
-(the forest view is the heaviest, 6.5 ms for the opaque pass); dynamic resolution takes it from there.
+On this Mac (headless Chrome), 2560 x 1267: about 19.5-23 ms of GPU time per frame across the benchmark views
+(the forest view is the heaviest); dynamic resolution takes it from there.
 Measure with `node tools/shots/shoot.mjs --bench`.
