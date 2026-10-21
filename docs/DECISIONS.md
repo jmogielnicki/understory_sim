@@ -108,7 +108,9 @@ Each is easy to reverse; the file or setting is named.
 
 ## Still Tidewater (not yet adapted)
 
-- The boat is Tidewater's diesel fishing boat; the bible would want something quieter (sail or electric).
+- The boat keeps Tidewater's lobster-boat hull and wheelhouse, refitted as an electric launch: no traps,
+  hauler, bait, buoys or radar; teak benches with canvas cushions round the cockpit; silent (only the water along
+  the hull). A boat designed for the world (a varnished launch or a small sailing boat) would be better.
 - Songbirds still sing from Tidewater's samples (generic woodland birds; no New England species).
 - The sound bed is Tidewater's (surf is near silent at the lake's wave height; the birds are generic).
 

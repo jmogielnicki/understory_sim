@@ -46,6 +46,10 @@ const smooth = ( a, b, x ) => {
 };
 
 const dB = ( d ) => Math.pow( 10, d / 20 );
+
+// Understory's launch runs on a quiet electric drive (no combustion in the world): no engine sound, only
+// the water along the hull. (Tidewater's diesel recording stays in the bank.)
+const ELECTRIC_BOAT = true;
 const MONO = dB( - 3 ); // a mono file plays on both channels: +3 dB against its (mono) measured loudness
 
 // Target loudness (LUFS, momentary) of each sound in its reference situation.
@@ -324,7 +328,7 @@ export class SoundScape {
 	engineStart() {
 
 		this._engineOn = true;
-		for ( const n of [ 'boat_engine', 'boat_rush', 'boat_lap', 'hull_slap' ] ) this._want( n );
+		for ( const n of [ ...( ELECTRIC_BOAT ? [] : [ 'boat_engine' ] ), 'boat_rush', 'boat_lap', 'hull_slap' ] ) this._want( n );
 
 	}
 
@@ -1078,7 +1082,7 @@ export class SoundScape {
 		const bd = Math.hypot( eb.x - e.lx, eb.z - e.lz );
 		const nearBoat = eb.active || bd < 60;
 		const eng = this._engine, rpm = eb.rpm;
-		this._bed( 'boat_engine', dB( lerp( MIX.engineIdle, MIX.engineRun, Math.pow( rpm, 0.8 ) ) ) * eng / dB( BANK.boat_engine.lufs ), now, 0.12,
+		if ( ! ELECTRIC_BOAT ) this._bed( 'boat_engine', dB( lerp( MIX.engineIdle, MIX.engineRun, Math.pow( rpm, 0.8 ) ) ) * eng / dB( BANK.boat_engine.lufs ), now, 0.12,
 			( 0.8 + 0.85 * rpm ) * lerp( 0.75, 1, eng ) );
 		this._ramp( this.engineLP.frequency, 900 + 6500 * Math.pow( rpm, 1.3 ), 0.12 );
 		const sp = eb.speed;

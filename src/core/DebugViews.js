@@ -61,7 +61,9 @@ export const VIEWS = {
 	// dusk over the village: the arches lit
 	dusk: { p: [ 330, 3.0, - 296 ], agl: true, yaw: - 0.05, pitch: 0.1, time: 19.6 },
 	// the dock and the moored boat from the shore path
-	dock: { p: [ 386, 1.7, - 252 ], agl: true, yaw: Math.PI * 0.9, pitch: - 0.05, time: 15.0 },
+	dock: { p: [ 400.5, 1.7, - 247 ], agl: true, yaw: Math.PI, pitch: - 0.05, time: 15.0 },
+	// the launch at the dock, from the water off its starboard quarter
+	boatSide: { p: [ 413, 2.4, - 214 ], yaw: 2.3, pitch: - 0.14, time: 15.5 },
 	// out on the lake by the sailboats, looking back at the north shore
 	sailing: { p: [ 340, 2.2, 182 ], yaw: - 0.6, pitch: 0.03, time: 16.0 },
 	// across the lake to the hamlet on the point, from the end of the dock

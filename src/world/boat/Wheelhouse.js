@@ -919,7 +919,7 @@ function orientTowardsAxis( g ) {
 
 }
 
-// ------------------------------------------------------------------ roof gear: mast, radars, lights, antennas
+// ------------------------------------------------------------------ roof gear: mast, lights, antennas
 
 function buildRoofGear( kit, L, parts ) {
 
@@ -931,22 +931,6 @@ function buildRoofGear( kit, L, parts ) {
 	mb.translate( 0, yr + 0.005, mz );
 	kit.add( 'fittings', mb, WHITE_PAINT );
 	kit.add( 'fittings', rod( V( 0, yr, mz ), V( 0, 3.9, mz ), 0.042, 14, 0.03 ), WHITE_PAINT );
-
-	// radome on a forward bracket
-	const ry = 3.02;
-	const arm = box( 0.1, 0.035, 0.34 );
-	arm.translate( 0, ry - 0.02, mz + 0.19 );
-	kit.add( 'fittings', arm, WHITE_PAINT );
-	const plate = box( 0.34, 0.015, 0.34 );
-	plate.translate( 0, ry, mz + 0.3 );
-	kit.add( 'fittings', plate, WHITE_PAINT );
-	kit.add( 'fittings', rod( V( 0, ry - 0.02, mz + 0.04 ), V( 0, ry - 0.2, mz + 0.01 ), 0.012, 6 ), WHITE_PAINT );
-	const radome = lathe( [ [ 0, 0 ], [ 0.285, 0 ], [ 0.3, 0.018 ], [ 0.3, 0.095 ], [ 0.29, 0.14 ], [ 0.245, 0.188 ], [ 0.16, 0.222 ], [ 0.07, 0.234 ], [ 0, 0.236 ] ], 24 );
-	radome.translate( 0, ry + 0.008, mz + 0.3 );
-	kit.add( 'fittings', radome, { color: 0xf3f2ee, rough: 0.4 } );
-	const band = cylinder( 0.302, 0.302, 0.02, 24, 1, true );
-	band.translate( 0, ry + 0.03, mz + 0.3 );
-	kit.add( 'fittings', band, { color: 0x3a3d42, rough: 0.5 } );
 
 	// spreader with side lights, masthead light
 	const sy = 3.45;
@@ -994,12 +978,8 @@ function buildRoofGear( kit, L, parts ) {
 
 	}
 
-	// open-array radar pedestal (array is animated, built in BoatModel)
-	const pz = 0.8;
-	const ped = roundedBox( 0.26, 0.28, 0.3, 0.03, 1 );
-	ped.translate( 0, yr + 0.14, pz );
-	kit.add( 'fittings', ped, { color: 0xf3f2ee, rough: 0.4 } );
-	parts.radarPivot = V( 0, yr + 0.3, pz );
+	// (no radar: a launch on the lake has no need of one)
+	parts.radarPivot = null;
 
 	// spotlight and horn on the front of the roof
 	const sx = 0.42, szz = 1.05, syy = roofTopY( 0.42 );

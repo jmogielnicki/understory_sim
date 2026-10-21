@@ -24,17 +24,46 @@ export function buoyGeometry( colors = [ 0xff6a13, 0xf4f1ea, 0x1d4f9c ], stick =
 
 }
 
+// On the lake the boat is a quiet electric launch, not a working lobster boat: no traps, hauler, warp,
+// buoys or bait (their builders are kept below, unused); teak benches with canvas cushions round the
+// cockpit instead.
 export function buildDeckGear( kit, L, parts ) {
 
-	buildTraps( kit, L );
-	buildHauler( kit, L );
-	buildCoils( kit, L );
-	buildBuoys( kit, L );
+	buildBenches( kit, L );
 	buildFenders( kit, L );
 	buildCleats( kit, L );
 	buildBow( kit, L );
 	buildContainers( kit, L );
 	buildStern( kit, L, parts );
+
+}
+
+// ------------------------------------------------------------------ cockpit benches
+
+// boat frame boxes (x0..x1, z0..z1, seat top) for the benches; also their colliders (BoatModel)
+export const COCKPIT_BENCHES = [
+	{ x0: 0.78, x1: 1.2, z0: - 3.45, z1: - 0.75, top: 0.8 },
+	{ x0: - 1.2, x1: - 0.78, z0: - 3.45, z1: - 0.75, top: 0.8 },
+	{ x0: - 0.78, x1: 0.78, z0: - 3.72, z1: - 3.3, top: 0.8 },
+];
+
+function buildBenches( kit, L ) {
+
+	for ( const b of COCKPIT_BENCHES ) {
+
+		const w = b.x1 - b.x0, d = b.z1 - b.z0, cx = ( b.x0 + b.x1 ) / 2, cz = ( b.z0 + b.z1 ) / 2;
+		// teak seat on a panelled front, a canvas cushion on top
+		const front = box( w - 0.04, b.top - 0.06 - L.deckY, d - 0.04 );
+		front.translate( cx, ( L.deckY + b.top - 0.06 ) / 2, cz );
+		kit.add( 'wood', front, { rough: 0.35 } );
+		const seat = box( w, 0.035, d );
+		seat.translate( cx, b.top - 0.06 + 0.0175, cz );
+		kit.add( 'wood', seat, { rough: 0.3 } );
+		const cushion = roundedBox( w - 0.05, 0.06, d - 0.05, 0.02, 2 );
+		cushion.translate( cx, b.top - 0.025 + 0.005, cz );
+		kit.add( 'fittings', cushion, { color: 0xe6dcc4, rough: 0.85 } );
+
+	}
 
 }
 

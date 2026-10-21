@@ -5,7 +5,7 @@ import { GeoKit, triangleCount } from './boat/GeoKit.js';
 import { BoatMaterials } from './boat/BoatMaterials.js';
 import { buildHull, buildHullVolume, keelVolume, houseHalfWidth, KEEL } from './boat/HullBuilder.js';
 import { buildWheelhouse, wheelGeometry, throttleGeometry, radarArrayGeometry, HOUSE, roofTopY } from './boat/Wheelhouse.js';
-import { buildDeckGear, TRAPS, TRAP, HAULER } from './boat/DeckGear.js';
+import { buildDeckGear, COCKPIT_BENCHES } from './boat/DeckGear.js';
 import { propellerGeometry, rudderGeometry, PROP, RUDDER } from './boat/Running.js';
 
 const STATIC_BUCKETS = [ 'hull', 'gelcoat', 'wood', 'fittings', 'trap', 'glow', 'glass' ];
@@ -98,7 +98,7 @@ export class BoatModel {
 		this.wheelMesh = addPart( 'wheel', wheelGeometry(), materials.wood, new Vector3(), this.wheelPivot );
 
 		this.throttleMesh = addPart( 'throttle', throttleGeometry(), materials.fittings, parts.throttlePivot );
-		this.radarMesh = addPart( 'radar', radarArrayGeometry(), materials.fittings, parts.radarPivot );
+		this.radarMesh = parts.radarPivot ? addPart( 'radar', radarArrayGeometry(), materials.fittings, parts.radarPivot ) : null;
 		this.propMesh = addPart( 'propeller', propellerGeometry(), materials.fittings, PROP.position );
 		this.rudderMesh = addPart( 'rudder', rudderGeometry(), materials.fittings, RUDDER.pivot );
 
@@ -270,7 +270,7 @@ export class BoatModel {
 		this.propMesh.rotation.z = this._propAngle;
 
 		this._radarAngle = ( this._radarAngle + RADAR_RPM / 60 * Math.PI * 2 * dt ) % ( Math.PI * 2 );
-		this.radarMesh.rotation.y = this._radarAngle;
+		if ( this.radarMesh ) this.radarMesh.rotation.y = this._radarAngle;
 
 		// apparent wind (true wind minus boat velocity) in the boat frame drives the ensign
 		this.group.updateWorldMatrix( true, false );
@@ -359,15 +359,7 @@ export class BoatModel {
 		add( 'helmSeat', V( HOUSE.helmX - 0.23, L.deckY, HOUSE.seatZ - 0.24 ), V( HOUSE.helmX + 0.23, 1.05, HOUSE.seatZ + 0.21 ) );
 		add( 'bench', V( 0.65, L.deckY, 0.075 ), V( 1.07, L.deckY + 0.47, 0.825 ), true );
 		add( 'roof', V( - 1.25, HOUSE.roofUnderY, HOUSE.roofZ0 ), V( 1.25, roofTopY( 0 ), HOUSE.roofZ1 ), true );
-		for ( const [ x, level, z ] of TRAPS ) {
-
-			const y0 = L.deckY + 0.03 + level * ( TRAP.H + 0.035 );
-			add( 'trap', V( x - TRAP.W / 2, y0, z - TRAP.L / 2 ), V( x + TRAP.W / 2, y0 + TRAP.H, z + TRAP.L / 2 ), true );
-
-		}
-
-		add( 'hauler', V( HAULER.x - 0.2, L.deckY, HAULER.z - 0.08 ), V( HAULER.x + 0.2, HAULER.y + 0.2, HAULER.z + 0.25 ) );
-		add( 'baitBarrel', V( 0.6, L.deckY, - 1.06 ), V( 1.12, L.deckY + 0.8, - 0.54 ) );
+		for ( const b of COCKPIT_BENCHES ) add( 'cockpitBench', V( b.x0, L.deckY, b.z0 ), V( b.x1, b.top, b.z1 ), true );
 		// foredeck steps (walkable) from the house front to the stem head
 		for ( const [ z0, z1 ] of [ [ L.houseFront, 2.4 ], [ 2.4, 3.3 ], [ 3.3, 4.15 ] ] ) {
 
