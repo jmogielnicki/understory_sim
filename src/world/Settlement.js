@@ -190,8 +190,15 @@ export class Settlement {
 		}
 
 		buildBoats( B, PLAN.BOATS, rand );
-		// the pond: no plants in the water
-		this.footprints.push( { x: PLAN.POND.x, z: PLAN.POND.z, r: Math.max( PLAN.POND.rx, PLAN.POND.rz ) + 0.5, kind: 'pond' } );
+		// the pond: no plants in the water (its ellipse as three circles along the long axis, so the meadow
+		// comes down to the water on the short sides)
+		{
+
+			const P = PLAN.POND, a = Math.max( P.rx, P.rz ), b = Math.min( P.rx, P.rz ), along = P.rx >= P.rz;
+			const ux = along ? Math.cos( P.yaw ) : Math.sin( P.yaw ), uz = along ? - Math.sin( P.yaw ) : Math.cos( P.yaw );
+			for ( const t of [ - 1, 0, 1 ] ) this.footprints.push( { x: P.x + ux * t * ( a - b ), z: P.z + uz * t * ( a - b ), r: b + 0.4, kind: 'pond' } );
+
+		}
 		for ( const c of buildDock( B, PLAN.DOCK, ground, rand ) ) colliders.addBox( c.center, c.half, c.yaw, { walkable: true, solid: false, tag: 'dock' } );
 		this.footprints.push( { x: PLAN.DOCK.x, z: ( PLAN.DOCK.zStart + PLAN.DOCK.zEnd ) / 2, r: 5, kind: 'dock' } );
 		// the erratics and the play boulders go to the rock scatter (Rocks: kind 'erratic'); rounded stones

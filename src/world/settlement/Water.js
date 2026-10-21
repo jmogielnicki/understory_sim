@@ -151,13 +151,27 @@ export function lilyBatch( P, rand ) {
 	const b = new Batch();
 	const pads = [];
 	const c = Math.cos( P.yaw ), s = Math.sin( P.yaw );
-	for ( let k = 0; k < 400 && pads.length < 70; k ++ ) {
+	for ( let k = 0; k < 1200 && pads.length < 130; k ++ ) {
 
-		const a = rand.next() * Math.PI * 2, r = Math.sqrt( rand.next() ) * 0.92;
-		const lx = Math.cos( a ) * r * P.rx, lz = Math.sin( a ) * r * P.rz;
-		// clumps toward the north-west shore
-		if ( lx * 0.5 + lz * 0.8 > rand.next() * 10 - 3 ) continue;
-		const x = P.x + lx * c + lz * s, z = P.z - lx * s + lz * c;
+		let x, z;
+		if ( pads.length > 6 && rand.next() < 0.6 ) {
+
+			// beside a pad already there: the pads grow in rafts
+			const q = pads[ Math.floor( rand.next() * pads.length ) ], a = rand.next() * Math.PI * 2, d = q[ 2 ] + 0.25 + rand.next() * 0.5;
+			x = q[ 0 ] + Math.cos( a ) * d; z = q[ 1 ] + Math.sin( a ) * d;
+			const lx = ( x - P.x ) * c - ( z - P.z ) * s, lz = ( x - P.x ) * s + ( z - P.z ) * c;
+			if ( ( lx / P.rx ) ** 2 + ( lz / P.rz ) ** 2 > 0.85 ) continue;
+
+		} else {
+
+			const a = rand.next() * Math.PI * 2, r = Math.sqrt( rand.next() ) * 0.92;
+			const lx = Math.cos( a ) * r * P.rx, lz = Math.sin( a ) * r * P.rz;
+			// clumps toward the north-west shore
+			if ( lx * 0.5 + lz * 0.8 > rand.next() * 10 - 3 ) continue;
+			x = P.x + lx * c + lz * s; z = P.z - lx * s + lz * c;
+
+		}
+
 		const rr = 0.16 + rand.next() * 0.2;
 		if ( pads.some( ( q ) => Math.hypot( q[ 0 ] - x, q[ 1 ] - z ) < q[ 2 ] + rr + 0.02 ) ) continue;
 		pads.push( [ x, z, rr ] );

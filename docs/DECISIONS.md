@@ -43,8 +43,10 @@ Each is easy to reverse; the file or setting is named.
 - **A hamlet across the water.** Six homes on the long point to the west, facing east toward the village (the
   layout image shows a second settlement on the far shore). `HAMLET` in `Plan.js`.
 - **Small craft.** Two sailboats at anchor, a kayak in the cove, a rowboat at the dock (`BOATS`).
-- **Gardens.** Raised beds with rows of leafy crops, two pergolas grown over with vines, a 12-tree apple orchard
-  beside them (`ORCHARD`).
+- **Gardens.** Five plots of raised beds with rows of leafy crops (east of the halls, west of them by the stream,
+  and below the pond), three pergolas grown over with vines, a 12-tree apple orchard (`GARDENS`, `ORCHARD`).
+- **The lily pond** has rafts of pads (up to ~130) toward its quieter shore, and the meadow comes down to the
+  water on all sides.
 - **Evening light.** Low stone lamps with a warm glow line the longer walks (lit after dusk); the blue seams
   breathe; every arch glows amber at night. Path lamps are warm rather than blue: the reference's night panel
   has warm path lights, and the bible's blue is kept for the technology in the homes.
