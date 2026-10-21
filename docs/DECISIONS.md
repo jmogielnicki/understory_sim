@@ -20,7 +20,7 @@ Each is easy to reverse; the file or setting is named.
 
 ## The village
 
-- **Size.** 35 earth homes (33 houses and two small vaults by the halls): four rows on the north hillside (A),
+- **Size.** 36 earth homes (34 houses and two small vaults by the halls): four rows on the north hillside (A),
   three west of the stream, four short rows on the east hillside (B), with six more in the hamlet across the
   water. The layout image packs in more; easy to extend in `Plan.js`.
 - **Homes.** One main arch (7–9 m span, ~4 m rise) with up to two smaller side arches; vault 8.5–10 m deep
