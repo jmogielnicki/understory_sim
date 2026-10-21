@@ -44,6 +44,12 @@ export const VIEWS = {
 	pond: { p: [ 254, 1.7, - 298 ], agl: true, yaw: 0.85, pitch: 0.0, time: 16.0 },
 	// the village's east edge, toward the woods (birches, pines, the forest floor)
 	woodsEdge: { p: [ 470, 1.7, - 360 ], agl: true, yaw: - 1.2, pitch: 0.05, time: 15.0 },
+	// along the stream below the first bridge, looking up it
+	brook: { p: [ 292, 12, - 396 ], agl: true, yaw: 2.66, pitch: - 0.42, time: 15.0 },
+	// beside the stream as it tumbles down past the first bridge
+	brookNear: { p: [ 263, 1.6, - 374 ], agl: true, yaw: - 2.5, pitch: - 0.25, time: 15.0 },
+	// a row of terraces from above and in front: tables, chairs, pots
+	terraces: { p: [ 352, 9, - 318 ], agl: true, yaw: 0.0, pitch: - 0.3, time: 15.5 },
 	// the stream coming down past the homes west of it, to the first bridge
 	stream: { p: [ 262, 2.2, - 336 ], agl: true, yaw: 0.35, pitch: 0.12, time: 15.5 },
 	// the lily pond and its bridge from the bank

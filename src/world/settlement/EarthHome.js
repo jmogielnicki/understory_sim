@@ -513,6 +513,65 @@ export function buildEarthHome( B, h, g, rand, groundAt, drapes = null, planting
 
 	}
 
+	// outdoor living on the terrace (the references: a timber table and chairs before an arch, a bench against
+	// the wall)
+	const table = ( lx, lz, yaw, n ) => {
+
+		B.pushAt( lx, 0, lz, yaw );
+		const W = 1.7, D = 0.85, H = 0.76;
+		const wood = { data: [ rand.next(), 0, 6, 0.45 ], tint: OAK };
+		B.box( 'wood', 0, H - 0.025, 0, W, 0.05, D, wood );
+		for ( const [ x, z ] of [ [ - W / 2 + 0.1, - D / 2 + 0.1 ], [ W / 2 - 0.1, - D / 2 + 0.1 ], [ - W / 2 + 0.1, D / 2 - 0.1 ], [ W / 2 - 0.1, D / 2 - 0.1 ] ] ) B.box( 'wood', x, H / 2 - 0.02, z, 0.07, H - 0.05, 0.07, wood );
+		// chairs: seat, four legs, a ladder back
+		const chair = ( x, z, ry ) => {
+
+			B.pushAt( x, 0, z, ry );
+			B.box( 'wood', 0, 0.45, 0, 0.44, 0.04, 0.42, wood );
+			for ( const [ a, b ] of [ [ - 0.19, - 0.18 ], [ 0.19, - 0.18 ], [ - 0.19, 0.18 ], [ 0.19, 0.18 ] ] ) B.box( 'wood', a, 0.22, b, 0.04, 0.44, 0.04, wood );
+			for ( const a of [ - 0.19, 0.19 ] ) B.box( 'wood', a, 0.7, - 0.19, 0.04, 0.5, 0.04, wood );
+			for ( const y of [ 0.62, 0.78, 0.92 ] ) B.box( 'wood', 0, y, - 0.19, 0.38, 0.05, 0.025, wood );
+			B.pop();
+
+		};
+
+		const seats = [ [ - 0.45, - 0.75, 0 ], [ 0.45, - 0.75, 0 ], [ - 0.45, 0.75, Math.PI ], [ 0.45, 0.75, Math.PI ], [ - 1.15, 0, Math.PI / 2 ], [ 1.15, 0, - Math.PI / 2 ] ];
+		for ( let i = 0; i < n; i ++ ) {
+
+			const [ x, z, r ] = seats[ i ];
+			chair( x + ( rand.next() - 0.5 ) * 0.1, z, r + ( rand.next() - 0.5 ) * 0.3 );
+
+		}
+
+		B.pop();
+
+	};
+
+	if ( rand.next() < 0.7 ) {
+
+		// before a side arch if there is one, else to one side of the doors
+		const side = arches.find( ( a ) => a.o !== 0 );
+		const lx = side ? side.o : ( rand.next() < 0.5 ? - 1 : 1 ) * ( arches[ 0 ].span / 2 + 0.5 );
+		B.pushAt( h.x, floorY, h.z, h.yaw );
+		table( lx, Math.min( g.terrace - 1.4, 2.3 ), ( rand.next() - 0.5 ) * 0.2, 3 + Math.floor( rand.next() * 3 ) );
+		B.pop();
+
+	}
+
+	if ( rand.next() < 0.5 && arches.length > 1 ) {
+
+		// a bench against the wall between two arches
+		const a0 = arches[ 0 ], a1 = arches[ 1 ];
+		const mid = ( a0.o + Math.sign( a1.o - a0.o ) * ( a0.span / 2 + RING ) + a1.o - Math.sign( a1.o - a0.o ) * ( a1.span / 2 + RING ) ) / 2;
+		B.pushAt( h.x, floorY, h.z, h.yaw );
+		B.pushAt( mid + ( rand.next() - 0.5 ) * 0.2, 0, 0.55, 0 );
+		const wood = { data: [ rand.next(), 0, 6, 0.5 ], tint: OAK };
+		B.box( 'wood', 0, 0.44, 0, 1.4, 0.05, 0.38, wood );
+		for ( const x of [ - 0.6, 0.6 ] ) B.box( 'stone', x, 0.21, 0, 0.16, 0.42, 0.34, { data: [ rand.next(), 3, 0.4, 0.16 ] } );
+		B.pop();
+		B.pop();
+
+	}
+
 	// a planted bank below the terrace's front wall: shrubs and ferns along its foot
 	if ( plantings ) {
 

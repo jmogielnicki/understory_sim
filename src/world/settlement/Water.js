@@ -30,7 +30,11 @@ const WATER = /* wgsl */`
 	s.normal = perturbNormalByMap( in.P, normalize( in.N ), uv, nT );
 	// tea-dark, faintly green; white water where it tumbles
 	let foam = select( smoothstep( 0.12, 0.35, slope ) * smoothstep( 0.35, 0.75, perlin2( q2 * 1.7 ) * 0.5 + 0.5 + slope ), 0.0, pond );
-	s.albedo = mix( ${ srgb( 0.035, 0.045, 0.03 ) }, ${ srgb( 0.82, 0.84, 0.82 ) }, foam );
+	// the pond deep and tea-dark; the brook shallow over its stones: clear, golden brown, mottled
+	let stones = perlin2( uv * vec2f( 2.2, 1.3 ) + 7.0 ) * 0.5 + 0.5;
+	let brook = mix( ${ srgb( 0.12, 0.1, 0.06 ) }, ${ srgb( 0.26, 0.21, 0.12 ) }, stones );
+	let base = select( brook, ${ srgb( 0.035, 0.045, 0.03 ) }, pond );
+	s.albedo = mix( base, ${ srgb( 0.82, 0.84, 0.82 ) }, foam );
 	s.roughness = mix( 0.02, 0.55, foam );
 	s.metalness = 0.0;
 `;
@@ -100,8 +104,9 @@ export function streamPart( samples, pond ) {
 
 		if ( row > 0 ) {
 
+			// (facing up: the side -1 vertex lies to the right of the flow)
 			const v = P.length / 3 - 4;
-			I.push( v, v + 2, v + 3, v, v + 3, v + 1 );
+			I.push( v, v + 3, v + 2, v, v + 1, v + 3 );
 
 		}
 
