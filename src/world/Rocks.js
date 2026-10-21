@@ -1,14 +1,13 @@
 import * as THREE from '../engine/index.js';
 import { Noise2D, mulberry32, smoothstep as sstep } from '../util/Noise.js';
 import { standard } from '../materials/Materials.js';
-import { WORLD } from './WorldLayout.js';
 import { buildRockGeometry, ROCK_STYLES } from './terrain/RockGeometry.js';
 import { rot2, srgb, terrainShadingModule } from './terrain/TerrainShading.js';
 import { lodFadeModule, bandFade } from '../materials/LODFade.js';
 
-// Scattered procedural rocks: boulders and blocks on the rocky shores (some half submerged),
-// talus below cliffs, outcrops breaking through the hillsides, rubble around the sea stacks and a
-// few decorative rocks where the beach meets the headlands.
+// Scattered procedural granite: boulder fields on the rocky shores (some half submerged), talus below the
+// ledges, glacial erratics through the woods and the meadows (and the ones the village plan places), and
+// cobbles on the lake bed's rocky patches.
 //
 // Four rock shapes x two LODs = 8 InstancedMeshes (8 draw calls). Instances are re-bucketed into
 // near / far meshes and frustum culled on the CPU when the camera moves, so instance indices do
@@ -144,36 +143,12 @@ export class Rocks {
 
 		};
 
-		// keep-out zones
+		// keep-out zones: the village's homes, halls, bridges and gardens; the paths
 		const foot = this.village && this.village.getFootprints ? this.village.getFootprints() : [];
-		const pier = WORLD.pier, spawn = WORLD.spawn.position, reef = WORLD.reef;
-		const walk = [ [ 55, - 65 ], [ 54.6, - 72 ], [ 52.4, - 82 ], [ 48.4, - 92 ], [ 44.8, - 100.5 ], [ 42.6, - 107.2 ] ];
-		const segDist = ( pts, x, z ) => {
+		const blocked = ( x, z, r ) => {
 
-			let best = Infinity;
-			for ( let k = 0; k < pts.length - 1; k ++ ) {
-
-				const a = pts[ k ], b = pts[ k + 1 ];
-				const abx = b[ 0 ] - a[ 0 ], abz = b[ 1 ] - a[ 1 ];
-				const t = Math.max( 0, Math.min( 1, ( ( x - a[ 0 ] ) * abx + ( z - a[ 1 ] ) * abz ) / ( abx * abx + abz * abz ) ) );
-				best = Math.min( best, Math.hypot( x - a[ 0 ] - abx * t, z - a[ 1 ] - abz * t ) );
-
-			}
-
-			return best;
-
-		};
-
-		const blocked = ( x, z, r, h ) => {
-
-			for ( const f of foot ) if ( Math.hypot( x - f.x, z - f.z ) < f.r + r + 2 ) return true;
-			if ( segDist( walk, x, z ) < r + 4 ) return true;
-			if ( Math.abs( x - pier.x ) < r + 9 && z > pier.zStart - 8 && z < pier.zEnd + 12 ) return true;
-			if ( Math.hypot( x - spawn.x, z - spawn.z ) < r + 10 ) return true;
-			if ( Math.hypot( x - reef.center.x, z - reef.center.z ) < reef.radius + r + 12 ) return true;
-			if ( T.pathDistance && T.pathDistance( x, z ) < r + 1.5 ) return true;
-			// the sandy beach of the bay stays clear above the waterline (a few rocks at its ends)
-			if ( x > - 125 && x < 155 && z > - 125 && h > - 1.2 && z < 40 ) return true;
+			for ( const f of foot ) if ( Math.hypot( x - f.x, z - f.z ) < f.r + r + 1.5 ) return true;
+			if ( T.pathDistance && T.pathDistance( x, z ) < r + 1.2 ) return true;
 			return false;
 
 		};
@@ -181,7 +156,7 @@ export class Rocks {
 		const add = ( x, z, size, style, { sink = 0.3, tilt = 0.25, align = 0.5, tumble = 0 } = {} ) => {
 
 			const h = T.heightAt( x, z );
-			if ( blocked( x, z, size, h ) || ! free( x, z, size ) ) return false;
+			if ( blocked( x, z, size ) || ! free( x, z, size ) ) return false;
 			T.normalAt( x, z, n );
 			const st = ROCK_STYLES[ style ].scale;
 			const sx = size * ( 0.8 + 0.4 * rand() ), sy = size * ( 0.75 + 0.5 * rand() ), sz = size * ( 0.8 + 0.4 * rand() );
@@ -218,43 +193,47 @@ export class Rocks {
 
 		};
 
-		// ---- rubble and boulders around the sea stacks
+		// ---- the erratics the village plan places (and boulder groups on the green)
 		for ( const s of T.rockSites || [] ) {
 
-			if ( s.kind !== 'stack' ) continue;
-			const count = Math.round( 6 + s.r * 1.2 );
-			for ( let k = 0; k < count * 3 && k < 80; k ++ ) {
+			if ( s.kind === 'erratic' ) add( s.x, s.z, s.r, pick( [ 3, 2, 1, 0.5 ] ), { sink: 0.35, tilt: 0.3, align: 0.4 } );
+			else if ( s.kind === 'boulders' ) {
 
-				const a = rand() * Math.PI * 2, d = s.r * ( 0.9 + rand() * 1.4 );
-				add( s.x + Math.cos( a ) * d, s.z + Math.sin( a ) * d, 0.8 + rand() * rand() * 3.5, pick( [ 3, 3, 1, 1 ] ), { sink: 0.25, tilt: 0.6, tumble: 0.4 } );
+				add( s.x, s.z, s.r * 0.7, pick( [ 3, 2, 1, 0 ] ), { sink: 0.3, tilt: 0.3, align: 0.4 } );
+				for ( let k = 0; k < 6; k ++ ) {
+
+					const a = rand() * Math.PI * 2, d = s.r * ( 0.7 + rand() * 0.8 );
+					add( s.x + Math.cos( a ) * d, s.z + Math.sin( a ) * d, 0.4 + rand() * 0.6, pick( [ 4, 2, 1, 0 ] ), { sink: 0.3, tilt: 0.5, align: 0.4 } );
+
+				}
 
 			}
 
 		}
 
-		// ---- grid scan: shore boulders, talus, hillside outcrops, headland scatter
+		// ---- grid scan over the walkable area: shore boulders, talus under the ledges, glacial erratics
+		// through the woods (New Hampshire's glacial till is full of them), a few outcrops
 		const step = 2.2;
-		for ( let z = - 880; z < 330; z += step ) {
+		const lim = T.size / 2 - 6;
+		for ( let z = - lim; z < lim; z += step ) {
 
-			for ( let x = - 640; x < 640; x += step ) {
+			for ( let x = - lim; x < lim; x += step ) {
 
 				const jx = x + ( rand() - 0.5 ) * step, jz = z + ( rand() - 0.5 ) * step;
 				const h = T.heightAt( jx, jz );
-				if ( h < - 7 || h > 250 ) continue;
+				if ( h < - 7 || h > 400 ) continue;
 				const r = rockAt( jx, jz );
 				const u = rand();
 
-				if ( h < 3.5 ) {
+				if ( h < 2.0 ) {
 
-					// rocky shore: boulder fields in the splash zone, partially submerged, in clusters
-					// (sparser toward the bay so its ends stay readable)
-					if ( r < 0.45 ) continue;
-					const cl = sstep( - 0.05, 0.45, clusterNoise.noise( jx / 23, jz / 23 ) );
-					const bay = Math.abs( jx - 10 ) < 210 && jz > - 130 && jz < 80 ? 0.35 : 1;
-					const p = 0.09 * cl * bay * sstep( 0.45, 0.8, r ) * ( h > - 2.5 ? 1 : 0.35 );
+					// rocky shore: boulder fields at the waterline, partially submerged, in clusters
+					if ( r < 0.3 && h > - 0.5 ) continue;
+					const cl = sstep( - 0.1, 0.4, clusterNoise.noise( jx / 23, jz / 23 ) );
+					const p = 0.11 * cl * sstep( 0.25, 0.7, Math.max( r, h < 0 ? 0.35 : 0 ) ) * ( h > - 2.0 ? 1 : 0.3 );
 					if ( u > p ) continue;
-					const size = 0.6 + rand() * rand() * 3.4;
-					add( jx, jz, size, pick( [ 4, 3, 2, 1 ] ), { sink: h < 0 ? 0.2 : 0.22, tilt: 0.7, align: 0.3, tumble: 0.45 } );
+					const size = 0.5 + rand() * rand() * 2.6;
+					add( jx, jz, size, pick( [ 4, 3, 2, 1 ] ), { sink: h < 0 ? 0.2 : 0.25, tilt: 0.7, align: 0.3, tumble: 0.45 } );
 					continue;
 
 				}
@@ -269,46 +248,13 @@ export class Rocks {
 					const size = big ? 1.6 + rand() * 3.2 : 0.4 + rand() * rand() * 1.6;
 					add( jx, jz, size, pick( big ? [ 1, 3, 2, 1 ] : [ 4, 2, 1, 0.5 ] ), { sink: big ? 0.45 : 0.3, tilt: 0.5, align: big ? 0.8 : 0.4 } );
 
-				} else if ( r < 0.35 && slope > 0.25 && slope < 0.9 && h > 6 ) {
+				} else if ( slope < 0.7 ) {
 
-					// occasional outcrops breaking through the vegetated slopes
-					if ( u > 0.0016 ) continue;
-					const size = 1.5 + rand() * 3.5;
-					add( jx, jz, size, pick( [ 1, 2, 3, 0.5 ] ), { sink: 0.55, tilt: 0.3, align: 0.9 } );
-
-				}
-
-			}
-
-		}
-
-		// ---- where the beach meets the headlands: a few boulder groups against the rocky ends,
-		// each a big anchor rock with smaller ones tumbled around it
-		for ( const side of [ - 1, 1 ] ) {
-
-			const seeds = [];
-			for ( let k = 0; k < 400 && seeds.length < 3; k ++ ) {
-
-				const x = side < 0 ? - 195 + rand() * 60 : 145 + rand() * 60;
-				const z = - 70 + rand() * 90;
-				const h = T.heightAt( x, z );
-				if ( h < - 1.5 || h > 2.5 || rockAt( x, z ) < 0.25 ) continue;
-				if ( seeds.some( ( q ) => Math.hypot( q[ 0 ] - x, q[ 1 ] - z ) < 14 ) ) continue;
-				seeds.push( [ x, z ] );
-
-			}
-
-			for ( const [ cx, cz ] of seeds ) {
-
-				add( cx, cz, 1.8 + rand() * 1.4, pick( [ 3, 2, 1, 0 ] ), { sink: 0.3, tilt: 0.4, align: 0.4, tumble: 0.3 } );
-				const n = 3 + Math.floor( rand() * 5 );
-				for ( let k = 0; k < n * 3; k ++ ) {
-
-					const a = rand() * Math.PI * 2, d = 2.5 + rand() * 5;
-					const x = cx + Math.cos( a ) * d, z = cz + Math.sin( a ) * d;
-					const h = T.heightAt( x, z );
-					if ( h < - 2 || h > 3 ) continue;
-					add( x, z, 0.4 + rand() * rand() * 1.4, pick( [ 4, 2, 1, 0 ] ), { sink: 0.2, tilt: 0.6, align: 0.4, tumble: 0.5 } );
+					// glacial erratics: lone boulders and small groups on the forest floor and in the meadows
+					const cl = sstep( - 0.2, 0.5, clusterNoise.noise( jx / 41 + 3.1, jz / 41 - 1.7 ) );
+					if ( u > 0.0045 * ( 0.3 + cl ) ) continue;
+					const size = 0.8 + rand() * rand() * 2.8;
+					add( jx, jz, size, pick( [ 1, 3, 2, 1 ] ), { sink: 0.4, tilt: 0.35, align: 0.5 } );
 
 				}
 
@@ -320,7 +266,8 @@ export class Rocks {
 		if ( T.rubble ) {
 
 			const res = T.res;
-			for ( let z = - 120; z < 360; z += 3 ) for ( let x = - 420; x < 420; x += 3 ) {
+			const lim = T.size / 2 - 6;
+			for ( let z = - lim; z < lim; z += 3 ) for ( let x = - lim; x < lim; x += 3 ) {
 
 				const jx = x + ( rand() - 0.5 ) * 3, jz = z + ( rand() - 0.5 ) * 3;
 				const i = Math.floor( jx - T.origin ), j = Math.floor( jz - T.origin );
@@ -367,7 +314,7 @@ export class Rocks {
 	let above = p.y - ground;
 	let sp = terrainSplat( p.xz );
 	let contact = ( 1.0 - smoothstep( 0.0, 0.22, above + ( R.height - 0.5 ) * 0.15 ) ) * smoothstep( -0.2, 0.3, ground );
-	let drift = mix( ${ srgb( 0.33, 0.27, 0.18 ) }, ${ srgb( 0.8, 0.72, 0.56 ) }, sp.x );
+	let drift = mix( ${ srgb( 0.24, 0.19, 0.12 ) }, ${ srgb( 0.52, 0.45, 0.34 ) }, sp.x );
 	let nb = terrainPerturbNormal( p, N, R.hd, 1.0 );
 	${ lodDiscard }
 	s.albedo = mix( R.albedo, drift, contact * 0.8 );

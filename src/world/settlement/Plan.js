@@ -62,6 +62,14 @@ export const ANNEXES = [
 // paved plaza around the communal buildings: polygon (x, z)
 export const PLAZA = [ [ 300, - 268 ], [ 330, - 262 ], [ 365, - 266 ], [ 392, - 276 ], [ 394, - 300 ], [ 370, - 308 ], [ 340, - 300 ], [ 312, - 294 ], [ 298, - 284 ] ];
 
+// The village clearing: the tended land the homes stand in (meadows, scattered trees, gardens); the forest
+// closes in beyond it (a ragged edge, see Settlement)
+export const CLEARING = [
+	[ 196, - 252 ], [ 192, - 300 ], [ 186, - 352 ], [ 200, - 405 ], [ 246, - 440 ], [ 300, - 448 ], [ 362, - 450 ], [ 424, - 454 ],
+	[ 470, - 440 ], [ 518, - 404 ], [ 566, - 376 ], [ 580, - 330 ], [ 566, - 274 ], [ 534, - 236 ], [ 500, - 206 ], [ 446, - 226 ],
+	[ 404, - 244 ], [ 340, - 252 ], [ 280, - 246 ],
+];
+
 // The green: an open, gently sloping lawn (polygon), with natural play structures
 export const GREEN = [ [ 262, - 320 ], [ 300, - 326 ], [ 345, - 326 ], [ 392, - 322 ], [ 405, - 312 ], [ 398, - 302 ], [ 372, - 310 ], [ 340, - 304 ], [ 306, - 298 ], [ 278, - 292 ], [ 262, - 300 ] ];
 export const PLAY = [

@@ -5,14 +5,16 @@ import { Material } from '../../engine/render/Material.js';
 import { mulberry32 } from '../../util/Noise.js';
 import { vegModule, uCamPos, C, f } from './VegNodes.js';
 
-// Camera-following ground flora: tall meadow grass (knee to waist high), dune grass, sea oats and
-// beach creeper.
+// Camera-following ground flora: meadow grass (knee high), the mown lawn of the village green, lupines in
+// drifts through the meadows, and low clover and daisies in the lawn.
 //
 // The world is divided into CELL x CELL metre cells. Every visible cell near the camera draws one
 // instance of a "patch": a fixed blue-noise set of clump slots. In the vertex shader each slot is
 // placed at cellOrigin + slot offset, its height comes from the terrain heightmap (manual bilinear
-// textureLoad) and its presence / size from an RGBA density mask (R dune grass, G meadow grass,
-// B sea oats, A creeper). Empty cells are skipped on the CPU and cells are frustum culled.
+// textureLoad) and its presence / size from an RGBA density mask (R lawn, G meadow grass, B lupines,
+// A clover and daisies; ForestScatter.buildMeadowMask). Empty cells are skipped on the CPU and cells are
+// frustum culled. (The kinds keep their island names in the code: dune = lawn, oat = lupine, creeper =
+// clover, flower = daisy.)
 //
 // Three levels share the same clumps and blades (identical parameters), so switching a cell
 // between them never moves a blade:
@@ -309,22 +311,25 @@ function buildPatch( level, clumps, seed = 7 ) {
 			// stalk (unit height, scaled in the shader)
 			b.blade( slot, KIND.OAT_STALK, near ? [ 0, 0.3, 0.6, 0.85, 1 ] : [ 0, 0.6, 1 ], near ? 0.0075 : 0.014, dx, dz, lean, hq, 0.2, rnd, [ bx, bz ], qTier );
 			// drooping panicle: flat spikelets hanging off the upper stalk
-			const heads = near ? 8 : 3;
+			const heads = near ? 16 : 5;
 			for ( let k = 0; k < heads; k ++ ) {
 
-				const hf = 0.7 + 0.3 * ( k / Math.max( 1, heads - 1 ) );
+				// lupine: a dense spike of small pea flowers whorled round the upper half of the stalk
+				const hf = 0.5 + 0.48 * ( k / Math.max( 1, heads - 1 ) );
 				const out = ( Math.sin( lean ) * hf + 0.2 * hf * hf ) * hq;
 				const up = ( Math.cos( lean ) * hf - 0.07 * hf * hf ) * hq;
-				const sa = az + ( k % 2 ? 1 : - 1 ) * ( 0.45 + 0.6 * hs[ k ] );
+				const sa = az + k * 2.4 + ( hs[ k % 8 ] - 0.5 ) * 0.5;
 				const sdx = Math.cos( sa ), sdz = Math.sin( sa );
-				const cx = bx + dx * out + sdx * 0.02, cz = bz + dz * out + sdz * 0.02;
-				const L = near ? 0.085 : 0.13, W = near ? 0.022 : 0.04;
+				const taper = 1 - ( hf - 0.5 ) * 1.1;
+				const cx = bx + dx * out + sdx * 0.012, cz = bz + dz * out + sdz * 0.012;
+				const L = ( near ? 0.05 : 0.09 ) * taper, W = ( near ? 0.02 : 0.035 ) * taper;
 				const n = [ 0, 1, 0 ];
 				const slotB = [ hf, KIND.OAT_HEAD, rnd, qTier ];
 				const a = b.v( [ cx, up + 0.01, cz ], n, [ 0, 0, 0, 0 ], slot, slotB );
-				const l = b.v( [ cx + sdx * L * 0.45 - sdz * W, up - L * 0.4, cz + sdz * L * 0.45 + sdx * W ], n, [ 0, 0, 0, 0 ], slot, slotB );
-				const r = b.v( [ cx + sdx * L * 0.45 + sdz * W, up - L * 0.4, cz + sdz * L * 0.45 - sdx * W ], n, [ 0, 0, 0, 0 ], slot, slotB );
-				const t = b.v( [ cx + sdx * L * 0.8, up - L * 0.95, cz + sdz * L * 0.8 ], n, [ 0, 0, 0, 0 ], slot, slotB );
+				// the flower stands out from the spike, its keel turned a little up
+				const l = b.v( [ cx + sdx * L * 0.45 - sdz * W, up - L * 0.15, cz + sdz * L * 0.45 + sdx * W ], n, [ 0, 0, 0, 0 ], slot, slotB );
+				const r = b.v( [ cx + sdx * L * 0.45 + sdz * W, up - L * 0.15, cz + sdz * L * 0.45 - sdx * W ], n, [ 0, 0, 0, 0 ], slot, slotB );
+				const t = b.v( [ cx + sdx * L * 0.9, up + L * 0.2, cz + sdz * L * 0.9 ], n, [ 0, 0, 0, 0 ], slot, slotB );
 				b.idx.push( a, l, t, a, t, r );
 
 			}
@@ -630,17 +635,17 @@ export class GrassField {
 const _lin = ( c ) => ( c < 0.04045 ? c * 0.0773993808 : Math.pow( c * 0.9478672986 + 0.0521327014, 2.4 ) );
 const srgb = ( r, g, b ) => `vec3f( ${ _lin( r ).toFixed( 6 ) }, ${ _lin( g ).toFixed( 6 ) }, ${ _lin( b ).toFixed( 6 ) } )`;
 
-// ---- tropical meadow (tall guinea / elephant grass)
+// ---- summer meadow (timothy, fescue, clover)
 // Local copy of TerrainShading.js's MEADOW / meadowTone (the terrain stream has not ported it yet):
 // switch to the terrain module's function once it exists. The tone is shared by the terrain and
 // the grass field (blade base colour): both evaluate it from the same inputs, so the geometric
 // grass fades into the ground without a visible boundary.
 const MEADOW = {
-	lush: srgb( 0.13, 0.2, 0.05 ),
-	green: srgb( 0.25, 0.32, 0.1 ),
-	olive: srgb( 0.36, 0.37, 0.14 ),
-	yellow: srgb( 0.5, 0.46, 0.2 ),
-	straw: srgb( 0.62, 0.54, 0.33 ),
+	lush: srgb( 0.12, 0.2, 0.05 ),
+	green: srgb( 0.23, 0.32, 0.1 ),
+	olive: srgb( 0.33, 0.37, 0.14 ),
+	yellow: srgb( 0.46, 0.45, 0.2 ),
+	straw: srgb( 0.58, 0.53, 0.33 ),
 	soil: srgb( 0.17, 0.13, 0.08 ),
 };
 
@@ -752,8 +757,9 @@ function createGrassMaterial( field ) {
 	let patchN = vegNoise( xz * ${ f( 1 / 6.5 ) } + 17.3 ) * 0.7 + vegNoise( xz * ${ f( 1 / 2.3 ) } ) * 0.3;
 	let lushH = mix( 0.7, 1.3, patchN ) * ( mt.lush * 0.25 + 1.0 ) * ( 1.0 - mt.dry * 0.25 );
 	// dune tufts vary a lot in size (young shoots to big old clumps)
-	let grassH = mix( lushH, 0.62, duneF ) * mix( r2 * 0.35 + 0.83, r2 * r2 * 0.9 + 0.5, duneF ) * ( density * 0.35 + 0.65 );
-	let oatH = r2 * 0.55 + 1.0;
+	let grassH = mix( lushH, 0.17, duneF ) * mix( r2 * 0.35 + 0.83, r2 * 0.3 + 0.85, duneF ) * ( density * 0.35 + 0.65 );
+	// lupine spikes stand above the meadow grass
+	let oatH = r2 * 0.35 + 0.85;
 	let vineS = r2 * 0.4 + 0.8;
 	let hScale = select( select( vineS, oatH, isOat ), grassH, isGrass );
 	// meadow clumps fan out wider than the wiry dune tufts
@@ -840,8 +846,8 @@ function createGrassMaterial( field ) {
 	let ao = mix( 0.32, 1.0, smoothstep( 0.0, 0.75, hf ) );
 	// dune grass: olive base, straw tips; meadow: the terrain's meadow tone, dark and brownish
 	// (dead leaf sheaths) at the base, lighter / sun-bleached towards the tips
-	let duneBase = mix( ${ C( 0x5d6232 ) }, ${ C( 0x7f8a40 ) }, rnd );
-	let duneTip = mix( ${ C( 0xb8ab6c ) }, ${ C( 0x9aa452 ) }, rnd );
+	let duneBase = mix( ${ C( 0x2f4a1a ) }, ${ C( 0x3d5a20 ) }, rnd );
+	let duneTip = mix( ${ C( 0x6a8c32 ) }, ${ C( 0x86a33e ) }, rnd );
 	let tone = in.vs.vVegGrassTone.xyz * ( rnd * 0.34 + 0.83 );
 	let lushBase = mix( tone * 0.5, VEG_MEADOW_SOIL, 0.3 );
 	let tipDry = in.vs.vVegGrassTone.w * 0.4 + smoothstep( 0.8, 1.0, rnd ) * 0.35;
@@ -856,11 +862,16 @@ function createGrassMaterial( field ) {
 	// wind sheen: blades flattened by a gust show their paler undersides, so gusts read
 	// as bright waves rolling across the grass
 	let grass = mix( grass0, grass0 * vec3f( 1.3, 1.28, 1.1 ) + vec3f( 0.03, 0.03, 0.015 ), in.vs.vVegGust * smoothstep( 0.15, 0.9, hf ) * 0.6 );
-	let oatStalk = mix( ${ C( 0x9c9a62 ) }, ${ C( 0xc2b27a ) }, hf );
-	let oatHead = mix( ${ C( 0xc9b27a ) }, ${ C( 0xa8905a ) }, rnd );
+	let oatStalk = mix( ${ C( 0x3c5524 ) }, ${ C( 0x56702f ) }, hf );
+	let lupineSp = fract( rnd * 7.31 );
+	var oatHead = mix( ${ C( 0x4a3f9e ) }, ${ C( 0x7c5cc4 ) }, fract( rnd * 3.7 ) );
+	oatHead = select( oatHead, mix( ${ C( 0xb8679e ) }, ${ C( 0xd48cb8 ) }, rnd ), lupineSp > 0.78 );
+	oatHead = select( oatHead, ${ C( 0xeee8f0 ) }, lupineSp > 0.93 );
+	// the buds at the tip of the spike stay green
+	oatHead = mix( oatHead, ${ C( 0x56702f ) }, smoothstep( 0.93, 1.0, hf ) * 0.7 );
 	let centre = in.vs.vVegGrass2.y; // 1 at leaf / flower centre
 	let vine = mix( mix( ${ C( 0x2e5219 ) }, ${ C( 0x4a7328 ) }, rnd ), ${ C( 0x7a8f4a ) }, centre * 0.3 ) * select( vec3f( 1.0 ), vec3f( 1.25, 1.05, 0.8 ), hf < 0.075 );
-	let flower = mix( ${ C( 0xb8479c ) }, ${ C( 0xf2e8ee ) }, smoothstep( 0.35, 0.9, centre ) );
+	let flower = mix( ${ C( 0xf3f0e8 ) }, ${ C( 0xe2a823 ) }, smoothstep( 0.55, 0.9, centre ) );
 	let c = select( select( select( select( flower, vine, kind < 3.5 ), oatHead, kind < 2.5 ), oatStalk, kind < 1.5 ), grass, kind < 0.5 );
 	let albedo = c * select( 1.0, ao, kind < 2.5 );
 	s.albedo = albedo;

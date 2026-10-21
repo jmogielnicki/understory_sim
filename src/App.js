@@ -141,7 +141,13 @@ export class App {
 		// terrain data is derived (shore field, GPU textures, meshes)
 		await progress( 0.12, 'Building the village…' );
 		this.village = qs.has( 'noVillage' ) ? null : new Settlement( { scene, terrain: this.terrainData, colliders: this.colliders } );
-		this.vegetation = null;
+		if ( ! qs.has( 'noVeg' ) ) {
+
+			await progress( 0.15, 'Planting the woods…' );
+			this.vegetation = new Vegetation( { scene, terrain: this.terrainData, village: this.village } );
+			useStaticVelocity( this.vegetation.group );
+
+		}
 
 		await progress( 0.19, 'Filling the lake…' );
 		this.shoreField = computeShoreField( this.terrainData, { res: 512, swellDir: [ WORLD.swellDir.x, WORLD.swellDir.y ] } );
@@ -150,10 +156,12 @@ export class App {
 		this.terrain = new Terrain( { scene, terrainData: this.terrainData, terrainGPU: this.terrainGPU, renderer } );
 		// the land beyond the walkable area, to the horizon
 		this.farTerrain = new FarTerrain( { scene, terrainData: this.terrainData, terrainGPU: this.terrainGPU } );
-		this.rocks = null;
+		// granite: shore boulders, erratics, talus, cobbles on the lake bed
+		this.rocks = new Rocks( { scene, terrain: this.terrain, village: this.village, colliders: this.colliders } );
 		this.debris = null;
 		// these apply the heightfield sun shadow in their own lighting model (see UnderwaterLighting)
 		this.terrain.mesh.material.appliesHillShadow = true;
+		this.rocks.material.appliesHillShadow = true;
 		this.reef = null;
 
 		this.boat = new BoatModel();

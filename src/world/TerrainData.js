@@ -209,7 +209,7 @@ export class TerrainData {
 					// ---- lake bed
 					const depth = - h;
 					// sand and gravel in the shallows, silt in deep water; coarser off rocky points
-					const sd = 1 - smoothstep( 2.5 + nz * 3, 7 + nz * 4, depth );
+					const sd = ( 1 - smoothstep( 1.2 + nz * 1.5, 3.5 + nz * 2, depth ) ) * smoothstep( - 0.3, 0.2, n.noise( x / 19, z / 19 ) + 0.1 );
 					sand[ k ] = Math.round( clamp( sd, 0, 1 ) * 255 );
 					// cobbles and boulders: off steep shores (the land slope carries over the first metres of the
 					// bed, which then drops off steeply too) and patches elsewhere in the shallows

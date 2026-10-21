@@ -223,7 +223,7 @@ const TERRAIN_SURFACE = /* wgsl */`
 		let depth = -h;
 		let reefD = length( xz - rc );
 		let reefW = 1.0 - smoothstep( ${ WORLD.reef.radius * 0.5 }, ${ WORLD.reef.radius * 1.15 }, reefD + ( mcr - 0.5 ) * 30.0 );
-		var under = mix( ${ S( 0.34, 0.3, 0.22 ) }, mix( ${ S( 0.62, 0.55, 0.42 ) }, ${ S( 0.5, 0.45, 0.35 ) }, smoothstep( 1.0, 5.0, depth ) ), smoothstep( 0.3, 0.72, sp.x ) );
+		var under = mix( ${ S( 0.21, 0.18, 0.12 ) }, mix( ${ S( 0.46, 0.39, 0.28 ) }, ${ S( 0.34, 0.29, 0.21 ) }, smoothstep( 0.8, 3.5, depth ) ), smoothstep( 0.3, 0.72, sp.x ) * 0.85 );
 		under = under * ( ( dM.w - 0.5 ) * 0.14 + 1.0 ) * ( ( grain - 0.45 ) * 0.25 + 1.0 );
 		// megaripple fields (~0.75 m) across the swell, troughs collect darker shell hash; not in
 		// the swash zone or the first metre of depth
@@ -346,7 +346,7 @@ const TERRAIN_SURFACE = /* wgsl */`
 
 		// ---- beach sand: pale coral sand, drifts of warmer / coarser sand, grain
 		let dryK = smoothstep( 0.2, 1.0, h );
-		var sand = mix( ${ S( 0.64, 0.57, 0.45 ) }, ${ S( 0.74, 0.67, 0.55 ) }, smoothstep( 0.3, 0.72, mcr + dryK * 0.2 ) );
+		var sand = mix( ${ S( 0.5, 0.44, 0.34 ) }, ${ S( 0.6, 0.53, 0.42 ) }, smoothstep( 0.3, 0.72, mcr + dryK * 0.2 ) );
 		sand = mix( sand, ${ S( 0.66, 0.55, 0.42 ) }, smoothstep( 0.55, 0.8, dM.w + ( macroB - 0.5 ) * 0.6 ) * 0.45 );
 		sand = sand * ( ( dM.w - 0.5 ) * 0.16 + 1.0 ) * ( ( dN.w - 0.5 ) * 0.1 + 1.0 );
 		sand = sand * ( ( grain - 0.45 ) * 0.3 + 0.97 ) * ( ( grainF - 0.45 ) * 0.2 + 1.0 );
@@ -388,7 +388,7 @@ const TERRAIN_SURFACE = /* wgsl */`
 		if ( underW > 0.0 ) {
 			let reefD = length( xz - rc );
 			let reefW = 1.0 - smoothstep( ${ WORLD.reef.radius * 0.5 }, ${ WORLD.reef.radius * 1.15 }, reefD + ( mcr - 0.5 ) * 30.0 );
-			under = mix( ${ S( 0.34, 0.3, 0.22 ) }, mix( ${ S( 0.62, 0.55, 0.42 ) }, ${ S( 0.5, 0.45, 0.35 ) }, smoothstep( 1.0, 5.0, depth ) ), smoothstep( 0.3, 0.72, sp.x ) );
+			under = mix( ${ S( 0.21, 0.18, 0.12 ) }, mix( ${ S( 0.46, 0.39, 0.28 ) }, ${ S( 0.34, 0.29, 0.21 ) }, smoothstep( 0.8, 3.5, depth ) ), smoothstep( 0.3, 0.72, sp.x ) * 0.85 );
 			under = under * ( ( dM.w - 0.5 ) * 0.14 + 1.0 ) * ( ( grain - 0.45 ) * 0.25 + 1.0 );
 			// megaripple fields (~0.75 m) across the swell, troughs collect darker shell hash; not in
 			// the swash zone or the first metre of depth

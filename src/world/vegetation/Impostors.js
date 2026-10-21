@@ -171,7 +171,9 @@ export class ImpostorAtlas {
 	// variantOf( seed, isGroup1 ): variant index within the group;
 	// colorOf( { seed, cr, leaf, bright, isGroup1 } ): linear albedo;
 	// nearDist( isGroup1 ): the near plants' hand-over distance.
-	createMaterial( { isGroup1, variantOf, colorOf, nearDist } ) {
+	// group1Max: distance beyond which group 1 is dropped (the shrubs; conifers keep theirs); modules: extra
+	// WGSL modules the colour / variant expressions call
+	createMaterial( { isGroup1, variantOf, colorOf, nearDist, group1Max = SHRUB_MAX, modules = [] } ) {
 
 		const [ g0, g1 ] = this.groups;
 		const cells = this.variantCount * OCT_N;
@@ -187,7 +189,7 @@ export class ImpostorAtlas {
 		const mat = new Material( {
 			name: 'veg-impostor',
 			side: 'double',
-			modules: [ vegModule, canopyModule ],
+			modules: [ vegModule, canopyModule, ...modules ],
 			textures: { vegImpA: this.rtA.texture, vegImpB: this.rtB.texture },
 			attributes: { iPos: 'vec4f', iDat: 'vec4f' },
 			// crown sway offset (xyz) and the effective scale (w) for the fragment stage
@@ -201,7 +203,7 @@ ${ common }
 	let sy = abs( iDat.y );
 	// LOD window: from the near plant's hand-over distance to the fade-out, else collapsed
 	let d = length( vegParams.camPos - base );
-	let vis = select( 0.0, 1.0, d >= ( ${ nearDist( 'g1Flag' ) } ) * ( 1.0 - VEG_LOD_BAND / 2.0 ) && d < select( draw.params.w, ${ f( SHRUB_MAX ) }, g1Flag ) );
+	let vis = select( 0.0, 1.0, d >= ( ${ nearDist( 'g1Flag' ) } ) * ( 1.0 - VEG_LOD_BAND / 2.0 ) && d < select( draw.params.w, min( draw.params.w, ${ f( group1Max ) } ), g1Flag ) );
 	// far away the forest is thinned out: fewer, proportionally larger crowns (grown about
 	// the base) keep the canopy closed
 	let thin = smoothstep( ${ f( THIN[ 0 ] ) }, ${ f( THIN[ 1 ] ) }, d );

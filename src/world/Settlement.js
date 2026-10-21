@@ -5,7 +5,8 @@ import { VillageTextures } from './village/TextureBaker.js';
 import { createVillageMaterials } from './village/VillageMaterials.js';
 import { Rand } from './Props.js';
 import { PATHS as TERRAIN_PATHS } from './terrain/Paths.js';
-import { Grading, frame } from './settlement/Grading.js';
+import { Grading, frame, polygonDistance } from './settlement/Grading.js';
+import { smoothstep } from '../util/Noise.js';
 import { buildEarthHome } from './settlement/EarthHome.js';
 import { buildTower } from './settlement/Towers.js';
 import { buildSteps, buildPavedPath, buildApron, buildBridge, buildPergola, buildGarden, buildPlay, buildDock } from './settlement/Landscape.js';
@@ -41,6 +42,28 @@ export class Settlement {
 
 		// ---------------------------------------------------------------- 1. earthworks
 		const G = this.grading = new Grading( terrain );
+		// the clearing is open ground (meadow, no forest floor), with a ragged edge into the woods
+		{
+
+			let x0 = Infinity, x1 = - Infinity, z0 = Infinity, z1 = - Infinity;
+			for ( const [ x, z ] of PLAN.CLEARING ) {
+
+				x0 = Math.min( x0, x ); x1 = Math.max( x1, x ); z0 = Math.min( z0, z ); z1 = Math.max( z1, z );
+
+			}
+
+			G.each( x0 - 20, z0 - 20, x1 + 20, z1 + 20, ( k, x, z ) => {
+
+				if ( terrain.heights[ k ] < 0.2 ) return;
+				const rag = terrain.noise.fbm( x / 23, z / 23, 3 ) * 9 + terrain.noise2.noise( x / 6, z / 6 ) * 2.5;
+				const t = 1 - smoothstep( - 4, 4, polygonDistance( PLAN.CLEARING, x, z ) + rag );
+				if ( t > 0 ) G.open( k, t );
+
+			} );
+
+		}
+
+
 		G.smoothArea( PLAN.GREEN, { blur: 4, edge: 7 } );
 		G.smoothArea( PLAN.PLAZA, { blur: 4, flat: 0.75, edge: 6 } );
 		for ( const p of PLAN.PATHS ) G.path( p );
@@ -170,6 +193,20 @@ export class Settlement {
 		}
 
 		this.triangles = B.triangles;
+
+	}
+
+	// 0..1: on the mown green (the plants' lawn)
+	lawnAt( x, z ) {
+
+		return 1 - smoothstep( - 3, 1.5, polygonDistance( PLAN.GREEN, x, z ) );
+
+	}
+
+	// the paths, for the plants to keep clear of: [{ points, width }]
+	get paths() {
+
+		return PLAN.PATHS.map( ( p ) => ( { points: p.pts, width: p.w * 2 } ) );
 
 	}
 
