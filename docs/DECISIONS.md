@@ -39,6 +39,16 @@ Each is easy to reverse; the file or setting is named.
 - **Paths.** Worn earth paths on the terrain, flagged stone along the lake shore, dressed stone steps
   wherever a path is steeper than ~1 in 7.
 
+- **A hamlet across the water.** Six homes on the long point to the west, facing east toward the village (the
+  layout image shows a second settlement on the far shore). `HAMLET` in `Plan.js`.
+- **Small craft.** Two sailboats at anchor, a kayak in the cove, a rowboat at the dock (`BOATS`).
+- **Gardens.** Raised beds with rows of leafy crops, two pergolas grown over with vines, a 12-tree apple orchard
+  beside them (`ORCHARD`).
+- **Evening light.** Low stone lamps with a warm glow line the longer walks (lit after dusk); the blue seams
+  breathe; every arch glows amber at night. Path lamps are warm rather than blue: the reference's night panel
+  has warm path lights, and the bible's blue is kept for the technology in the homes.
+- **Where you start.** On the path above the first rows, looking down over the roofs to the halls and the lake.
+
 ## The woods and the planting
 
 - **Forest mix.** Eastern white pine (shores, ledges, emergent), eastern hemlock (ravines, north slopes, by
@@ -58,6 +68,8 @@ Each is easy to reverse; the file or setting is named.
 
 ## Look
 
+- **Stone.** Warm cream and honey sandstone with soft joints; the headwall tops are a slim stone coping with
+  turf running back into the roof meadow (so from above the homes read as green mounds).
 - **Grade.** A little warmer and more saturated than Tidewater's (saturation 1.14, warmth 0.05, contrast 1.05)
   toward the references' warm summer afternoon (`src/post/PostFX.js`). Default time 16:30.
 - **Lake.** Short wind chop (3.5 m/s over 3 km of fetch), wave heights scaled to 55 %, ripples lapping the
@@ -70,3 +82,9 @@ Each is easy to reverse; the file or setting is named.
 - The boat is Tidewater's diesel fishing boat; the bible would want something quieter (sail or electric).
 - No wildlife yet (the gulls, crabs and the whale were island animals): loons would be the obvious first.
 - The sound bed is Tidewater's (surf is near silent at the lake's wave height; the birds are generic).
+
+## Performance
+
+On this Mac (headless Chrome), 2560 x 1267: about 18-22 ms of GPU time per frame across the benchmark views
+(the forest view is the heaviest, 6.5 ms for the opaque pass); dynamic resolution takes it from there.
+Measure with `node tools/shots/shoot.mjs --bench`.

@@ -87,6 +87,9 @@ export const GARDENS = [
 	{ x: 428, z: - 292, yaw: - 0.6, rows: 2, cols: 3, bed: [ 1.3, 3.6 ] },
 	{ x: 408, z: - 276, yaw: - 0.4, rows: 2, cols: 2, bed: [ 1.2, 3.4 ] },
 ];
+// A small orchard of apple trees in rows beside the gardens (x, z of its centre, rows x cols, spacing, yaw)
+export const ORCHARD = { x: 448, z: - 250, rows: 3, cols: 4, spacing: 6.5, yaw: - 0.6 };
+
 export const PERGOLAS = [
 	{ x: 432, z: - 308, yaw: - 0.55, len: 9, w: 2.6 },
 	{ x: 398, z: - 288, yaw: - 0.35, len: 7, w: 2.4 },

@@ -240,7 +240,14 @@ export function scatterForest( site, seed = 2026 ) {
 	for ( const pl of site.plantings || [] ) {
 
 		const yaw = rand() * TAU;
-		if ( pl.kind === 'shrub' ) {
+		if ( pl.kind === 'tree' ) {
+
+			// a fruit tree: short trunk, broad low crown (a beech-green canopy tree, squat)
+			const sy = 0.7 + rand() * 0.1;
+			out.trees.push( { x: pl.x, y: pl.y, z: pl.z, s: pl.s, sy, yaw, la: yaw, l: sy, H: 12.5 * pl.s * sy, seed: seedFor( 3, rand() ) } );
+			occT.add( pl.x, pl.z, 2.5 * pl.s );
+
+		} else if ( pl.kind === 'shrub' ) {
 
 			const sp = rand() < 0.5 ? 1 : 0;
 			const sy = 0.45 + rand() * 0.25;

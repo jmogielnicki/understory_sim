@@ -139,8 +139,24 @@ export class Settlement {
 
 		for ( const p of PLAN.PERGOLAS ) {
 
-			buildPergola( B, p, ground, rand );
+			buildPergola( B, p, ground, rand, drapes );
 			this.footprints.push( { x: p.x, z: p.z, r: p.len / 2 + 1, kind: 'pergola' } );
+
+		}
+
+		// the orchard: apple trees in rows (the vegetation's broadleaf trees, small, as 'tree' plantings)
+		{
+
+			const O = PLAN.ORCHARD, c = Math.cos( O.yaw ), s = Math.sin( O.yaw );
+			for ( let i = 0; i < O.cols; i ++ ) for ( let j = 0; j < O.rows; j ++ ) {
+
+				const lx = ( i - ( O.cols - 1 ) / 2 ) * O.spacing + ( rand.next() - 0.5 ) * 0.6, lz = ( j - ( O.rows - 1 ) / 2 ) * O.spacing;
+				const x = O.x + lx * c + lz * s, z = O.z - lx * s + lz * c;
+				this.plantings.push( { x, z, y: ground( x, z ) - 0.1, s: 0.45 + rand.next() * 0.1, kind: 'tree' } );
+
+			}
+
+			this.footprints.push( { x: O.x, z: O.z, r: O.spacing * 2, kind: 'orchard' } );
 
 		}
 

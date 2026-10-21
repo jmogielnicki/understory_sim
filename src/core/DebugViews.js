@@ -50,6 +50,8 @@ export const VIEWS = {
 	lilies: { p: [ 228, 1.5, - 300 ], agl: true, yaw: - 0.75, pitch: - 0.12, time: 16.5 },
 	// the gardens and pergolas below hillside B
 	gardens: { p: [ 400, 2.2, - 300 ], agl: true, yaw: - 1.25, pitch: - 0.05, time: 16.0 },
+	// the pergola walk and the orchard beyond
+	orchard: { p: [ 472, 3.0, - 276 ], agl: true, yaw: 2.42, pitch: - 0.12, time: 15.5 },
 	// dusk over the village: the arches lit
 	dusk: { p: [ 330, 3.0, - 296 ], agl: true, yaw: - 0.05, pitch: 0.1, time: 19.6 },
 	// the dock and the moored boat from the shore path

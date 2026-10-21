@@ -224,7 +224,7 @@ export function buildBridge( B, b, groundAt, rand ) {
 }
 
 // pergola: timber posts, beams and rafters over a garden walk (local x along it)
-export function buildPergola( B, p, groundAt, rand ) {
+export function buildPergola( B, p, groundAt, rand, drapes = null ) {
 
 	const c = Math.cos( p.yaw ), s = Math.sin( p.yaw );
 	const g = groundAt( p.x, p.z );
@@ -249,6 +249,19 @@ export function buildPergola( B, p, groundAt, rand ) {
 	const r = Math.round( p.len / 0.55 );
 	for ( let k = 0; k <= r; k ++ ) B.box( 'wood', - p.len / 2 - 0.2 + ( p.len + 0.4 ) * k / r, H + 0.25, 0, 0.06, 0.12, p.w + 0.5, { data: [ rand.next(), 0, 0, 0.6 ], tint: GREY_OAK } );
 	B.pop();
+	// vines grown over it: strands hanging from both beams
+	if ( drapes ) {
+
+		for ( const side of [ - 1, 1 ] ) for ( let x = - p.len / 2; x < p.len / 2; x += 0.5 + rand.next() * 0.6 ) {
+
+			if ( rand.next() < 0.3 ) continue;
+			const z = side * ( p.w / 2 + 0.06 );
+			const wx = p.x + x * c + z * s, wz = p.z - x * s + z * c;
+			drapes.strand( new Vector3( wx, g + H + 0.2, wz ), new Vector3( s * side, 0, c * side ), 0.5 + rand.next() * 1.3, 0.45 + rand.next() * 0.35, rand.next(), 0.12 );
+
+		}
+
+	}
 
 }
 
