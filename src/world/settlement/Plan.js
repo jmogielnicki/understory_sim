@@ -33,9 +33,16 @@ export const HOMES = [
 	{ id: 'A3c', x: 380, z: - 412, yaw: - 0.04, span: 7.0, rise: 3.8, depth: 9, side: [ [ 6.6, 4.0, 2.6 ] ], terrace: 5, skylights: 2 },
 	{ id: 'A3d', x: 407, z: - 414, yaw: - 0.1, span: 8.0, rise: 4.2, depth: 9.5, side: [], terrace: 5.5, skylights: 2 },
 	{ id: 'A3e', x: 434, z: - 418, yaw: - 0.18, span: 7.4, rise: 4.0, depth: 9, side: [ [ - 7.0, 4.2, 2.6 ] ], terrace: 5, skylights: 1 },
+	// ---- hillside A, row 4 (~36-45 m), the top row under the woods
+	{ id: 'A4a', x: 338, z: - 444, yaw: 0.0, span: 7.8, rise: 4.1, depth: 9, side: [ [ 7.2, 4.2, 2.7 ] ], terrace: 5, skylights: 2 },
+	{ id: 'A4b', x: 366, z: - 447, yaw: - 0.25, span: 7.2, rise: 3.9, depth: 9, side: [ [ - 6.8, 4.0, 2.6 ] ], terrace: 5, skylights: 2, seam: true },
+	{ id: 'A4c', x: 394, z: - 449, yaw: 0.12, span: 8.4, rise: 4.4, depth: 10, side: [ [ - 7.6, 4.2, 2.7 ], [ 7.6, 4.2, 2.7 ] ], terrace: 5.5, skylights: 3 },
+	{ id: 'A4d', x: 422, z: - 451, yaw: - 0.2, span: 7.4, rise: 4.0, depth: 9, side: [ [ 6.9, 4.0, 2.6 ] ], terrace: 5, skylights: 2 },
+	{ id: 'A4e', x: 448, z: - 454, yaw: - 0.25, span: 7.0, rise: 3.8, depth: 8.5, side: [], terrace: 5, skylights: 1, seam: true },
 	// ---- hillside A west of the stream, facing south-east over the pond
 	{ id: 'AWa', x: 226, z: - 356, yaw: 0.38, span: 7.6, rise: 4.0, depth: 9, side: [ [ 7.0, 4.0, 2.6 ] ], terrace: 5.5, skylights: 2, seam: true },
 	{ id: 'AWb', x: 238, z: - 392, yaw: 0.3, span: 8.0, rise: 4.2, depth: 9.5, side: [ [ - 7.2, 4.2, 2.7 ] ], terrace: 5, skylights: 2 },
+	{ id: 'AWc', x: 262, z: - 428, yaw: - 0.25, span: 7.6, rise: 4.0, depth: 9, side: [ [ 6.8, 4.0, 2.6 ] ], terrace: 5, skylights: 2 },
 	// ---- hillside B, facing south-west over the gardens and the cove
 	{ id: 'B1a', x: 449, z: - 304, yaw: - 0.72, span: 7.6, rise: 4.0, depth: 9, side: [ [ 7.0, 4.0, 2.6 ] ], terrace: 5.5, skylights: 2 },
 	{ id: 'B1b', x: 470, z: - 281, yaw: - 0.8, span: 8.2, rise: 4.3, depth: 9.5, side: [ [ - 7.4, 4.2, 2.7 ] ], terrace: 6, skylights: 2, seam: true },
@@ -45,6 +52,9 @@ export const HOMES = [
 	{ id: 'B2c', x: 538, z: - 283, yaw: - 0.86, span: 8.4, rise: 4.4, depth: 10, side: [ [ 7.6, 4.4, 2.8 ] ], terrace: 6, skylights: 3 },
 	{ id: 'B3a', x: 512, z: - 362, yaw: - 0.6, span: 7.6, rise: 4.0, depth: 9, side: [ [ 7.0, 4.2, 2.6 ] ], terrace: 5, skylights: 2 },
 	{ id: 'B3b', x: 538, z: - 340, yaw: - 0.7, span: 8.0, rise: 4.2, depth: 9.5, side: [], terrace: 5.5, skylights: 2, seam: true },
+	{ id: 'B4a', x: 532, z: - 392, yaw: - 0.45, span: 7.6, rise: 4.0, depth: 9, side: [ [ 7.0, 4.0, 2.6 ] ], terrace: 5, skylights: 2 },
+	{ id: 'B4b', x: 557, z: - 369, yaw: - 0.55, span: 8.0, rise: 4.2, depth: 9.5, side: [ [ - 7.2, 4.2, 2.7 ] ], terrace: 5.5, skylights: 2, seam: true },
+	{ id: 'B4c', x: 580, z: - 346, yaw: - 0.7, span: 7.2, rise: 3.9, depth: 9, side: [], terrace: 5, skylights: 1 },
 ];
 
 // The communal buildings: tall catenary shells of the same stone, between the green and the cove.
@@ -65,8 +75,8 @@ export const PLAZA = [ [ 300, - 268 ], [ 330, - 262 ], [ 365, - 266 ], [ 392, - 
 // The village clearing: the tended land the homes stand in (meadows, scattered trees, gardens); the forest
 // closes in beyond it (a ragged edge, see Settlement)
 export const CLEARING = [
-	[ 196, - 252 ], [ 192, - 300 ], [ 186, - 352 ], [ 200, - 405 ], [ 246, - 440 ], [ 300, - 448 ], [ 362, - 450 ], [ 424, - 454 ],
-	[ 470, - 440 ], [ 518, - 404 ], [ 566, - 376 ], [ 580, - 330 ], [ 566, - 274 ], [ 534, - 236 ], [ 500, - 206 ], [ 446, - 226 ],
+	[ 196, - 252 ], [ 192, - 300 ], [ 186, - 352 ], [ 200, - 405 ], [ 240, - 452 ], [ 300, - 468 ], [ 362, - 474 ], [ 424, - 478 ],
+	[ 476, - 466 ], [ 530, - 420 ], [ 582, - 392 ], [ 604, - 340 ], [ 572, - 274 ], [ 534, - 236 ], [ 500, - 206 ], [ 446, - 226 ],
 	[ 404, - 244 ], [ 340, - 252 ], [ 280, - 246 ],
 ];
 
@@ -142,11 +152,19 @@ export const PATHS = [
 	// west of the stream: the pond, the two homes there
 	{ w: 1.25, pts: [ [ 258, - 287 ], [ 240, - 290 ], [ 219, - 298 ], [ 208, - 316 ], [ 213, - 336 ], [ 232, - 347 ], [ 252, - 352 ], [ 269, - 356 ] ] },
 	{ w: 1.15, pts: [ [ 213, - 336 ], [ 220, - 362 ], [ 236, - 382 ], [ 262, - 396 ], [ 289, - 405 ] ] },
+	// up to row 4 (from the walk behind row 3, between the homes)
+	{ w: 1.25, pts: [ [ 352, - 419 ], [ 352, - 432 ], [ 351, - 446 ] ] },
+	{ w: 1.25, pts: [ [ 408, - 425 ], [ 408, - 438 ], [ 408, - 450 ] ] },
+	{ w: 1.25, pts: [ [ 448, - 429 ], [ 440, - 440 ], [ 436, - 450 ] ] },
+	// west of the stream, up to the top home
+	{ w: 1.15, pts: [ [ 262, - 396 ], [ 260, - 410 ], [ 262, - 421 ] ] },
 	// the plaza to the gardens and up hillside B
 	{ w: 1.35, pts: [ [ 392, - 276 ], [ 404, - 286 ], [ 418, - 300 ], [ 436, - 312 ], [ 446, - 296 ], [ 462, - 276 ], [ 484, - 252 ], [ 498, - 214 ] ] },
 	{ w: 1.25, pts: [ [ 436, - 312 ], [ 456, - 326 ], [ 480, - 338 ], [ 500, - 318 ], [ 524, - 296 ], [ 548, - 274 ] ] },
 	{ w: 1.25, pts: [ [ 480, - 338 ], [ 500, - 368 ], [ 520, - 352 ], [ 546, - 330 ] ] },
 	{ w: 1.25, pts: [ [ 418, - 351 ], [ 436, - 340 ], [ 456, - 326 ] ] },
+	// hillside B, row 4: a walk in front of its terraces
+	{ w: 1.25, pts: [ [ 500, - 368 ], [ 514, - 380 ], [ 530, - 384 ], [ 548, - 366 ], [ 566, - 346 ], [ 576, - 336 ] ] },
 	// the dock
 	{ w: 1.0, pave: true, pts: [ [ 401, - 252 ], [ 400, - 247 ] ] },
 ];

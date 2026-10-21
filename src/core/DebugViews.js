@@ -66,6 +66,10 @@ export const VIEWS = {
 	sailing: { p: [ 340, 2.2, 182 ], yaw: - 0.6, pitch: 0.03, time: 16.0 },
 	// across the lake to the hamlet on the point, from the end of the dock
 	hamlet: { p: [ 400.5, 1.8, - 212 ], agl: true, yaw: 2.05, pitch: 0.02, time: 17.0 },
+	// the top row of hillside A from the walk behind row 3
+	row4: { p: [ 380, 1.7, - 427 ], agl: true, yaw: 0.1, pitch: 0.08, time: 15.5 },
+	// hillside B's upper rows from the gardens' side
+	hillB: { p: [ 488, 2.0, - 352 ], agl: true, yaw: - 1.7, pitch: 0.06, time: 16.0 },
 	// a loon (the first of the wildlife's), seen from a few metres off on the water: p is the offset from it
 	loon: { follow: 'loon', p: [ 3.6, 0.55, 0.9 ], pitch: - 0.1, time: 16.0 },
 	loonPair: { follow: 'loon', p: [ 8, 1.4, 6 ], pitch: - 0.1, time: 16.0 },

@@ -34,7 +34,7 @@ water, terrain, vegetation, lighting and post-processing it reuses and adapts.
 - New Hampshire granite: ledges and talus under Rattlesnake's cliffs, boulder-strewn shores, glacial erratics.
 
 **The village** (`src/world/Settlement.js`, layout as data in `src/world/settlement/Plan.js`)
-- 24 earth homes on two hillsides: broad stone arches with glazed timber fronts and warm rooms behind, the
+- 33 earth homes on two hillsides: broad stone arches with glazed timber fronts and warm rooms behind, the
   vaults buried under planted mounds with oval skylights, flagged terraces, vines spilling over the arches,
   pots of plants; on some doors the pale blue seam of everyday technology.
 - Three tall catenary halls between the green and the cove, with framed great windows.
