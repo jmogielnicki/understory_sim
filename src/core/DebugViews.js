@@ -44,6 +44,16 @@ export const VIEWS = {
 	pond: { p: [ 254, 1.7, - 298 ], agl: true, yaw: 0.85, pitch: 0.0, time: 16.0 },
 	// the village's east edge, toward the woods (birches, pines, the forest floor)
 	woodsEdge: { p: [ 470, 1.7, - 360 ], agl: true, yaw: - 1.2, pitch: 0.05, time: 15.0 },
+	// the stream coming down past the homes west of it, to the first bridge
+	stream: { p: [ 262, 2.2, - 336 ], agl: true, yaw: 0.35, pitch: 0.12, time: 15.5 },
+	// the lily pond and its bridge from the bank
+	lilies: { p: [ 228, 1.5, - 300 ], agl: true, yaw: - 0.75, pitch: - 0.12, time: 16.5 },
+	// the gardens and pergolas below hillside B
+	gardens: { p: [ 400, 2.2, - 300 ], agl: true, yaw: - 1.25, pitch: - 0.05, time: 16.0 },
+	// dusk over the village: the arches lit
+	dusk: { p: [ 330, 3.0, - 296 ], agl: true, yaw: - 0.05, pitch: 0.1, time: 19.6 },
+	// out on the lake by the sailboats, looking back at the north shore
+	sailing: { p: [ 340, 2.2, 182 ], yaw: - 0.6, pitch: 0.03, time: 16.0 },
 	// key art candidates: down over the homes and the halls to the lake; across the green from hillside B
 	keyart: { p: [ 290, 6, - 400 ], agl: true, yaw: - 2.5, pitch: - 0.12, time: 16.5 },
 	keyartEast: { p: [ 520, 5, - 330 ], agl: true, yaw: 1.83, pitch: - 0.08, time: 16.5 },

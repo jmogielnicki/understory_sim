@@ -137,8 +137,8 @@ export const PATHS = [
 	{ w: 1.0, pts: [ [ 338, - 382 ], [ 339, - 400 ], [ 339, - 418 ] ] },
 	{ w: 1.0, pts: [ [ 421, - 390 ], [ 421, - 408 ], [ 421, - 424 ] ] },
 	// west of the stream: the pond, the two homes there
-	{ w: 1.0, pts: [ [ 258, - 287 ], [ 236, - 296 ], [ 222, - 312 ], [ 218, - 334 ], [ 232, - 346 ], [ 252, - 352 ], [ 269, - 356 ] ] },
-	{ w: 0.9, pts: [ [ 218, - 334 ], [ 222, - 362 ], [ 236, - 382 ], [ 262, - 396 ], [ 289, - 405 ] ] },
+	{ w: 1.0, pts: [ [ 258, - 287 ], [ 240, - 290 ], [ 219, - 298 ], [ 208, - 316 ], [ 213, - 336 ], [ 232, - 347 ], [ 252, - 352 ], [ 269, - 356 ] ] },
+	{ w: 0.9, pts: [ [ 213, - 336 ], [ 220, - 362 ], [ 236, - 382 ], [ 262, - 396 ], [ 289, - 405 ] ] },
 	// the plaza to the gardens and up hillside B
 	{ w: 1.1, pts: [ [ 392, - 276 ], [ 404, - 286 ], [ 418, - 300 ], [ 436, - 312 ], [ 446, - 296 ], [ 462, - 276 ], [ 484, - 252 ], [ 498, - 214 ] ] },
 	{ w: 1.0, pts: [ [ 436, - 312 ], [ 456, - 326 ], [ 480, - 338 ], [ 500, - 318 ], [ 524, - 296 ], [ 548, - 274 ] ] },
@@ -156,3 +156,11 @@ export const ERRATICS = [
 ];
 
 export const DOCK = { x: 400.5, zStart: - 250, zEnd: - 214, width: 1.8, headWidth: 7, headDepth: 3.6, deck: 0.62 };
+
+// Small craft on the lake: two day sailers at anchor, a kayak drawn up in the cove, a rowboat at the dock
+export const BOATS = [
+	{ kind: 'sail', x: 360, z: 160, yaw: 2.6, len: 6.5, color: 'white' },
+	{ kind: 'sail', x: 120, z: 430, yaw: 0.9, len: 5.6, color: 'blue' },
+	{ kind: 'kayak', x: 318, z: - 226, yaw: 1.2, color: 'red' },
+	{ kind: 'row', x: 397.6, z: - 232, yaw: 0.05, color: 'green' },
+];

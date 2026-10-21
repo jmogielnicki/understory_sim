@@ -12,7 +12,8 @@ import { buildTower } from './settlement/Towers.js';
 import { buildSteps, buildPavedPath, buildApron, buildBridge, buildPergola, buildGarden, buildPlay, buildDock } from './settlement/Landscape.js';
 import { waterMeshes } from './settlement/Water.js';
 import { Drapes } from './settlement/Drapes.js';
-import { createStoneMaterial, createGlazingMaterial, createGlowMaterial } from './settlement/SettlementMaterials.js';
+import { createStoneMaterial, createGlazingMaterial, createGlowMaterial, createSailMaterial } from './settlement/SettlementMaterials.js';
+import { buildBoats } from './settlement/Boats.js';
 import * as PLAN from './settlement/Plan.js';
 
 // The village of earth homes on the north shore of the cove (see settlement/Plan.js for the layout and
@@ -122,7 +123,7 @@ export class Settlement {
 		for ( const p of PLAN.PATHS ) {
 
 			if ( p.pave ) buildPavedPath( B, p, ground );
-			steps += buildSteps( B, p, rand );
+			steps += buildSteps( B, p, rand, ground );
 
 		}
 
@@ -143,7 +144,21 @@ export class Settlement {
 		this.beds = [];
 		for ( const gd of PLAN.GARDENS ) {
 
-			this.beds.push( ...buildGarden( B, gd, ground, rand ) );
+			const beds = buildGarden( B, gd, ground, rand );
+			this.beds.push( ...beds );
+			// crops in rows: low leafy plants (the vegetation's small shrubs and ferns)
+			for ( const b of beds ) {
+
+				const c = Math.cos( b.yaw ), s = Math.sin( b.yaw );
+				for ( let i = 0; i < 6; i ++ ) for ( let j = 0; j < 2; j ++ ) {
+
+					const lx = ( i - 2.5 ) / 6 * ( b.l - 0.3 ), lz = ( j - 0.5 ) * ( b.w * 0.5 );
+					this.plantings.push( { x: b.x + lx * c + lz * s, z: b.z - lx * s + lz * c, y: b.y, s: 0.42 + rand.next() * 0.15, kind: rand.next() < 0.6 ? 'shrub' : 'fern', crop: true } );
+
+				}
+
+			}
+
 			this.footprints.push( { x: gd.x, z: gd.z, r: Math.max( gd.rows * ( gd.bed[ 0 ] + 1.1 ), gd.cols * ( gd.bed[ 1 ] + 1.3 ) ) / 2 + 1, kind: 'garden' } );
 
 		}
@@ -155,6 +170,9 @@ export class Settlement {
 
 		}
 
+		buildBoats( B, PLAN.BOATS, rand );
+		// the pond: no plants in the water
+		this.footprints.push( { x: PLAN.POND.x, z: PLAN.POND.z, r: Math.max( PLAN.POND.rx, PLAN.POND.rz ) + 0.5, kind: 'pond' } );
 		for ( const c of buildDock( B, PLAN.DOCK, ground, rand ) ) colliders.addBox( c.center, c.half, c.yaw, { walkable: true, solid: false, tag: 'dock' } );
 		this.footprints.push( { x: PLAN.DOCK.x, z: ( PLAN.DOCK.zStart + PLAN.DOCK.zEnd ) / 2, r: 5, kind: 'dock' } );
 		// the erratics and the play boulders go to the rock scatter (Rocks: kind 'erratic'); rounded stones
@@ -210,6 +228,7 @@ export class Settlement {
 			stone: createStoneMaterial(),
 			glazing: createGlazingMaterial(),
 			glow: createGlowMaterial(),
+			sail: createSailMaterial(),
 			wood: village.wood,
 			hard: village.hard,
 		};
@@ -222,7 +241,7 @@ export class Settlement {
 			const mesh = new Mesh( b.build(), mats[ key ] );
 			mesh.name = 'village_' + key;
 			mesh.receiveShadow = key !== 'glow';
-			mesh.castShadow = key === 'stone' || key === 'wood' || key === 'hard';
+			mesh.castShadow = key === 'stone' || key === 'wood' || key === 'hard' || key === 'sail';
 			mesh.staticVelocity = true;
 			if ( key === 'wood' || key === 'hard' ) mesh.onBeforeRender = () => this.textures.bake();
 			this.group.add( mesh );
@@ -241,10 +260,13 @@ export class Settlement {
 
 	}
 
-	// the paths, for the plants to keep clear of: [{ points, width }]
+	// the paths (and the stream), for the plants to keep clear of: [{ points, width }]
 	get paths() {
 
-		return PLAN.PATHS.map( ( p ) => ( { points: p.pts, width: p.w * 2 } ) );
+		return [
+			...PLAN.PATHS.map( ( p ) => ( { points: p.pts, width: p.w * 2 } ) ),
+			{ points: PLAN.STREAM.map( ( q ) => [ q.x, q.z ] ), width: 3.4 },
+		];
 
 	}
 

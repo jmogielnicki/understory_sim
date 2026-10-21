@@ -244,7 +244,9 @@ export function scatterForest( site, seed = 2026 ) {
 
 			const sp = rand() < 0.5 ? 1 : 0;
 			const sy = 0.45 + rand() * 0.25;
-			out.shrubs.push( { x: pl.x, y: pl.y, z: pl.z, s: pl.s * 0.7, sy, yaw, la: yaw, l: - sy, H: 1.6 * pl.s * 0.7 * sy, seed: shrubSeed( sp, rand() ) } );
+			const s = pl.s * ( pl.crop ? 1.0 : 0.7 );
+			const syy = pl.crop ? 0.6 : sy;
+			out.shrubs.push( { x: pl.x, y: pl.y, z: pl.z, s, sy: syy, yaw, la: yaw, l: - syy, H: 1.6 * s * syy, seed: shrubSeed( pl.crop ? 2 : sp, rand() ) } );
 
 		} else {
 

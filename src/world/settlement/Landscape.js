@@ -12,11 +12,11 @@ const BARK = [ 0.42, 0.33, 0.25 ];
 
 // Steps: wherever a path climbs steeper than ~1 in 7, dressed stone treads on its smoothed profile
 // (risers ~16 cm). Returns the number of steps.
-export function buildSteps( B, p, rand ) {
+export function buildSteps( B, p, rand, groundAt ) {
 
-	const prof = p.profile;
-	if ( ! prof ) return 0;
 	const pts = p.pts;
+	let len = 0;
+	for ( let k = 0; k < pts.length - 1; k ++ ) len += Math.hypot( pts[ k + 1 ][ 0 ] - pts[ k ][ 0 ], pts[ k + 1 ][ 1 ] - pts[ k ][ 1 ] );
 	// position / direction at arc length s
 	const at = ( s ) => {
 
@@ -40,8 +40,21 @@ export function buildSteps( B, p, rand ) {
 
 	};
 
+	// the finished ground along the path (after every earthwork), smoothed over a couple of metres
+	const prof = { heightAt: ( s ) => {
+
+		let h = 0;
+		for ( const d of [ - 1, - 0.5, 0, 0.5, 1 ] ) {
+
+			const c = at( Math.min( len, Math.max( 0, s + d ) ) );
+			h += groundAt( c.x, c.z );
+
+		}
+
+		return h / 5;
+
+	} };
 	let n = 0;
-	const len = prof.length;
 	const rise = 0.16;
 	let s = 0;
 	while ( s < len - 0.3 ) {

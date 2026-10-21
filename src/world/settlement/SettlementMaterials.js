@@ -277,3 +277,22 @@ export function createGlowMaterial() {
 	return m;
 
 }
+
+// sailcloth: off-white dacron with seams across the sail, a little translucent against the sun
+export function createSailMaterial() {
+
+	const m = standard( {
+		name: 'SettlementSails', roughness: 0.7, metalness: 0, side: 'double',
+		attributes: ATTRIBUTES, varyings: VARYINGS,
+	} );
+	m.modules = [ commonModule ];
+	m.vertex = PASS;
+	m.surface = /* wgsl */`
+	let seams = smoothstep( 0.012, 0.0, abs( fract( ( in.uv.x - in.uv.y ) * 7.0 ) - 0.5 ) - 0.48 );
+	s.albedo = in.vs.vTint * ( 0.93 + perlin2( in.uv * 30.0 ) * 0.04 ) * ( 1.0 - seams * 0.12 );
+	s.roughness = 0.7;
+	s.translucency = in.vs.vTint * 0.35;
+`;
+	return m;
+
+}
