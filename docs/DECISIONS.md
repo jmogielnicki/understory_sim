@@ -97,8 +97,10 @@ Each is easy to reverse; the file or setting is named.
 
 ## Look
 
-- **Stone.** Warm cream and honey sandstone with soft joints; the headwall tops are a slim stone coping with
-  turf running back into the roof meadow (so from above the homes read as green mounds).
+- **Stone.** Warm cream and honey sandstone in large, softly rounded blocks (courses ~0.6-0.85 m, blocks
+  1.1-2.3 m) with fine, light joints, the blocks differing only a little in colour, so a wall reads as one warm
+  stone as in the references; arch rings of few, large voussoirs. The headwall tops are a slim stone coping
+  with turf running back into the roof meadow (so from above the homes read as green mounds).
 - **Grade.** A little warmer and more saturated than Tidewater's (saturation 1.14, warmth 0.05, contrast 1.05)
   toward the references' warm summer afternoon (`src/post/PostFX.js`). Default time 16:30.
 - **Lake.** Short wind chop (3.5 m/s over 3 km of fetch), wave heights scaled to 55 %, ripples lapping the

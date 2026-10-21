@@ -85,24 +85,25 @@ fn stnRelief( b: StnBlock, joint: f32, bevel: f32 ) -> f32 {
 	let bev = smoothstep( 0.0, bevel, e );
 	let c = b.local / max( b.size, vec2f( 1e-3 ) ) - 0.5;
 	let pillow = 1.0 - dot( c, c ) * 0.5;
-	return select( 0.0, bev * ( 0.85 + 0.15 * pillow ), e > 0.0 );
+	return select( 0.0, bev * ( 0.75 + 0.25 * pillow ), e > 0.0 );
 }
 
 struct StnSample { col: vec3f, rough: f32, h: f32, ao: f32 };
 
 fn stnSample( uv: vec2f, P: vec3f, pattern: f32, seed: f32, wear: f32, tint: vec3f ) -> StnSample {
 	var b: StnBlock;
-	var joint = 0.011;
-	var bevel = 0.035;
+	// (docs/REFERENCE.md: large, softly rounded blocks with fine joints)
+	var joint = 0.007;
+	var bevel = 0.07;
 	if ( pattern < 0.5 ) {
-		b = stnBlocks( uv, 0.42, 0.56, 0.7, 1.6, seed );
+		b = stnBlocks( uv, 0.62, 0.86, 1.1, 2.3, seed );
 	} else if ( pattern < 1.5 ) {
 		b = stnBlocks( uv, 0.55, 0.85, 0.6, 1.3, seed + 11.0 );
 		joint = 0.014;
 		bevel = 0.025;
 	} else if ( pattern < 2.5 ) {
-		b = stnBlocks( vec2f( uv.x, uv.y + 0.01 ), 50.0, 50.0, 0.5, 0.72, seed + 5.0 );
-		bevel = 0.045;
+		b = stnBlocks( vec2f( uv.x, uv.y + 0.01 ), 50.0, 50.0, 0.85, 1.15, seed + 5.0 );
+		bevel = 0.08;
 	} else {
 		// one dressed block per piece
 		b.id = vec2f( seed, 0.0 );
@@ -114,8 +115,9 @@ fn stnSample( uv: vec2f, P: vec3f, pattern: f32, seed: f32, wear: f32, tint: vec
 	let bh = hash21( b.id + vec2f( seed * 7.3, 1.7 ) );
 	let bh2 = hash21( b.id + vec2f( 3.1, seed ) );
 	// colour: cream, honey and pale blocks; mottling and fine grain inside each
-	var col = mix( STN_A, STN_B, smoothstep( 0.35, 1.0, bh ) );
-	col = mix( col, STN_C, smoothstep( 0.6, 0.95, bh2 ) * 0.7 );
+	// (the blocks differ only a little: the wall reads as one warm stone)
+	var col = mix( STN_A, STN_B, smoothstep( 0.35, 1.0, bh ) * 0.55 );
+	col = mix( col, STN_C, smoothstep( 0.6, 0.95, bh2 ) * 0.5 );
 	let mott = perlin2( uv * 2.7 + b.id * 1.31 ) * 0.5 + perlin2( uv * 9.0 + 3.1 ) * 0.25;
 	col = col * ( 1.0 + mott * 0.12 ) * tint;
 	// pits and grain
@@ -123,7 +125,7 @@ fn stnSample( uv: vec2f, P: vec3f, pattern: f32, seed: f32, wear: f32, tint: vec
 	col = col * ( 0.94 + grain * 0.08 );
 	// joints: deep, darker; a grimy rim along the bottom of each block
 	let inJoint = 1.0 - smoothstep( joint * 0.6, joint + 0.006, b.edge );
-	col = mix( col, col * vec3f( 0.58, 0.55, 0.5 ), inJoint );
+	col = mix( col, col * vec3f( 0.8, 0.77, 0.72 ), inJoint );
 	// weathering: moss and grime creep up from the ground and in from the joints where wear is high
 	let lowK = 1.0 - smoothstep( 0.0, 0.9, uv.y );
 	let mossN = perlin2( uv * 1.3 + seed ) * 0.5 + 0.5;
@@ -134,7 +136,7 @@ fn stnSample( uv: vec2f, P: vec3f, pattern: f32, seed: f32, wear: f32, tint: vec
 	o.col = col;
 	o.rough = mix( 0.82, 0.92, inJoint ) - grain * 0.05;
 	o.h = rel * 0.03 + ( grain - 0.5 ) * 0.0015 + mott * 0.003;
-	o.ao = mix( 1.0, 0.55, inJoint );
+	o.ao = mix( 1.0, 0.75, inJoint );
 	return o;
 }
 
@@ -341,7 +343,7 @@ export function createGlazingMaterial() {
 		// light: from the window by day, falling off toward the back; the lamp's pool after dusk
 		let lampPool = 1.0 / ( 1.0 + dot( H - lp, H - lp ) * 0.25 );
 		// (sunlight through the glass warms the room by day)
-		illum = mix( mix( 0.95, 0.4, back ), 0.25 + lampPool * 1.6, night );
+		illum = mix( mix( 1.6, 0.8, back ) + lampPool * 0.5, 0.25 + lampPool * 1.6, night );
 		col *= mix( ${ srgb( 1.0, 0.9, 0.76 ) }, vec3f( 1.0 ), night );
 		inside = col;
 		if ( hit == 4 ) { inside = ${ srgb( 1.0, 0.8, 0.5 ) }; illum = mix( 2.5, 5.0, night ); }
