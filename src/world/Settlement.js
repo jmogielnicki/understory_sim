@@ -9,7 +9,7 @@ import { Grading, frame, polygonDistance } from './settlement/Grading.js';
 import { smoothstep } from '../util/Noise.js';
 import { buildEarthHome } from './settlement/EarthHome.js';
 import { buildTower } from './settlement/Towers.js';
-import { buildSteps, buildPavedPath, buildApron, buildBridge, buildPergola, buildGarden, buildPlay, buildDock } from './settlement/Landscape.js';
+import { buildSteps, buildPavedPath, buildPathLights, buildApron, buildBridge, buildPergola, buildGarden, buildPlay, buildDock } from './settlement/Landscape.js';
 import { waterMeshes } from './settlement/Water.js';
 import { Drapes } from './settlement/Drapes.js';
 import { createStoneMaterial, createGlazingMaterial, createGlowMaterial, createSailMaterial } from './settlement/SettlementMaterials.js';
@@ -125,6 +125,8 @@ export class Settlement {
 
 			if ( p.pave ) buildPavedPath( B, p, ground );
 			steps += buildSteps( B, p, rand, ground );
+			// lamps along the longer walks
+			if ( p.pts.length > 3 ) for ( const position of buildPathLights( B, p, ground, rand ) ) this.lights.push( { position, color: new Color( 1.0, 0.7, 0.4 ), intensity: 1.6, kind: 'pathLight' } );
 
 		}
 

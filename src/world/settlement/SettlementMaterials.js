@@ -19,7 +19,8 @@ import { srgb } from '../terrain/TerrainShading.js';
 //   pattern 6  terracotta (plant pots): warm clay, a little salt bloom near the rim
 // GLAZING: vdata: x seed, y lit (0..1, warm light inside), z 0 window / 1 door / 2 skylight / 3 hall window
 // (framing drawn in the shader). uv: metres across the pane.
-// GLOW: unlit pale blue light (the technology seams): vdata.x phase. Breathes slowly.
+// GLOW: unlit light: the pale blue technology seams (vdata.x phase: they breathe slowly) and, with vdata.y = 1,
+// the warm path lamps (steady, lit after dusk).
 
 const STONE_WGSL = /* wgsl */`
 const STN_A: vec3f = ${ srgb( 0.75, 0.66, 0.52 ) }; // cream
@@ -269,9 +270,12 @@ export function createGlowMaterial() {
 	m.lit = false;
 	m.vertex = PASS;
 	m.output = /* wgsl */`
-	// pale, breathing blue: brighter at night, gently visible by day
-	let breathe = sin( frame.time * 0.9 + in.vs.vData.x * 6.28 ) * 0.25 + 0.75;
-	let k = mix( 1.6, 4.0, smoothstep( 0.1, 0.7, frame.night ) ) * breathe;
+	// pale, breathing blue: brighter at night, gently visible by day (vData.y = 1: a steady lamp, which
+	// shows only after dusk)
+	let lamp = in.vs.vData.y > 0.5;
+	let breathe = select( sin( frame.time * 0.9 + in.vs.vData.x * 6.28 ) * 0.25 + 0.75, 1.0, lamp );
+	let night = smoothstep( 0.1, 0.7, frame.night );
+	let k = select( mix( 1.6, 4.0, night ), mix( 0.15, 6.0, night ), lamp ) * breathe;
 	r.color = vec4f( in.vs.vTint * k, 1.0 );
 `;
 	return m;

@@ -374,6 +374,40 @@ export function buildDock( B, d, groundAt, rand ) {
 
 }
 
+// Low stone lamps along a path, every ~`every` metres on alternate sides: a dressed post with a warm glowing
+// cap. Returns the light positions (world).
+export function buildPathLights( B, p, groundAt, rand, every = 16 ) {
+
+	const out = [];
+	const pts = p.pts;
+	let acc = every * 0.5, side = 1;
+	for ( let k = 0; k < pts.length - 1; k ++ ) {
+
+		const [ ax, az ] = pts[ k ], [ bx, bz ] = pts[ k + 1 ];
+		const L = Math.hypot( bx - ax, bz - az );
+		const dx = ( bx - ax ) / L, dz = ( bz - az ) / L;
+		while ( acc < L ) {
+
+			const x = ax + dx * acc - dz * side * ( p.w + 0.55 ), z = az + dz * acc + dx * side * ( p.w + 0.55 );
+			const g = groundAt( x, z );
+			const yaw = Math.atan2( dx, dz );
+			B.box( 'stone', x, g + 0.3, z, 0.2, 0.75, 0.2, { ry: yaw, data: [ rand.next(), 3, 0.5, 0.2 ] } );
+			B.box( 'glow', x, g + 0.69, z, 0.14, 0.05, 0.14, { ry: yaw, data: [ rand.next(), 1, 0, 0 ], tint: [ 1.0, 0.72, 0.42 ] } );
+			B.box( 'stone', x, g + 0.75, z, 0.26, 0.06, 0.26, { ry: yaw, data: [ rand.next(), 3, 0.5, 0.26 ] } );
+			out.push( new Vector3( x, g + 0.7, z ) );
+			side = - side;
+			acc += every * ( 0.85 + rand.next() * 0.3 );
+
+		}
+
+		acc -= L;
+
+	}
+
+	return out;
+
+}
+
 // distance from (x, z) to the nearest path of a list
 export function nearestPath( paths, x, z ) {
 

@@ -33,9 +33,10 @@ export const WORLD = {
 
 	beach: { xMin: 300, xMax: 420 },
 
-	spawn: { position: new THREE.Vector3( 420, 0, - 270 ), yaw: Math.PI },
-	// where the player starts: on the slope above the cove, looking south over the lake
-	start: { position: new THREE.Vector3( 430, 0, - 300 ), yaw: Math.PI },
+	spawn: { position: new THREE.Vector3( 290, 0, - 400 ), yaw: - 2.5 },
+	// where the player starts: on the path above the first rows of homes, looking down over their roofs to the
+	// halls and the lake (the key art's view)
+	start: { position: new THREE.Vector3( 290, 0, - 400 ), yaw: - 2.5 },
 
 	// prevailing direction the (small) waves travel: north-westerlies blow down the lake toward the south-east
 	swellDir: new THREE.Vector2( 0.35, 1 ).normalize(),
