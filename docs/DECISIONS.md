@@ -36,8 +36,9 @@ Each is easy to reverse; the file or setting is named.
 - **Stone.** One warm sandstone family (cream, honey, pale) for homes and halls; granite for boulders.
 - **Stream and pond.** The stream drops ~45 m from the ravine to the cove through a lily pond (level 7.2 m);
   four timber footbridges. The pond and stream water are opaque, dark, reflective surfaces (not see-through).
-- **Paths.** Worn earth paths on the terrain, flagged stone along the lake shore, dressed stone steps
-  wherever a path is steeper than ~1 in 7.
+- **Paths.** The village's walks are surfaced with crushed sandstone (pale and warm like the homes, as in the
+  layout image) and about 2.5 m wide; trails in the woods stay worn earth; flagged stone along the lake shore,
+  dressed stone steps wherever a path is steeper than ~1 in 7.
 
 - **A hamlet across the water.** Six homes on the long point to the west, facing east toward the village (the
   layout image shows a second settlement on the far shore). `HAMLET` in `Plan.js`.

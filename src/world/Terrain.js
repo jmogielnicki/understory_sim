@@ -547,8 +547,16 @@ const TERRAIN_SURFACE = /* wgsl */`
 		var dirt = mix( ${ S( 0.38, 0.31, 0.23 ) }, ${ S( 0.5, 0.43, 0.32 ) }, dM.w ) * ( ( dN.y - 0.4 ) * 0.35 + 0.95 );
 		dirt = mix( dirt, ${ S( 0.3, 0.22, 0.15 ) }, jungleW * 0.7 );
 		dirt = mix( dirt, ${ S( 0.56, 0.53, 0.48 ) }, smoothstep( 0.72, 0.82, dN.z ) * 0.5 );
-		// grass creeping onto the trail, a grassy strip between the two worn ruts
-		let creep = smoothstep( 0.45, 0.7, dN.y + ( dF.y - 0.45 ) * 0.5 ) * smoothstep( 0.9, 0.5, sp.y );
+		// the village's walks (on the open ground) are surfaced with crushed sandstone, the colour of the
+		// homes: pale and warm, a fine grain of light and dark chips, darker where it is damp and trodden
+		let walkK = smoothstep( 0.45, 0.8, sp.z ) * ( 1.0 - jungleW );
+		var gravel = mix( ${ S( 0.58, 0.52, 0.41 ) }, ${ S( 0.68, 0.61, 0.48 ) }, smoothstep( 0.3, 0.7, dM.w * 0.7 + macroB * 0.3 ) );
+		gravel = gravel * ( ( grainF - 0.45 ) * 0.35 + 1.0 ) * ( ( grain - 0.45 ) * 0.2 + 1.0 );
+		gravel = mix( gravel, ${ S( 0.46, 0.4, 0.31 ) }, smoothstep( 0.6, 0.8, dN.y + ( dM.y - 0.5 ) * 0.4 ) * 0.35 );
+		dirt = mix( dirt, gravel, walkK );
+		// grass creeping onto the trail, a grassy strip between the two worn ruts (only along the
+		// walks' edges in the village)
+		let creep = smoothstep( 0.45, 0.7, dN.y + ( dF.y - 0.45 ) * 0.5 ) * smoothstep( mix( 0.9, 0.6, walkK ), mix( 0.5, 0.35, walkK ), sp.y );
 		dirt = mix( dirt, lawn, creep * 0.8 );
 
 		// ---- combine
