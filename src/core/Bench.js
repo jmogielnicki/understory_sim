@@ -293,8 +293,6 @@ export class Bench {
 		for ( const name of views ) {
 
 			this.pose( name );
-			// spray from before (a loon's dive, the boat) would hang in the air with the clock stopped
-			if ( app.spray && app.spray.clear ) app.spray.clear();
 			app.post.outputTexture = this._out;
 			try {
 
