@@ -44,11 +44,11 @@ export class Settlement {
 
 		// ---------------------------------------------------------------- 1. earthworks
 		const G = this.grading = new Grading( terrain );
-		// the clearing is open ground (meadow, no forest floor), with a ragged edge into the woods
-		{
+		// the clearings are open ground (meadow, no forest floor), with a ragged edge into the woods
+		for ( const poly of [ PLAN.CLEARING, PLAN.HAMLET_CLEARING ] ) {
 
 			let x0 = Infinity, x1 = - Infinity, z0 = Infinity, z1 = - Infinity;
-			for ( const [ x, z ] of PLAN.CLEARING ) {
+			for ( const [ x, z ] of poly ) {
 
 				x0 = Math.min( x0, x ); x1 = Math.max( x1, x ); z0 = Math.min( z0, z ); z1 = Math.max( z1, z );
 
@@ -58,7 +58,7 @@ export class Settlement {
 
 				if ( terrain.heights[ k ] < 0.2 ) return;
 				const rag = terrain.noise.fbm( x / 23, z / 23, 3 ) * 9 + terrain.noise2.noise( x / 6, z / 6 ) * 2.5;
-				const t = 1 - smoothstep( - 4, 4, polygonDistance( PLAN.CLEARING, x, z ) + rag );
+				const t = 1 - smoothstep( - 4, 4, polygonDistance( poly, x, z ) + rag );
 				if ( t > 0 ) G.open( k, t );
 
 			} );
@@ -68,7 +68,8 @@ export class Settlement {
 
 		G.smoothArea( PLAN.GREEN, { blur: 4, edge: 7 } );
 		G.smoothArea( PLAN.PLAZA, { blur: 4, flat: 0.75, edge: 6 } );
-		for ( const p of PLAN.PATHS ) G.path( p );
+		this.allPaths = [ ...PLAN.PATHS, ...PLAN.HAMLET_PATHS ];
+		for ( const p of this.allPaths ) G.path( p );
 		// the pond first: it settles its level under the natural rim, which the stream then runs through
 		G.pond( PLAN.POND );
 		this.stream = G.stream( PLAN.STREAM, PLAN.POND );
@@ -79,10 +80,10 @@ export class Settlement {
 			return y;
 
 		} );
-		this.homes = PLAN.HOMES.map( ( h ) => ( { h, g: G.home( { ...h, terrace: h.terrace * 0.82 } ) } ) );
+		this.homes = [ ...PLAN.HOMES, ...PLAN.HAMLET ].map( ( h ) => ( { h, g: G.home( { ...h, terrace: h.terrace * 0.82 } ) } ) );
 		this.annexes = PLAN.ANNEXES.map( ( h ) => ( { h: { ...h, terrace: 3, skylights: 0 }, g: G.home( { ...h, terrace: 3 } ) } ) );
 		// the paths join the terrain's own list (worn ground, kept clear of plants and debris)
-		for ( const p of PLAN.PATHS ) TERRAIN_PATHS.push( p );
+		for ( const p of this.allPaths ) TERRAIN_PATHS.push( p );
 		terrain.buildMinMax();
 		const t1 = performance.now();
 
@@ -120,7 +121,7 @@ export class Settlement {
 		PLAN.TOWERS.forEach( ( t, i ) => buildApron( B, t, ground, 0.06 + i * 0.012 ) );
 		for ( const t of PLAN.TOWERS ) this.footprints.push( { x: t.x, z: t.z, r: t.r + 5, kind: 'plaza' } );
 		let steps = 0;
-		for ( const p of PLAN.PATHS ) {
+		for ( const p of this.allPaths ) {
 
 			if ( p.pave ) buildPavedPath( B, p, ground );
 			steps += buildSteps( B, p, rand, ground );
@@ -264,7 +265,7 @@ export class Settlement {
 	get paths() {
 
 		return [
-			...PLAN.PATHS.map( ( p ) => ( { points: p.pts, width: p.w * 2 } ) ),
+			...this.allPaths.map( ( p ) => ( { points: p.pts, width: p.w * 2 } ) ),
 			{ points: PLAN.STREAM.map( ( q ) => [ q.x, q.z ] ), width: 3.4 },
 		];
 

@@ -54,6 +54,10 @@ export const VIEWS = {
 	dusk: { p: [ 330, 3.0, - 296 ], agl: true, yaw: - 0.05, pitch: 0.1, time: 19.6 },
 	// out on the lake by the sailboats, looking back at the north shore
 	sailing: { p: [ 340, 2.2, 182 ], yaw: - 0.6, pitch: 0.03, time: 16.0 },
+	// across the lake to the hamlet on the point, from the end of the dock
+	hamlet: { p: [ 400.5, 1.8, - 212 ], agl: true, yaw: 2.05, pitch: 0.02, time: 17.0 },
+	// the hamlet close to, from the water
+	hamletNear: { p: [ - 560, 2.5, 330 ], yaw: 1.65, pitch: 0.0, time: 16.0 },
 	// key art candidates: down over the homes and the halls to the lake; across the green from hillside B
 	keyart: { p: [ 290, 6, - 400 ], agl: true, yaw: - 2.5, pitch: - 0.12, time: 16.5 },
 	keyartEast: { p: [ 520, 5, - 330 ], agl: true, yaw: 1.83, pitch: - 0.08, time: 16.5 },

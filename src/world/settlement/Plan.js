@@ -164,3 +164,21 @@ export const BOATS = [
 	{ kind: 'kayak', x: 318, z: - 226, yaw: 1.2, color: 'red' },
 	{ kind: 'row', x: 397.6, z: - 232, yaw: 0.05, color: 'green' },
 ];
+
+// A hamlet across the water on the long point to the west (the layout image shows a second settlement on the
+// far shore): six homes facing east over the lake toward the village, in their own clearing
+export const HAMLET = [
+	{ id: 'H1', x: - 626, z: 205, yaw: 1.45, span: 7.2, rise: 3.9, depth: 8.5, side: [ [ 6.8, 4.0, 2.6 ] ], terrace: 4.5, skylights: 1, seam: true },
+	{ id: 'H2', x: - 640, z: 262, yaw: 1.62, span: 7.8, rise: 4.1, depth: 9, side: [ [ - 7.0, 4.0, 2.6 ] ], terrace: 4.5, skylights: 2 },
+	{ id: 'H3', x: - 648, z: 318, yaw: 1.55, span: 7.0, rise: 3.8, depth: 8.5, side: [], terrace: 4.5, skylights: 1 },
+	{ id: 'H4', x: - 652, z: 372, yaw: 1.5, span: 8.0, rise: 4.2, depth: 9, side: [ [ 7.2, 4.2, 2.7 ] ], terrace: 5, skylights: 2, seam: true },
+	{ id: 'H5', x: - 640, z: 425, yaw: 1.35, span: 7.2, rise: 3.9, depth: 8.5, side: [ [ - 6.8, 4.0, 2.6 ] ], terrace: 4.5, skylights: 1 },
+	{ id: 'H6', x: - 668, z: 470, yaw: 1.2, span: 7.6, rise: 4.0, depth: 9, side: [], terrace: 4.5, skylights: 1 },
+];
+export const HAMLET_CLEARING = [
+	[ - 600, 170 ], [ - 578, 240 ], [ - 584, 320 ], [ - 590, 400 ], [ - 596, 460 ], [ - 630, 510 ], [ - 690, 500 ],
+	[ - 700, 430 ], [ - 690, 360 ], [ - 684, 290 ], [ - 670, 220 ], [ - 648, 180 ],
+];
+export const HAMLET_PATHS = [
+	{ w: 0.9, pts: [ [ - 612, 210 ], [ - 622, 262 ], [ - 628, 318 ], [ - 632, 372 ], [ - 624, 425 ], [ - 648, 470 ] ] },
+];
