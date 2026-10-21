@@ -114,12 +114,6 @@ Each is easy to reverse; the file or setting is named.
 - Songbirds still sing from Tidewater's samples (generic woodland birds; no New England species).
 - The sound bed is Tidewater's (surf is near silent at the lake's wave height; the birds are generic).
 
-## Known issues
-
-- Reference shots taken in one batch can show a haze of dark specks in the sky in a view that follows another
-  (most after an aerial view); single views are clean, and the running game has not shown it. Cause not yet
-  found (not the wildlife, haze or spray). The README screenshots are shot one batch per aerial view.
-
 ## Performance
 
 On this Mac (headless Chrome), 2560 x 1267: about 18-22 ms of GPU time per frame across the benchmark views

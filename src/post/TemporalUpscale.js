@@ -604,7 +604,25 @@ DEBUG_OUTPUT
 
 		}
 
-		// after a restart (resize, another AA mode) the history is ignored for a frame (FSR2 reset)
+		// a camera cut (teleport, a debug view, a respawn: > 6 m or > ~25 degrees in one frame) restarts the
+		// history too; otherwise locked thin features of the old view (twigs, wires) could survive in the
+		// new one as specks wherever their reprojection lands
+		const cp = F.cameraPos.value, pp = F.prevCameraPos.value;
+		// view directions now and before: the screen centre unprojected (NDC depth 0.5) from each camera
+		const dir = ( e, o ) => {
+
+			const w = e[ 11 ] * 0.5 + e[ 15 ];
+			const x = ( e[ 8 ] * 0.5 + e[ 12 ] ) / w - o.x, y = ( e[ 9 ] * 0.5 + e[ 13 ] ) / w - o.y, z = ( e[ 10 ] * 0.5 + e[ 14 ] ) / w - o.z;
+			const l = Math.hypot( x, y, z ) || 1;
+			return [ x / l, y / l, z / l ];
+
+		};
+
+		const a = dir( F.invViewProj.value.elements, cp ), b = dir( U.prevInvViewProj.value.elements, pp );
+		const cosT = a[ 0 ] * b[ 0 ] + a[ 1 ] * b[ 1 ] + a[ 2 ] * b[ 2 ];
+		if ( cp.distanceTo( pp ) > 6 || cosT < 0.9 ) this._needsRestart = true;
+
+		// after a restart (resize, another AA mode, a cut) the history is ignored for a frame (FSR2 reset)
 		U.reset.value = this._needsRestart ? 1 : 0;
 		this._needsRestart = false;
 
