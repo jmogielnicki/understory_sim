@@ -1,4 +1,4 @@
-import { Mesh, Vector2, Vector3 } from '../engine/index.js';
+import { Mesh, Vector2, Vector3, Vector4 } from '../engine/index.js';
 import { ShaderModule } from '../engine/gpu/Shader.js';
 import { CDLOD } from '../core/CDLOD.js';
 import { standard } from '../materials/Materials.js';
@@ -62,10 +62,16 @@ export class Terrain {
 				viewPos: [ 'vec3f', this.uViewPos.value ],
 				wetDarken: [ 'f32', 0.58 ],
 				gustOffset: [ 'vec2f', this.gustOffset ],
+				// the village's mown green (setLawn): outline, two points per vec4; x = point count;
+				// its bounds (x0, z0, x1, z1) padded by the edge's falloff
+				lawnPoly: [ 'vec4f[8]', new Float32Array( 32 ) ],
+				lawnInfo: [ 'vec4f', new Vector4() ],
+				lawnBox: [ 'vec4f', new Vector4( 1e9, 1e9, - 1e9, - 1e9 ) ],
 			},
 			attributes: { nodeData: 'vec4f' },
 		} );
 		this.params = { wetDarken: mat.uniforms.wetDarken };
+		this.lawnUniforms = { poly: mat.uniforms.lawnPoly, info: mat.uniforms.lawnInfo, box: mat.uniforms.lawnBox };
 		this.uViewPos = mat.uniforms.viewPos;
 
 		mat.vertex = /* wgsl */`
@@ -108,6 +114,27 @@ export class Terrain {
 		mat.defines.MATERIAL_SUN_MODULATION = this.sunShadow ? 1 : 0;
 		mat.surface = TERRAIN_SURFACE;
 		mat.needsUpdate = true;
+
+	}
+
+	// The village's mown green: [[x, z], ...] (up to 16 points), shaded as a dense, even lawn rather than
+	// tall meadow (its edge falls off over -3..+1.5 m, as Settlement.lawnAt).
+	setLawn( points ) {
+
+		const U = this.lawnUniforms, n = Math.min( points.length, 16 );
+		const poly = new Float32Array( 32 );
+		let x0 = Infinity, z0 = Infinity, x1 = - Infinity, z1 = - Infinity;
+		for ( let i = 0; i < n; i ++ ) {
+
+			const [ x, z ] = points[ i ];
+			poly[ i * 2 ] = x; poly[ i * 2 + 1 ] = z;
+			x0 = Math.min( x0, x ); z0 = Math.min( z0, z ); x1 = Math.max( x1, x ); z1 = Math.max( z1, z );
+
+		}
+
+		U.poly.value = poly;
+		U.info.value = new Vector4( n, 0, 0, 0 );
+		U.box.value = new Vector4( x0 - 2, z0 - 2, x1 + 2, z1 + 2 );
 
 	}
 
@@ -423,12 +450,34 @@ const TERRAIN_SURFACE = /* wgsl */`
 		let V = normalize( frame.cameraPos - p );
 		let NdV = sat( dot( N0, V ) );
 		let mt = terrainMeadowTone( macroA, macroB, slope, N0.z, dM.w * 0.65 + dN.w * 0.35, true );
+		// the village's mown green (Terrain.setLawn): signed distance to its outline (< 0 inside)
+		var lawnD = 1e3;
+		if ( xz.x > mat.lawnBox.x && xz.y > mat.lawnBox.y && xz.x < mat.lawnBox.z && xz.y < mat.lawnBox.w ) {
+			let n = u32( mat.lawnInfo.x );
+			var d2 = 1e9;
+			var inside = false;
+			for ( var i = 0u; i < n; i++ ) {
+				let j = select( i - 1u, n - 1u, i == 0u );
+				let va = mat.lawnPoly[ i >> 1u ]; let vb = mat.lawnPoly[ j >> 1u ];
+				let a = select( va.xy, va.zw, ( i & 1u ) == 1u );
+				let b = select( vb.xy, vb.zw, ( j & 1u ) == 1u );
+				let e = b - a; let w = xz - a;
+				let q = w - e * sat( dot( w, e ) / max( dot( e, e ), 1e-6 ) );
+				d2 = min( d2, dot( q, q ) );
+				if ( ( a.y > xz.y ) != ( b.y > xz.y ) && xz.x < ( b.x - a.x ) * ( xz.y - a.y ) / ( b.y - a.y ) + a.x ) { inside = !inside; }
+			}
+			lawnD = select( sqrt( d2 ), - sqrt( d2 ), inside );
+		}
+		let greenK = 1.0 - smoothstep( -3.0, 1.5, lawnD );
+		// mown: fresh, even green (a little mottled by the clover and the mower), no tussocks or straw
+		let mownTone = mix( ${ S( 0.28, 0.39, 0.13 ) }, ${ S( 0.35, 0.43, 0.16 ) }, smoothstep( 0.35, 0.65, dM.w * 0.6 + macroB * 0.4 ) )
+			* ( ( dN.w - 0.5 ) * 0.12 + 1.0 );
 		// clumps (1-3 m) and tussocks, blade-scale grain
 		let clump = dM.w * 0.6 + dN.y * 0.4;
 		// seen from afar the tussocks and their shadowed gaps are what makes tall grass read as
 		// grass (not lawn): the clump contrast grows with distance as the blades fade out
-		let clumpK = mix( 0.34, 0.95, smoothstep( 40.0, 140.0, camDist ) );
-		var lawn = mt.tone * ( ( clump - 0.5 ) * clumpK + 1.0 ) * ( ( dF.y - 0.4 ) * 0.22 + 1.0 );
+		let clumpK = mix( 0.34, 0.95, smoothstep( 40.0, 140.0, camDist ) ) * ( 1.0 - greenK * 0.75 );
+		var lawn = mix( mt.tone, mownTone, greenK ) * ( ( clump - 0.5 ) * clumpK + 1.0 ) * ( ( dF.y - 0.4 ) * 0.22 + 1.0 );
 		lawn = lawn * mix( 1.0, smoothstep( 0.25, 0.55, dN.y * 0.5 + dM.y * 0.5 ) * 0.35 + 0.72, smoothstep( 50.0, 160.0, camDist ) );
 		// grass combed along the wind: long streaks (anisotropic sample of the fbm channel)
 		// (comb and gust only where the lawn shows: not under full forest, sand or water)
@@ -441,7 +490,7 @@ const TERRAIN_SURFACE = /* wgsl */`
 		}
 		// seen from above the dark soil shows between the clumps; at grazing angles blade sides
 		// cover everything (lighter, more saturated)
-		let gapK = smoothstep( 0.3, 0.95, NdV ) * smoothstep( 0.62, 0.3, clump );
+		let gapK = smoothstep( 0.3, 0.95, NdV ) * smoothstep( 0.62, 0.3, clump ) * ( 1.0 - greenK );
 		lawn = mix( lawn, MEADOW_soil, gapK * 0.45 );
 		lawn = mix( lawn, terrainSaturation( lawn * 1.12, 1.15 ), smoothstep( 0.45, 0.1, NdV ) * 0.6 );
 		// travelling gusts flatten the grass: the paler blade backs show as waves (same gust
@@ -452,14 +501,16 @@ const TERRAIN_SURFACE = /* wgsl */`
 			lawn = mix( lawn, lawn * vec3f( 1.25, 1.22, 1.06 ) + 0.01, gust * 0.6 );
 		}
 		// bare trodden soil in places, sandy soil toward the beach
-		lawn = mix( lawn, ${ S( 0.4, 0.33, 0.23 ) }, smoothstep( 0.72, 0.84, dN.y + ( dM.y - 0.5 ) * 0.5 ) * 0.25 );
+		lawn = mix( lawn, ${ S( 0.4, 0.33, 0.23 ) }, smoothstep( 0.72, 0.84, dN.y + ( dM.y - 0.5 ) * 0.5 ) * 0.25 * ( 1.0 - greenK * 0.8 ) );
 		lawn = mix( lawn, ${ S( 0.60, 0.52, 0.38 ) }, sat( sp.x * 1.6 ) * smoothstep( 0.45, 0.62, dN.z + dM.y * 0.3 ) * 0.7 );
 		// inside the geometric grass field (GrassField) the ground is only seen between the blades:
 		// the shaded base of the sward, dark and brownish with dead leaves; it hands over to the
 		// sward's own look (above) where the blades thin out
 		let grassHere = smoothstep( 2.5, 4.5, h ) * ( 1.0 - smoothstep( 0.45, 0.85, jungleW ) ) * ( 1.0 - sat( sp.x * 1.6 ) );
 		let fieldK = ( 1.0 - smoothstep( ${ GRASS_FADE[ 0 ].toFixed( 1 ) }, ${ GRASS_FADE[ 1 ].toFixed( 1 ) }, length( p.xz - frame.cameraPos.xz ) ) ) * grassHere;
-		let swardBase = mix( mt.tone * 0.4, MEADOW_soil, 0.4 ) * ( ( dN.y - 0.45 ) * 0.6 + 1.0 ) * ( ( dF.y - 0.4 ) * 0.3 + 1.0 );
+		var swardBase = mix( mt.tone * 0.4, MEADOW_soil, 0.4 ) * ( ( dN.y - 0.45 ) * 0.6 + 1.0 ) * ( ( dF.y - 0.4 ) * 0.3 + 1.0 );
+		// a lawn is dense to the ground: between its short blades more green blades, not soil
+		swardBase = mix( swardBase, mownTone * ( ( dF.y - 0.4 ) * 0.25 + 0.82 ), greenK );
 		lawn = mix( lawn, swardBase, fieldK * 0.85 );
 		let litter = mix( ${ S( 0.24, 0.16, 0.09 ) }, ${ S( 0.38, 0.28, 0.16 ) }, dF.y );
 		var jungle = mix( ${ S( 0.13, 0.19, 0.06 ) }, litter, smoothstep( 0.42, 0.6, dN.y + ( dM.y - 0.5 ) * 0.3 ) );
@@ -595,8 +646,8 @@ const TERRAIN_SURFACE = /* wgsl */`
 			+ rill * 0.006 * rillK;
 		// seagrass canopy stands proud of the sand with a ragged scarp; rubble is knobbly
 		let seabedH = seagrassW * ( blades * 0.05 + 0.08 ) + rubbleW * ( dN.x * 0.07 + dF.x * 0.015 );
-		let groundH = dN.y * mix( 0.05, 0.035, jungleW ) + dF.y * 0.012 + dM.y * 0.045 + canopyH * canopyW * 2.5
-			+ clump * 0.12 * ( 1.0 - jungleW ) + comb * 0.03 * ( 1.0 - jungleW );
+		let groundH = ( dN.y * mix( 0.05, 0.035, jungleW ) + dF.y * 0.012 ) * ( 1.0 - greenK * 0.6 ) + dM.y * 0.045 + canopyH * canopyW * 2.5
+			+ ( clump * 0.12 + comb * 0.03 ) * ( 1.0 - jungleW ) * ( 1.0 - greenK * 0.8 );
 		let screeH = dN.z * 0.04 + dM.x * 0.06;
 		let dirtH = dN.z * 0.012 + dN.y * 0.01;
 		var hd = mix( mix( groundH, screeH, screeW ), dirtH, pathW );

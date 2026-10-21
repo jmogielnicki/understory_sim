@@ -748,7 +748,7 @@ export function buildTreeNear( seed = 21, b = new GeoBuilder() ) {
 	TREE_LOBES.forEach( ( L, i ) => {
 
 		const { cards: cs, tips } = clumpCards( L, i, {
-			clumps: Math.round( 3.9 * L[ 3 ] ), clumpR: 0.82, cardsPer: 3, size: 1.45, crownC, crownR, rand, flexFn: flex, hScale: H, part: 1, flatten: 0.72,
+			clumps: Math.round( 5.2 * L[ 3 ] ), clumpR: 0.86, cardsPer: 3, size: 1.55, crownC, crownR, rand, flexFn: flex, hScale: H, part: 1, flatten: 0.72,
 		} );
 		cards.push( ...cs );
 		// short twigs carrying each clump (from part way along the lobe's limb, not one point);

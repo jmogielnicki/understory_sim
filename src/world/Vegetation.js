@@ -105,6 +105,7 @@ export class Vegetation {
 		// the village green is mown lawn
 		if ( village && village.lawnAt ) site.inLawn = ( x, z ) => village.lawnAt( x, z );
 		if ( village && village.plantings ) site.plantings = village.plantings;
+		if ( village && village.vistas ) site.vistas = village.vistas;
 		this.site = site;
 		const recs = scatterForest( site );
 		this.records = recs;

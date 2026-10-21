@@ -43,7 +43,9 @@ water, terrain, vegetation, lighting and post-processing it reuses and adapts.
 
 **The woods and meadows**
 - Eastern white pines and hemlocks, maples, red oaks, beeches and paper birches, mountain laurel, hobblebush
-  and blueberry, ferns on the forest floor; meadow grass with lupines and daisies in the village, a mown green.
+  and blueberry, ferns on the forest floor.
+- In the village, groves of broad open-grown oaks and maples with birches between the homes, meadow grass with
+  lupines and daisies, and a mown green.
 
 **The lake**
 - Common loons out on the open water, in pairs and alone: swimming, peering, diving and surfacing somewhere

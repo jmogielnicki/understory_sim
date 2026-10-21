@@ -158,6 +158,14 @@ export const ERRATICS = [
 	[ 410, - 260, 1.6 ], [ 250, - 380, 1.7 ], [ 500, - 290, 1.5 ], [ 328, - 360, 1.2 ], [ 562, - 300, 2.2 ], [ 448, - 260, 1.4 ],
 ];
 
+// Designed vistas: corridors kept free of trees (half-width w, metres), from where you first stand
+// (WORLD.start, above the first rows) down to each of the halls
+export const VISTAS = [
+	{ from: [ 290, - 400 ], to: [ 346, - 283 ], w: 10 },
+	{ from: [ 290, - 400 ], to: [ 373, - 293 ], w: 9 },
+	{ from: [ 290, - 400 ], to: [ 321, - 279 ], w: 8 },
+];
+
 export const DOCK = { x: 400.5, zStart: - 250, zEnd: - 214, width: 1.8, headWidth: 7, headDepth: 3.6, deck: 0.62 };
 
 // Small craft on the lake: two day sailers at anchor, a kayak drawn up in the cove, a rowboat at the dock

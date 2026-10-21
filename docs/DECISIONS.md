@@ -69,9 +69,17 @@ Each is easy to reverse; the file or setting is named.
 - **Forest mix.** Eastern white pine (shores, ledges, emergent), eastern hemlock (ravines, north slopes, by
   the water), maple, red oak, beech and paper birch; mountain laurel, hobblebush and lowbush blueberry; ferns.
   Placement rules: `src/world/vegetation/ForestScatter.js`.
-- **The village clearing.** The homes stand in an open meadow (`CLEARING` in `Plan.js`) with scattered birches,
-  pines and oaks, as in the references; the forest closes in at a ragged edge.
+- **The village clearing.** The homes stand among trees, as in the layout image: clumps and groves of
+  open-grown red oaks and maples with broad, low crowns, birches in twos and threes, a few pines, glades of
+  meadow between (`CLEARING` in `Plan.js`, rules in `ForestScatter.js`); trees keep ~4.5 m off the homes and
+  the forest closes in at a ragged edge. The mown green stays open but for its edges.
+- **Designed vistas.** Corridors from the starting point down to each hall are kept free of trees, so the
+  opening view (and the loading-screen key art) shows all three halls (`VISTAS` in `Plan.js`).
+- **Fuller crowns.** Every broadleaf tree carries ~1.3x the leaf clusters it had in Tidewater (the crowns read
+  as solid and rounded, like the references' trees); about +2 ms over the nine benchmark views together.
 - **Open-grown pines keep their low limbs**; pines in the forest have shed their lower third.
+- **The green.** Shaded as a dense mown lawn (fresh, even green to the ground, no tussocks, little relief)
+  instead of tall-meadow sward, which made it read as dark olive carpet (`Terrain.setLawn`).
 - **Ground flora.** Knee-high meadow grass on the roofs and in the clearing, a short mown lawn on the green,
   drifts of lupine (purple-blue, some pink and white) through the meadows and crowding round the homes, daisies
   and clover in the lawn. Tidewater's tropical grass kinds were repurposed (dune grass → lawn, sea oats →
@@ -97,6 +105,12 @@ Each is easy to reverse; the file or setting is named.
 - The boat is Tidewater's diesel fishing boat; the bible would want something quieter (sail or electric).
 - Songbirds still sing from Tidewater's samples (generic woodland birds; no New England species).
 - The sound bed is Tidewater's (surf is near silent at the lake's wave height; the birds are generic).
+
+## Known issues
+
+- Reference shots taken in one batch can show a haze of dark specks in the sky in a view that follows another
+  (most after an aerial view); single views are clean, and the running game has not shown it. Cause not yet
+  found (not the wildlife, haze or spray). The README screenshots are shot one batch per aerial view.
 
 ## Performance
 

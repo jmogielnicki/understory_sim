@@ -272,6 +272,20 @@ export class Settlement {
 
 	}
 
+	// corridors kept free of trees: [{ from: [x, z], to: [x, z], w }] (PLAN.VISTAS)
+	get vistas() {
+
+		return PLAN.VISTAS;
+
+	}
+
+	// the mown green's outline [[x, z], ...] (the terrain shades it as lawn)
+	get lawnPolygon() {
+
+		return PLAN.GREEN;
+
+	}
+
 	// 0..1: on the mown green (the plants' lawn)
 	lawnAt( x, z ) {
 

@@ -154,6 +154,7 @@ export class App {
 		this.terrainGPU = new TerrainGPU( this.terrainData, this.shoreField );
 		// terrain and rocks apply the heightfield sun shadow (long hill shadows) in their own lighting
 		this.terrain = new Terrain( { scene, terrainData: this.terrainData, terrainGPU: this.terrainGPU, renderer } );
+		if ( this.village ) this.terrain.setLawn( this.village.lawnPolygon );
 		// the land beyond the walkable area, to the horizon
 		this.farTerrain = new FarTerrain( { scene, terrainData: this.terrainData, terrainGPU: this.terrainGPU } );
 		// granite: shore boulders, erratics, talus, cobbles on the lake bed

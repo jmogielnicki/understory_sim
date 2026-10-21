@@ -14,7 +14,8 @@ import { PINE_H, HEMLOCK_H } from './ConiferGeometry.js';
 //   shrubs       mountain laurel and lowbush blueberry in the forest gaps, hobblebush in the damp; and
 //                round the homes
 //   ferns        the forest floor (hay-scented and cinnamon ferns in drifts), the village's banks
-// In the village clearing: scattered birches, a few pines and oaks, shrubs and ferns along the homes.
+// In the village clearing: clumps of open-grown oaks and maples with broad, low crowns, birches, a few
+// pines; the mown green kept open; shrubs and ferns along the homes.
 //
 // Records: { x, y, z, s, sy, yaw, la, l, H, seed } as the instanced vegetation expects (VegInstances):
 // canopy trees l = sy, shrubs l = -sy; pines l = sy, hemlocks l = -sy (the impostors' group flag).
@@ -91,6 +92,21 @@ class Occupancy {
 
 }
 
+// inside one of the village's designed vistas (corridors kept free of trees)?
+function inVista( vistas, x, z ) {
+
+	for ( const v of vistas || [] ) {
+
+		const [ ax, az ] = v.from, ex = v.to[ 0 ] - ax, ez = v.to[ 1 ] - az;
+		const t = clamp( ( ( x - ax ) * ex + ( z - az ) * ez ) / ( ex * ex + ez * ez ), 0, 1 );
+		if ( Math.hypot( x - ax - ex * t, z - az - ez * t ) < v.w ) return true;
+
+	}
+
+	return false;
+
+}
+
 function scatter( rand, x0, z0, x1, z1, step, fn ) {
 
 	for ( let z = z0; z < z1; z += step ) for ( let x = x0; x < x1; x += step ) fn( x + rand() * step, z + rand() * step );
@@ -149,13 +165,15 @@ export function scatterForest( site, seed = 2026 ) {
 		if ( c.h < 0.35 ) return;
 		const stand = N.fbm( x / 140, z / 140, 3 ); // stands of one character
 		const patch = N2.fbm( x / 37, z / 37, 2 );
-		// in the open (the village clearing, the roofs, the green) only scattered trees
+		// in the open (the village clearing, the roofs) trees in clumps and groves with glades between
+		// (docs/REFERENCE.md: the village stands among trees); the mown green stays open but for its edges
 		const forest = 1 - smoothstep( 0.25, 0.75, c.open );
-		let p = 0.92 * forest + ( 1 - forest ) * 0.035 * smoothstep( - 0.2, 0.3, patch );
+		const lawn = site.inLawn ? site.inLawn( x, z ) : 0;
+		let p = 0.92 * forest + ( 1 - forest ) * 0.2 * smoothstep( - 0.3, 0.3, patch ) * ( 1 - lawn * 0.95 );
 		// thinner on the ledges and steep ground
 		p *= 1 - smoothstep( 0.3, 0.6, c.rock ) * 0.6 - smoothstep( 0.45, 0.62, c.slope ) * 0.5;
 		if ( rand() > p ) return;
-		if ( ! ok( x, z, forest > 0.5 ? 1.5 : 4 ) ) return;
+		if ( ! ok( x, z, forest > 0.5 ? 1.5 : 2.5 ) || inVista( site.vistas, x, z ) ) return;
 
 		// site affinities
 		const shoreK = 1 - smoothstep( 6, 45, c.shore );
@@ -166,8 +184,8 @@ export function scatterForest( site, seed = 2026 ) {
 		let wHard = 0.65 * ( 1 - shoreK * 0.5 ) * ( 1 - damp * 0.3 );
 		if ( forest < 0.5 ) {
 
-			// the clearing: birches above all, a few pines and oaks
-			wPine *= 0.5; wHem *= 0.08; wHard *= 1.3;
+			// the clearing: hardwoods above all, a few pines
+			wPine *= 0.3; wHem *= 0.05; wHard *= 1.6;
 
 		}
 
@@ -201,15 +219,17 @@ export function scatterForest( site, seed = 2026 ) {
 			// hardwoods: birch at the edges, on rocky ground and in the clearing; red oak on the dry slopes;
 			// maple and beech elsewhere
 			const edge = smoothstep( 0.1, 0.5, c.open ) * ( 1 - smoothstep( 0.6, 0.95, c.open ) );
-			const wB = 0.12 + edge * 1.2 + ( forest < 0.5 ? 1.4 : 0 ) + smoothstep( 0.2, 0.45, c.rock ) * 0.4;
-			const wO = 0.25 + dry * 0.5;
+			const open = forest < 0.5;
+			const wB = 0.12 + edge * 1.2 + ( open ? 0.35 : 0 ) + smoothstep( 0.2, 0.45, c.rock ) * 0.4;
+			const wO = 0.25 + dry * 0.5 + ( open ? 0.45 : 0 );
 			const wM = 0.45 + damp * 0.2;
-			const wE = 0.25;
+			const wE = open ? 0.1 : 0.25;
 			const v = rand() * ( wB + wO + wM + wE );
 			const sp = v < wB ? 2 : v < wB + wO ? 1 : v < wB + wO + wM ? 0 : 3;
 			const birch = sp === 2;
-			const s = ( birch ? 0.95 + rand() * 0.3 : 1.15 + rand() * 0.45 ) * ( forest < 0.5 && ! birch ? 1.1 : 1 );
-			const sy = ( birch ? 1.15 : 0.95 ) + rand() * 0.3;
+			// open-grown hardwoods spread wide and low
+			const s = ( birch ? 0.95 + rand() * 0.3 : 1.15 + rand() * 0.45 ) * ( open && ! birch ? 1.15 : 1 );
+			const sy = ( birch ? 1.15 : open ? 0.82 : 0.95 ) + rand() * ( open && ! birch ? 0.2 : 0.3 );
 			const r = 2.5 * s;
 			if ( ! occT.free( x, z, r, 1 ) ) return;
 			occT.add( x, z, r );
@@ -223,7 +243,7 @@ export function scatterForest( site, seed = 2026 ) {
 					const a = rand() * TAU, d = 1.6 + rand() * 1.4;
 					const bx = x + Math.cos( a ) * d, bz = z + Math.sin( a ) * d;
 					cover( site, bx, bz, c );
-					if ( ! ok( bx, bz, 2 ) ) continue;
+					if ( ! ok( bx, bz, 2 ) || inVista( site.vistas, bx, bz ) ) continue;
 					const s2 = s * ( 0.75 + rand() * 0.2 );
 					out.trees.push( { x: bx, y: site.groundY( bx, bz, 0.4 ) - 0.15, z: bz, s: s2, sy: sy * ( 0.95 + rand() * 0.1 ), yaw: rand() * TAU, la: rand() * TAU, l: sy, H: 12.5 * s2 * sy, seed: seedFor( 2, rand() ) } );
 					occ.add( bx, bz, 0.4 );

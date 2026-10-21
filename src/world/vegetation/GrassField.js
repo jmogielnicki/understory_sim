@@ -846,8 +846,8 @@ function createGrassMaterial( field ) {
 	let ao = mix( 0.32, 1.0, smoothstep( 0.0, 0.75, hf ) );
 	// dune grass: olive base, straw tips; meadow: the terrain's meadow tone, dark and brownish
 	// (dead leaf sheaths) at the base, lighter / sun-bleached towards the tips
-	let duneBase = mix( ${ C( 0x2f4a1a ) }, ${ C( 0x3d5a20 ) }, rnd );
-	let duneTip = mix( ${ C( 0x6a8c32 ) }, ${ C( 0x86a33e ) }, rnd );
+	let duneBase = mix( ${ C( 0x3a5a24 ) }, ${ C( 0x48652a ) }, rnd );
+	let duneTip = mix( ${ C( 0x7a9a40 ) }, ${ C( 0x90ad4c ) }, rnd );
 	let tone = in.vs.vVegGrassTone.xyz * ( rnd * 0.34 + 0.83 );
 	let lushBase = mix( tone * 0.5, VEG_MEADOW_SOIL, 0.3 );
 	let tipDry = in.vs.vVegGrassTone.w * 0.4 + smoothstep( 0.8, 1.0, rnd ) * 0.35;
