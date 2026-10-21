@@ -13,7 +13,7 @@ export const VIEWS = {
 	// on the village slope, looking south over the cove
 	villageSlope: { p: [ 430, 1.7, - 320 ], agl: true, yaw: Math.PI, pitch: - 0.04, time: 16.0 },
 	// at the cove's edge, eye level, looking out of the cove
-	cove: { p: [ 360, 1.7, - 252 ], agl: true, yaw: Math.PI * 0.95, pitch: - 0.03, time: 9.5 },
+	cove: { p: [ 366, 1.7, - 249 ], agl: true, yaw: Math.PI * 0.95, pitch: - 0.03, time: 9.5 },
 	// low over the open lake, looking back north at the shore and Rattlesnake
 	lakeNorth: { p: [ 250, 2.0, 450 ], yaw: 0.1, pitch: 0.02, time: 16.5 },
 	// low over the lake looking south-east toward Red Hill
@@ -40,6 +40,8 @@ export const VIEWS = {
 	hall: { p: [ 350.5, 1.7, - 256 ], agl: true, yaw: 0.15, pitch: 0.28, time: 15.0 },
 	// by the pond, toward the bridge and the homes west of the stream
 	pond: { p: [ 254, 1.7, - 298 ], agl: true, yaw: 0.85, pitch: 0.0, time: 16.0 },
+	// the village's east edge, toward the woods (birches, pines, the forest floor)
+	woodsEdge: { p: [ 470, 1.7, - 360 ], agl: true, yaw: - 1.2, pitch: 0.05, time: 15.0 },
 	// the top of the Rattlesnake cliffs (outside the walkable area: the far terrain), looking south
 	summit: { p: [ - 140, 30, - 790 ], agl: true, yaw: Math.PI * 0.9, pitch: - 0.18, time: 14.0 },
 };

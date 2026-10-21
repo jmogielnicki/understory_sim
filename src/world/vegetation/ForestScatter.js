@@ -234,6 +234,26 @@ export function scatterForest( site, seed = 2026 ) {
 
 	} );
 
+	// ---- the village's own plantings (pots on the terraces) --------------------------------------------
+	for ( const pl of site.plantings || [] ) {
+
+		const yaw = rand() * TAU;
+		if ( pl.kind === 'shrub' ) {
+
+			const sp = rand() < 0.5 ? 1 : 0;
+			const sy = 0.45 + rand() * 0.25;
+			out.shrubs.push( { x: pl.x, y: pl.y, z: pl.z, s: pl.s * 0.7, sy, yaw, la: yaw, l: - sy, H: 1.6 * pl.s * 0.7 * sy, seed: shrubSeed( sp, rand() ) } );
+
+		} else {
+
+			out.ferns.push( { x: pl.x, y: pl.y, z: pl.z, s: pl.s * 0.9, yaw, la: 0, l: 0, H: 0.05, seed: rand() } );
+
+		}
+
+		occ.add( pl.x, pl.z, 0.5 );
+
+	}
+
 	// ---- shrubs: forest gaps and edges; round the homes and along the paths in the village -----------
 	scatter( rand, - half, - half, half, half, 3.4, ( x, z ) => {
 
@@ -307,8 +327,9 @@ export function buildMeadowMask( site ) {
 			const lawn = site.inLawn ? site.inLawn( x, z ) : 0;
 			const clump = N.noise( x / 7.5, z / 7.5 ) * 0.65 + N2.noise( x / 19, z / 19 ) * 0.35;
 			const meadow = ( 1 - lawn ) * ( 0.75 + 0.25 * smoothstep( - 0.4, 0.3, clump ) );
-			const lupine = ( 1 - lawn ) * smoothstep( 0.25, 0.5, N.noise( x / 13 + 5.1, z / 13 - 2.7 ) + N2.noise( x / 4, z / 4 ) * 0.2 );
-			const creep = lawn * smoothstep( 0.05, 0.35, N2.noise( x / 6 - 1.1, z / 6 + 4.4 ) ) + ( 1 - lawn ) * 0.25;
+			const nearHome = smoothstep( 7, 2.5, od );
+			const lupine = ( 1 - lawn ) * Math.max( smoothstep( 0.0, 0.35, N.noise( x / 13 + 5.1, z / 13 - 2.7 ) + N2.noise( x / 4, z / 4 ) * 0.2 ) * 0.9, nearHome * 0.8 );
+			const creep = lawn * smoothstep( 0.05, 0.35, N2.noise( x / 6 - 1.1, z / 6 + 4.4 ) ) + ( 1 - lawn ) * 0.55 * smoothstep( - 0.3, 0.3, N2.noise( x / 9 + 2.2, z / 9 ) );
 			const o = ( j * res + i ) * 4;
 			data[ o ] = Math.round( 255 * clamp( lawn * keep * ( 0.55 + 0.25 * clump ), 0, 1 ) );
 			data[ o + 1 ] = Math.round( 255 * clamp( meadow * keep, 0, 1 ) );

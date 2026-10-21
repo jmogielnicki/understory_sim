@@ -16,6 +16,7 @@ import { srgb } from '../terrain/TerrainShading.js';
 //              vdata.w = the piece's length along u (m)
 //   pattern 4  garden soil (raised beds)
 //   pattern 5  granite boulder: grey, lichened (the glacial erratics, stream stones)
+//   pattern 6  terracotta (plant pots): warm clay, a little salt bloom near the rim
 // GLAZING: vdata: x seed, y lit (0..1, warm light inside), z 0 window / 1 door / 2 skylight / 3 hall window
 // (framing drawn in the shader). uv: metres across the pane.
 // GLOW: unlit pale blue light (the technology seams): vdata.x phase. Breathes slowly.
@@ -185,7 +186,14 @@ export function createStoneMaterial() {
 	let pattern = d.y;
 	var st: StnSample;
 	var hd = 0.0;
-	if ( pattern > 4.5 ) {
+	if ( pattern > 5.5 ) {
+		let n = perlin2( in.uv * vec2f( 3.0, 9.0 ) + d.x * 11.0 ) * 0.5 + 0.5;
+		st.col = mix( ${ srgb( 0.6, 0.33, 0.2 ) }, ${ srgb( 0.72, 0.43, 0.27 ) }, n );
+		st.col = mix( st.col, ${ srgb( 0.78, 0.72, 0.62 ) }, smoothstep( 0.7, 0.95, in.uv.x ) * 0.25 * n );
+		st.rough = 0.85;
+		st.h = n * 0.002;
+		st.ao = 1.0;
+	} else if ( pattern > 4.5 ) {
 		st = stnGranite( in.P, d.x );
 	} else if ( pattern > 3.5 ) {
 		st = stnSoil( in.uv );

@@ -444,7 +444,7 @@ function skylight( B, x, y, z, r, yaw, seed ) {
 
 // Build one home into the builder. g: Grading.home() result. Returns the light sources and the collider
 // boxes (local), for the settlement to register.
-export function buildEarthHome( B, h, g, rand, groundAt ) {
+export function buildEarthHome( B, h, g, rand, groundAt, drapes = null, plantings = null ) {
 
 	const arches = settleArches( g.arches.map( ( a ) => ( { ...a } ) ) );
 	const seed = rand.next();
@@ -464,6 +464,47 @@ export function buildEarthHome( B, h, g, rand, groundAt ) {
 		lights.push( { lx: a.o, ly: Math.min( a.rise * 0.55, 2.2 ), lz: - RECESS + 0.6, kind: 'window' } );
 
 	} );
+
+	// trailing vines from the roof meadow over the arch crowns and the wall tops
+	const c0 = Math.cos( h.yaw ), s0 = Math.sin( h.yaw );
+	const toWorld = ( lx, ly, lz ) => new Vector3( h.x + lx * c0 + lz * s0, floorY + ly, h.z - lx * s0 + lz * c0 );
+	const facing = new Vector3( s0, 0, c0 );
+	if ( drapes ) {
+
+		for ( let x = xa + 0.4; x < xb - 0.3; x += 0.3 + rand.next() * 0.45 ) {
+
+			// over an arch: more strands near its crown, fewer toward its feet
+			let over = null;
+			for ( const a of arches ) if ( Math.abs( x - a.o ) < a.span / 2 + RING ) over = a;
+			const yTop = top( x ) + 0.1;
+			if ( yTop < 0.8 ) continue;
+			const crown = over ? 1 - Math.abs( x - over.o ) / ( over.span / 2 + RING ) : 0.3;
+			if ( rand.next() > 0.25 + crown * 0.6 ) continue;
+			const len = Math.min( yTop - 0.6, 0.4 + rand.next() * ( 0.8 + crown * 1.4 ) );
+			drapes.strand( toWorld( x, yTop, PROUD + 0.06 ), facing, len, 0.5 + rand.next() * 0.45, rand.next(), 0.08 );
+
+		}
+
+	}
+
+	// pots of plants on the terrace: by the wall between the arches and at the corners
+	if ( plantings ) {
+
+		const spots = [];
+		for ( let i = 0; i < arches.length - 1; i ++ ) spots.push( [ ( arches[ i ].o + arches[ i ].span / 2 + arches[ i + 1 ].o - arches[ i + 1 ].span / 2 ) / 2, 0.7 ] );
+		spots.push( [ g.xl - 0.1, g.terrace - 0.6 ], [ g.xr + 0.1, g.terrace - 0.6 ], [ arches[ 0 ].o - arches[ 0 ].span / 2 - 0.3, 0.75 ] );
+		for ( const [ lx, lz ] of spots ) {
+
+			if ( rand.next() < 0.25 ) continue;
+			const r = 0.24 + rand.next() * 0.16, hgt = r * ( 1.4 + rand.next() * 0.6 );
+			const p = toWorld( lx, 0, lz );
+			B.lathe( 'stone', p.x, p.y, p.z, [ [ r * 0.72, 0 ], [ r, hgt * 0.92 ], [ r * 1.1, hgt * 0.95 ], [ r * 1.1, hgt ], [ r * 0.92, hgt ] ], { segs: 14, data: [ rand.next(), 6, 0, 0 ] } );
+			B.lathe( 'stone', p.x, p.y + hgt - 0.06, p.z, [ [ r * 0.92, 0 ], [ 0.01, 0.02 ] ], { segs: 14, data: [ rand.next(), 4, 0, 0 ] } );
+			plantings.push( { x: p.x, z: p.z, y: p.y + hgt - 0.05, s: r * 1.6, kind: rand.next() < 0.6 ? 'shrub' : 'fern' } );
+
+		}
+
+	}
 
 	// terrace: flags from the headwall out, and inside the openings back to the glazing
 	const tx0 = g.xl - 0.6, tx1 = g.xr + 0.6, td = g.terrace;

@@ -11,6 +11,7 @@ import { buildEarthHome } from './settlement/EarthHome.js';
 import { buildTower } from './settlement/Towers.js';
 import { buildSteps, buildPavedPath, buildApron, buildBridge, buildPergola, buildGarden, buildPlay, buildDock } from './settlement/Landscape.js';
 import { waterMeshes } from './settlement/Water.js';
+import { Drapes } from './settlement/Drapes.js';
 import { createStoneMaterial, createGlazingMaterial, createGlowMaterial } from './settlement/SettlementMaterials.js';
 import * as PLAN from './settlement/Plan.js';
 
@@ -67,8 +68,9 @@ export class Settlement {
 		G.smoothArea( PLAN.GREEN, { blur: 4, edge: 7 } );
 		G.smoothArea( PLAN.PLAZA, { blur: 4, flat: 0.75, edge: 6 } );
 		for ( const p of PLAN.PATHS ) G.path( p );
-		this.stream = G.stream( PLAN.STREAM, PLAN.POND );
+		// the pond first: it settles its level under the natural rim, which the stream then runs through
 		G.pond( PLAN.POND );
+		this.stream = G.stream( PLAN.STREAM, PLAN.POND );
 		const towerY = PLAN.TOWERS.map( ( t ) => {
 
 			const y = terrain.heightAt( t.x, t.z );
@@ -86,9 +88,12 @@ export class Settlement {
 		// ---------------------------------------------------------------- 2. the built village
 		const ground = ( x, z ) => terrain.heightAt( x, z );
 		const B = new Builder();
+		const drapes = new Drapes();
+		// plants the village sets (pots on the terraces): { x, z, y, s, kind: 'shrub' | 'fern' }, for Vegetation
+		this.plantings = [];
 		for ( const { h, g } of [ ...this.homes, ...this.annexes ] ) {
 
-			const r = buildEarthHome( B, h, g, rand, ground );
+			const r = buildEarthHome( B, h, g, rand, ground, drapes, this.plantings );
 			const c = r.collider;
 			colliders.addBox( c.center, c.half, c.yaw, { tag: 'home' } );
 			for ( const l of r.lights ) this.lights.push( { position: l.position, color: new Color( 1.0, 0.66, 0.36 ), intensity: 1.8, kind: l.kind } );
@@ -152,14 +157,47 @@ export class Settlement {
 
 		for ( const c of buildDock( B, PLAN.DOCK, ground, rand ) ) colliders.addBox( c.center, c.half, c.yaw, { walkable: true, solid: false, tag: 'dock' } );
 		this.footprints.push( { x: PLAN.DOCK.x, z: ( PLAN.DOCK.zStart + PLAN.DOCK.zEnd ) / 2, r: 5, kind: 'dock' } );
-		// the erratics and the play boulders go to the rock scatter (Rocks: kind 'erratic')
+		// the erratics and the play boulders go to the rock scatter (Rocks: kind 'erratic'); rounded stones
+		// edge the pond and line the stream, more of them at the falls
 		terrain.rockSites.push( ...PLAN.ERRATICS.map( ( [ x, z, r ] ) => ( { x, z, r, h: r, kind: 'erratic' } ) ) );
+		{
+
+			const P = PLAN.POND, c = Math.cos( P.yaw ), s = Math.sin( P.yaw );
+			for ( let k = 0; k < 34; k ++ ) {
+
+				const a = k / 34 * Math.PI * 2 + rand.next() * 0.1;
+				if ( Math.abs( Math.sin( a - 1.0 ) ) < 0.18 ) continue; // a gap: the path comes down to the water
+				const lx = Math.cos( a ) * ( P.rx + 0.4 ), lz = Math.sin( a ) * ( P.rz + 0.4 );
+				terrain.rockSites.push( { x: P.x + lx * c + lz * s, z: P.z - lx * s + lz * c, r: 0.35 + rand.next() * 0.5, kind: 'stone' } );
+
+			}
+
+			for ( let i = 0; i < this.stream.length; i += 6 ) {
+
+				const q = this.stream[ i ];
+				if ( q.water < 0.1 || ( q.seg >= P.inlet && q.seg < P.outlet ) ) continue;
+				const n = q.fall ? 4 : rand.next() < 0.5 ? 1 : 0;
+				for ( let k = 0; k < n; k ++ ) {
+
+					const side = rand.next() < 0.5 ? - 1 : 1;
+					const a = this.stream[ Math.min( this.stream.length - 1, i + 1 ) ];
+					const dx = a.x - q.x, dz = a.z - q.z, l = Math.hypot( dx, dz ) || 1;
+					const off = ( q.w * 0.5 + 0.2 + rand.next() * 0.5 ) * side;
+					terrain.rockSites.push( { x: q.x - dz / l * off, z: q.z + dx / l * off, r: 0.3 + rand.next() * ( q.fall ? 0.7 : 0.4 ), kind: 'stone' } );
+
+				}
+
+			}
+
+		}
 		for ( const p of PLAN.PLAY ) if ( p.kind === 'boulders' ) terrain.rockSites.push( { x: p.x, z: p.z, r: p.r, h: p.r, kind: 'boulders' } );
 
 		this._assemble( B );
+		const dm = drapes.mesh();
+		if ( dm ) this.group.add( dm );
 		for ( const m of waterMeshes( this.stream, PLAN.POND, rand ) ) this.group.add( m );
 		scene.add( this.group );
-		this.timings = { grading: Math.round( t1 - t0 ), build: Math.round( performance.now() - t1 ), steps };
+		this.timings = { grading: Math.round( t1 - t0 ), build: Math.round( performance.now() - t1 ), steps, drapeVerts: drapes.batch.vcount, plantings: this.plantings.length };
 
 	}
 

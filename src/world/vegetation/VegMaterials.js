@@ -565,9 +565,10 @@ ${ lobes ? /* wgsl */`
 export const uCanopyNear = vegParams.fields.canopyNear;
 
 // aMat = (part, canopy exposure (ao), colour rand, card rand); parts: 0 bark, 1 tree card, 4 shrub card
-// Species per instance (seed): trees 0 dark glossy (bronze new flush), 1 mid green, 2 yellow-green,
-// 3 blue-green; shrubs 0 sea grape (round leaves, red veins), 1 croton (variegated), 2 hibiscus
-// (flowering). The far impostors use the same palette (canopyLeafColor) and brightness structure.
+// Species per instance (seed): trees 0 maple, 1 red oak, 2 paper birch, 3 beech; shrubs 0 mountain laurel
+// (glossy, pink-white flowers), 1 hobblebush (light green, white flower clusters), 2 lowbush blueberry
+// (small blue-green leaves, a few red). The far impostors use the same palette (canopyLeafColor) and
+// brightness structure. (ForestScatter.seedFor picks seeds of a species.)
 export const canopyModule = new ShaderModule( {
 	name: 'vegCanopy',
 	deps: [ vegModule ],
@@ -575,7 +576,7 @@ export const canopyModule = new ShaderModule( {
 fn vegPick4( s4: f32, a: vec3f, b: vec3f, c: vec3f, d: vec3f ) -> vec3f { return select( select( select( d, c, s4 < 2.5 ), b, s4 < 1.5 ), a, s4 < 0.5 ); }
 fn vegPick3( s3: f32, a: vec3f, b: vec3f, c: vec3f ) -> vec3f { return select( select( c, b, s3 < 1.5 ), a, s3 < 0.5 ); }
 fn vegTreeSpecies( seed: f32 ) -> f32 { return floor( fract( seed * 5.31 ) * 4.0 ); }
-// shrubs: 0 sea grape 45 %, 1 croton 15 %, 2 hibiscus 40 %
+// shrubs: 0 mountain laurel 45 %, 1 hobblebush 15 %, 2 lowbush blueberry 40 %
 fn vegShrubSpecies( seed: f32 ) -> f32 {
 	let h = fract( seed * 3.17 );
 	return select( select( 2.0, 1.0, h < 0.6 ), 0.0, h < 0.45 );
@@ -584,36 +585,52 @@ fn vegShrubSpecies( seed: f32 ) -> f32 {
 // base leaf colour of an instance (species, per-card random cr, per-instance tint)
 fn vegCanopyLeafColor( seed: f32, cr: f32, isShrub: bool ) -> vec3f {
 	let spT = vegTreeSpecies( seed ); let spS = vegShrubSpecies( seed );
-	// tree species: dark glossy (bronze flush), fresh mid green, yellow-green, blue-green
-	// (Caribbean hillside forest: deep, olive and yellow-greens, muted, with a few dry / bronze
-	// and flowering crowns)
-	let t0 = mix( mix( ${ C( 0x283a1b ) }, ${ C( 0x364a23 ) }, cr ), ${ C( 0x5e4a2e ) }, smoothstep( 0.96, 0.995, cr ) * 0.5 );
-	let t1 = mix( ${ C( 0x34491f ) }, ${ C( 0x485c27 ) }, cr );
-	let t2 = mix( ${ C( 0x4f5a27 ) }, ${ C( 0x646a31 ) }, cr );
-	let t3 = mix( ${ C( 0x2a3b2a ) }, ${ C( 0x3a4a36 ) }, cr );
-	let s0 = mix( ${ C( 0x3f5522 ) }, ${ C( 0x52662a ) }, cr );
-	let s1 = mix( ${ C( 0x2c421e ) }, ${ C( 0x44561f ) }, cr );
-	let s2 = mix( ${ C( 0x34521c ) }, ${ C( 0x466624 ) }, cr );
+	// high summer in the New Hampshire woods: maple mid green, red oak darker and glossier, paper birch
+	// light and yellowish, beech fresh green
+	let t0 = mix( ${ C( 0x3b5824 ) }, ${ C( 0x4c6b2c ) }, cr );
+	let t1 = mix( ${ C( 0x2e4520 ) }, ${ C( 0x3c5626 ) }, cr );
+	let t2 = mix( ${ C( 0x5a7a2c ) }, ${ C( 0x6e8a36 ) }, cr );
+	let t3 = mix( ${ C( 0x47682a ) }, ${ C( 0x5a7c30 ) }, cr );
+	let s0 = mix( ${ C( 0x2a4020 ) }, ${ C( 0x3a5228 ) }, cr );
+	let s1 = mix( ${ C( 0x4e6c2a ) }, ${ C( 0x627f34 ) }, cr );
+	let s2 = mix( ${ C( 0x3a5732 ) }, ${ C( 0x4b683b ) }, cr );
 	let iv = vegHash12( vec2f( seed * 17.3, 4.1 ) );
 	let iv2 = vegHash12( vec2f( seed * 5.9, 8.3 ) );
-	var c = select( vegPick4( spT, t0, t1, t2, t3 ), vegPick3( spS, s0, s1, s2 ), isShrub ) * ( iv * 0.36 + 0.74 );
-	// a few trees dry / dropping leaves (brown-olive), or flowering (flamboyant, orange-red)
+	var c = select( vegPick4( spT, t0, t1, t2, t3 ), vegPick3( spS, s0, s1, s2 ), isShrub ) * ( iv * 0.3 + 0.8 );
+	// now and then a tree past its best (yellowing) or a maple turning early
 	let treeK = select( 1.0, 0.0, isShrub );
-	let dry = step( iv2, 0.035 ) * treeK;
-	c = mix( c, mix( ${ C( 0x5c5234 ) }, ${ C( 0x6e5a3a ) }, cr ), dry * 0.5 );
-	let flower = step( 0.988, iv2 ) * treeK * step( 0.5, cr );
-	c = mix( c, ${ C( 0x8a4a2c ) }, flower * 0.5 );
-	return mix( vec3f( luminance( c ) ), c, 0.85 );
+	c = mix( c, mix( ${ C( 0x6a6a34 ) }, ${ C( 0x7a6a38 ) }, cr ), step( iv2, 0.025 ) * treeK * 0.5 );
+	c = mix( c, ${ C( 0x8a3a24 ) }, step( 0.992, iv2 ) * treeK * step( spT, 0.5 ) * step( 0.6, cr ) * 0.6 );
+	return mix( vec3f( luminance( c ) ), c, 0.88 );
 }
 
 fn vegBarkColor( n: f32, n2: f32 ) -> vec3f {
 	return mix( mix( ${ C( 0x302a22 ) }, ${ C( 0x5c5549 ) }, n * 0.6 + n2 * 0.4 ), ${ C( 0x7b7b6a ) }, smoothstep( 0.64, 0.8, n2 ) * 0.3 );
 }
 
+// bark by species: paper birch chalk white with black lenticels and dark scars, beech smooth grey,
+// maple and oak grey-brown
+fn vegSpeciesBark( spT: f32, st: vec2f, seed: f32, hf: f32 ) -> vec3f {
+	let n = vegNoise( vec2f( st.x * 30.0, st.y * 2.5 + seed * 40.0 ) );
+	let n2 = vegNoise( vec2f( st.x * 6.0, st.y * 0.7 ) );
+	var c = vegBarkColor( n, n2 );
+	if ( spT > 1.5 && spT < 2.5 ) {
+		let lent = smoothstep( 0.78, 0.86, vegNoise( vec2f( st.x * 3.0, st.y * 28.0 + seed * 9.0 ) ) );
+		let scar = smoothstep( 0.72, 0.8, vegNoise( vec2f( st.x * 2.0 + 3.0, st.y * 3.0 + seed * 4.0 ) ) );
+		c = mix( ${ C( 0xd9d5c9 ) }, ${ C( 0xece8dc ) }, n );
+		c = mix( c, ${ C( 0x1c1a17 ) }, max( lent * 0.85, scar * 0.75 ) );
+		// the old base of the trunk dark and furrowed
+		c = mix( c, ${ C( 0x2c2824 ) }, smoothstep( 0.12, 0.02, hf ) * 0.8 );
+	} else if ( spT > 2.5 ) {
+		c = mix( ${ C( 0x6a6a64 ) }, ${ C( 0x8e8d86 ) }, n * 0.5 + n2 * 0.5 );
+	}
+	return c;
+}
+
 // leaf-cluster tile of a card: trees broad / narrow leaves by species, shrubs round / narrow
 fn vegLeafTile( seed: f32, isShrub: bool ) -> f32 {
 	let spT = vegTreeSpecies( seed ); let spS = vegShrubSpecies( seed );
-	return select( select( 0.0, 1.0, fract( spT * 0.5 ) > 0.25 ), select( 2.0, 3.0, spS == 1.0 ), isShrub );
+	return select( select( 0.0, 1.0, spT > 1.5 && spT < 2.5 ), select( 2.0, 3.0, spS < 0.5 ), isShrub );
 }
 
 // alpha-test threshold compensating the coverage loss of the minified (mipmapped) leaf texture
@@ -627,7 +644,9 @@ fn vegImpostorColor( seed: f32, cr: f32, leaf: f32, bright: f32, isGroup1: bool 
 	let leafC = vegCanopyLeafColor( seed, cr, isGroup1 ) * ( bright * 1.4 );
 	// limbs and twigs seen through the crown gaps are in the crown's shade: dark and a little
 	// green-brown, and the leaves dominate the blend (grey limbs made far crowns read grey-beige)
-	let barkC = mix( ${ C( 0x1c1a13 ) }, ${ C( 0x2e2b20 ) }, ( bright - 0.4 ) / 0.5 );
+	let spT = vegTreeSpecies( seed );
+	let birch = ! isGroup1 && spT > 1.5 && spT < 2.5;
+	let barkC = select( mix( ${ C( 0x1c1a13 ) }, ${ C( 0x2e2b20 ) }, ( bright - 0.4 ) / 0.5 ), ${ C( 0xb0aca2 ) } * bright, birch );
 	let c = mix( barkC, leafC, smoothstep( 0.05, 0.55, leaf ) );
 	// far crowns keep their green through the haze (a little more saturated than the near canopy)
 	return max( mix( vec3f( luminance( c ) ), c, 1.25 ), vec3f( 0.0 ) );
@@ -683,15 +702,14 @@ export function createCanopyMaterial( leafAtlas ) {
 	let bright = L.y * 1.4;
 	let cell = L.z;
 	var c = vegCanopyLeafColor( seed, cr, isShrub ) * bright;
-	// species details: red-veined old leaves (sea grape), variegation (croton), flowers (hibiscus)
+	// species details: laurel's pink-white flower clusters, hobblebush's white lace caps, blueberry's few red
+	// leaves; a few leaves yellowing on the trees
 	let shrub0 = isShrub && spS < 0.5; let shrub1 = isShrub && spS == 1.0; let shrub2 = isShrub && spS > 1.5;
-	c = mix( c, ${ C( 0x7a3a22 ) }, smoothstep( 0.86, 0.98, cell ) * 0.55 * select( 0.0, 1.0, shrub0 ) );
-	let vari = select( ${ C( 0x7a3a22 ) }, ${ C( 0x9a8a30 ) }, fract( cell * 7.3 ) > 0.5 );
-	c = mix( c, vari, smoothstep( 0.72, 0.9, cell ) * 0.55 * select( 0.0, 1.0, shrub1 ) );
-	c = select( c, ${ C( 0xb3261e ) }, shrub2 && cell > 0.92 );
-	// trees: a few old leaves turning red / yellow before they drop (sea almond)
+	c = select( c, mix( ${ C( 0xf2dde2 ) }, ${ C( 0xe0a8b8 ) }, fract( cell * 5.1 ) ), shrub0 && cell > 0.9 );
+	c = select( c, ${ C( 0xf0eee4 ) }, shrub1 && cell > 0.88 );
+	c = mix( c, ${ C( 0x8a2e22 ) }, smoothstep( 0.86, 0.96, cell ) * 0.6 * select( 0.0, 1.0, shrub2 ) );
 	let treeK = select( 1.0, 0.0, isShrub );
-	c = mix( c, mix( ${ C( 0x8a7a3a ) }, ${ C( 0x7e3e22 ) }, step( 0.992, fract( cell * 3.7 ) ) ), step( 0.984, fract( cell * 3.7 ) ) * treeK * 0.6 );
+	c = mix( c, ${ C( 0x8a8a3a ) }, step( 0.988, fract( cell * 3.7 ) ) * treeK * 0.5 );
 	// sunlit outer / upper leaves brighter and a little yellow-green; shaded interior kept for contrast
 	let outer = smoothstep( 0.62, 1.0, ao );
 	c = mix( c, c * vec3f( 1.16, 1.22, 0.92 ), outer * 0.7 );
@@ -702,9 +720,10 @@ export function createCanopyMaterial( leafAtlas ) {
 	if ( isBark ) {
 		let st = in.uv;
 		let n2 = vegNoise( vec2f( st.x * 6.0, st.y * 0.7 ) );
-		var bark = vegBarkColor( vegNoise( vec2f( st.x * 30.0, st.y * 2.5 + seed * 40.0 ) ), n2 );
-		// moss and epiphytes on the humid lower trunk and the upper sides of the limbs
-		bark = mix( bark, mix( ${ C( 0x2c3a18 ) }, ${ C( 0x44552a ) }, n2 ), smoothstep( 0.45, 0.7, vegNoise( vec2f( st.x * 9.0, st.y * 1.3 + seed * 11.0 ) ) + ( 0.35 - hfB ) * 0.6 ) * 0.7 );
+		var bark = vegSpeciesBark( select( spT, 0.0, isShrub ), st, seed, hfB );
+		// moss on the lower trunk's north side and on the upper sides of the limbs (not on birch)
+		let mossy = select( 0.7, 0.15, spT > 1.5 && spT < 2.5 && ! isShrub );
+		bark = mix( bark, mix( ${ C( 0x2c3a18 ) }, ${ C( 0x44552a ) }, n2 ), smoothstep( 0.55, 0.8, vegNoise( vec2f( st.x * 9.0, st.y * 1.3 + seed * 11.0 ) ) + ( 0.25 - hfB ) * 0.6 ) * mossy );
 		albedo = bark;
 	}
 	s.albedo = albedo;

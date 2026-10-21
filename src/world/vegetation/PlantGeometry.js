@@ -702,7 +702,8 @@ export function buildTreeNear( seed = 21, b = new GeoBuilder() ) {
 		const y = c.y;
 		const r = 0.34 - 0.1 * f;
 		const fin = Math.pow( Math.max( 0, Math.cos( 4 * a + 0.4 ) ), 4 ) * Math.exp( - Math.max( y, 0 ) / 0.8 );
-		return r * ( 1 + 0.9 * fin + 0.25 * Math.exp( - Math.max( y + 0.3, 0 ) / 0.5 ) );
+		// temperate trees: only a slight root flare (no rainforest buttresses)
+		return r * ( 1 + 0.12 * fin + 0.3 * Math.exp( - Math.max( y + 0.3, 0 ) / 0.5 ) );
 
 	};
 

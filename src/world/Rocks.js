@@ -197,6 +197,7 @@ export class Rocks {
 		for ( const s of T.rockSites || [] ) {
 
 			if ( s.kind === 'erratic' ) add( s.x, s.z, s.r, pick( [ 3, 2, 1, 0.5 ] ), { sink: 0.35, tilt: 0.3, align: 0.4 } );
+			else if ( s.kind === 'stone' ) add( s.x, s.z, s.r, pick( [ 4, 3, 2, 0 ] ), { sink: 0.3, tilt: 0.4, align: 0.3 } );
 			else if ( s.kind === 'boulders' ) {
 
 				add( s.x, s.z, s.r * 0.7, pick( [ 3, 2, 1, 0 ] ), { sink: 0.3, tilt: 0.3, align: 0.4 } );

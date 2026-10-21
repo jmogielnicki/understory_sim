@@ -326,12 +326,26 @@ export class Grading {
 
 	}
 
-	// the pond: an elliptical bowl, its rim kept a little above the water all round
+	// The pond: an elliptical bowl with gently shelving banks. Its level sits just under the lowest point of
+	// the natural ground round it (P.level is the upper limit), so the rim never rises as a dyke; uphill the
+	// banks are cut back to a gentle slope instead of a wall. Returns the level used.
 	pond( P ) {
 
 		const T = this.T;
 		const f = frame( P.x, P.z, P.yaw );
-		const R = Math.max( P.rx, P.rz ) + 8;
+		let rimMin = Infinity;
+		for ( let k = 0; k < 48; k ++ ) {
+
+			const a = k / 48 * Math.PI * 2;
+			const [ x, z ] = f.toW( Math.cos( a ) * P.rx * 1.08, Math.sin( a ) * P.rz * 1.08 );
+			rimMin = Math.min( rimMin, this.natural( x, z ) );
+
+		}
+
+		const level = Math.min( P.level, rimMin - 0.12 );
+		P.level = level;
+		const R = Math.max( P.rx, P.rz ) + 10;
+		const Rm = ( P.rx + P.rz ) / 2;
 		this.each( P.x - R, P.z - R, P.x + R, P.z + R, ( k, x, z ) => {
 
 			const [ lx, lz ] = f.toL( x, z );
@@ -339,20 +353,24 @@ export class Grading {
 			const h = T.heights[ k ];
 			if ( r < 1 ) {
 
-				T.heights[ k ] = Math.min( h, P.level - P.depth * Math.sqrt( 1 - r * r ) - 0.05 );
+				// a shelf round the edge, then the bowl
+				const d = P.depth * smoothstep( 0.82, 0.35, r ) + 0.25 * smoothstep( 1.0, 0.8, r );
+				T.heights[ k ] = Math.min( h, level - d );
 
 			} else {
 
-				// rim: at least 0.2 m above the water, falling back to the ground outside
-				const rim = P.level + 0.2 + ( r - 1 ) * 2.2;
-				const t = 1 - smoothstep( 1.0, 1.5, r );
-				if ( h < rim ) T.heights[ k ] = lerp( h, Math.max( h, Math.min( rim, P.level + 0.45 ) ), t );
+				// the bank: not below the rim, not steeper than ~1 in 3 up from the water
+				const bank = level + 0.12 + ( r - 1 ) * Rm * 0.32;
+				const t = 1 - smoothstep( 1.3, 1.8, r );
+				T.heights[ k ] = lerp( h, Math.min( Math.max( h, level + 0.12 ), bank ), t );
 
 			}
 
 			this.open( k, 1 - smoothstep( 1.1, 1.6, r ) );
 
 		} );
+
+		return level;
 
 	}
 
