@@ -1,6 +1,8 @@
 // Reference shots of named views (core/DebugViews.js) from a headless Chrome, for visual checks:
 //   node tools/shots/shoot.mjs view1,view2 [--tag=name] [--out=dir] [--size=1280x634] [--url=http://127.0.0.1:5189/]
 //     [--chrome=path] [--timeout=600] [--headful] [--port=5191] [--extra=&foo&bar]
+//   node tools/shots/shoot.mjs --bench [--tag=name] [--size=...]: the frame-time benchmark (?bench&auto): the default
+//     views' shots, then <out>/bench-<tag>.json with the wall / GPU ms per view
 // Needs the dev server (npm run dev). The page runs ?bench&shots=… (core/Bench.js), which renders each view with
 // the clock stopped and uploads it as raw BGRA8 (8-byte width / height header) to the collector here, which writes
 // <out>/<tag>-<view>.png. Exits when every view has arrived (or on timeout).
@@ -17,7 +19,8 @@ const args = Object.fromEntries( process.argv.slice( 3 ).map( ( a ) => {
 	return m ? [ m[ 1 ], m[ 2 ] ?? true ] : [ a, true ];
 
 } ) );
-const views = ( process.argv[ 2 ] || 'beach' ).split( ',' );
+const benchMode = process.argv[ 2 ] === '--bench';
+const views = benchMode ? [] : ( process.argv[ 2 ] || 'aerial' ).split( ',' );
 const tag = args.tag || 'shot';
 const outDir = args.out || 'shots';
 const size = args.size || '1280x634';
@@ -101,12 +104,20 @@ const server = createServer( ( req, res ) => {
 
 		}
 
-		if ( ! name.endsWith( '.bgra' ) ) return;
+		if ( ! name.endsWith( '.bgra' ) ) {
+
+			writeFileSync( join( outDir, name ), body );
+			console.log( 'file', join( outDir, name ) );
+			if ( benchMode && name.endsWith( '.json' ) ) finish( 0 );
+			return;
+
+		}
+
 		const w = body.readUInt32LE( 0 ), h = body.readUInt32LE( 4 );
 		const file = join( outDir, name.replace( /\.bgra$/, '.png' ) );
 		writeFileSync( file, png( w, h, body.subarray( 8 ) ) );
 		console.log( 'shot', file, w + 'x' + h );
-		if ( ++ got >= views.length ) finish( 0 );
+		if ( ! benchMode && ++ got >= views.length ) finish( 0 );
 
 	} );
 
@@ -114,7 +125,8 @@ const server = createServer( ( req, res ) => {
 
 server.listen( port, '127.0.0.1', () => {
 
-	const url = `${ base }?bench&noAudio&shots=${ views.join( ',' ) }&tag=${ tag }&size=${ size }&collector=http://127.0.0.1:${ port }/${ args.extra || '' }`;
+	const job = benchMode ? `auto=${ tag }` : `shots=${ views.join( ',' ) }&tag=${ tag }&size=${ size }`;
+	const url = `${ base }?bench&noAudio&${ job }&collector=http://127.0.0.1:${ port }/${ args.extra || '' }`;
 	console.log( 'open', url );
 	const profile = mkdtempSync( join( tmpdir(), 'shots-chrome-' ) );
 	const flags = [
