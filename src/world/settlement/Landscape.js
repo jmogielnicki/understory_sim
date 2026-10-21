@@ -4,7 +4,7 @@ import { polylineDistance } from '../terrain/Paths.js';
 
 // The village's built landscape between the homes: stone steps where the paths climb, timber footbridges over
 // the stream, pergolas and raised beds in the gardens, log play frames on the green, flagged paving on the
-// plaza and the lakeshore walk, and the dock. Builder keys as in EarthHome.js ('stone', 'wood', 'hard').
+// halls' aprons and the lakeshore walk, and the dock. Builder keys as in EarthHome.js ('stone', 'wood', 'hard').
 
 const OAK = [ 0.62, 0.45, 0.3 ];
 const GREY_OAK = [ 0.66, 0.6, 0.52 ];
@@ -112,42 +112,35 @@ export function buildPavedPath( B, p, groundAt ) {
 
 }
 
-// flagged paving following the ground over the cells where inside( x, z ) holds (the aprons round the
-// communal buildings); bounds: [ x0, z0, x1, z1 ]
-export function buildPaving( B, bounds, inside, groundAt, cell = 0.6 ) {
+// a flagged apron round a hall's foot: a polar ring from the wall out to a gently wavering edge
+export function buildApron( B, t, groundAt, lift = 0.06 ) {
 
-	const [ x0, z0, x1, z1 ] = bounds;
-	const cols = Math.ceil( ( x1 - x0 ) / cell ), rows = Math.ceil( ( z1 - z0 ) / cell );
-	const P = [], N = [], UV = [], I = [];
-	const id = new Map();
-	const vert = ( i, j ) => {
+	const N = 96, M = 8;
+	const r0 = t.r * 0.92, P = [], NN = [], UV = [], I = [];
+	for ( let i = 0; i <= N; i ++ ) {
 
-		const k = j * ( cols + 1 ) + i;
-		let v = id.get( k );
-		if ( v === undefined ) {
+		const a = i / N * Math.PI * 2;
+		const edge = t.r + 4.2 + Math.sin( a * 3 + t.x ) * 0.8 + Math.sin( a * 7 + t.z ) * 0.35;
+		for ( let j = 0; j <= M; j ++ ) {
 
-			const x = x0 + i * cell, z = z0 + j * cell;
-			v = P.length / 3;
-			P.push( x, groundAt( x, z ) + 0.06, z );
-			N.push( 0, 1, 0 );
+			const r = r0 + ( edge - r0 ) * j / M;
+			const x = t.x + Math.cos( a ) * r, z = t.z + Math.sin( a ) * r;
+			P.push( x, groundAt( x, z ) + lift, z );
+			NN.push( 0, 1, 0 );
 			UV.push( x, z );
-			id.set( k, v );
 
 		}
 
-		return v;
+	}
 
-	};
+	for ( let i = 0; i < N; i ++ ) for ( let j = 0; j < M; j ++ ) {
 
-	for ( let j = 0; j < rows; j ++ ) for ( let i = 0; i < cols; i ++ ) {
-
-		if ( ! inside( x0 + ( i + 0.5 ) * cell, z0 + ( j + 0.5 ) * cell ) ) continue;
-		const a = vert( i, j ), b = vert( i + 1, j ), c = vert( i, j + 1 ), d = vert( i + 1, j + 1 );
-		I.push( a, c, d, a, d, b );
+		const a = i * ( M + 1 ) + j, b = a + M + 1;
+		I.push( a, b + 1, a + 1, a, b, b + 1 );
 
 	}
 
-	B.part( 'stone', new Part( P, N, UV, I ), 0, 0, 0, { data: [ 0.71, 1, 0.45, 0 ] } );
+	B.part( 'stone', new Part( P, NN, UV, I ), 0, 0, 0, { data: [ 0.71, 1, 0.45, 0 ] } );
 
 }
 

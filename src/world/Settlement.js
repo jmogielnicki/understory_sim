@@ -8,7 +8,7 @@ import { PATHS as TERRAIN_PATHS } from './terrain/Paths.js';
 import { Grading, frame } from './settlement/Grading.js';
 import { buildEarthHome } from './settlement/EarthHome.js';
 import { buildTower } from './settlement/Towers.js';
-import { buildSteps, buildPavedPath, buildPaving, buildBridge, buildPergola, buildGarden, buildPlay, buildDock } from './settlement/Landscape.js';
+import { buildSteps, buildPavedPath, buildApron, buildBridge, buildPergola, buildGarden, buildPlay, buildDock } from './settlement/Landscape.js';
 import { waterMeshes } from './settlement/Water.js';
 import { createStoneMaterial, createGlazingMaterial, createGlowMaterial } from './settlement/SettlementMaterials.js';
 import * as PLAN from './settlement/Plan.js';
@@ -87,16 +87,8 @@ export class Settlement {
 
 		} );
 
-		// aprons of flags round the communal buildings (ragged edges into the grass)
-		const apron = ( x, z ) => {
-
-			const wob = Math.sin( x * 0.9 + z * 0.4 ) * 0.6 + Math.sin( x * 0.37 - z * 1.3 ) * 0.5;
-			for ( const t of PLAN.TOWERS ) if ( Math.hypot( x - t.x, z - t.z ) < t.r + 4.5 + wob ) return true;
-			return false;
-
-		};
-
-		buildPaving( B, [ 300, - 310, 395, - 255 ], apron, ground );
+		// aprons of flags round the communal buildings (each a little higher than the last where they overlap)
+		PLAN.TOWERS.forEach( ( t, i ) => buildApron( B, t, ground, 0.06 + i * 0.012 ) );
 		for ( const t of PLAN.TOWERS ) this.footprints.push( { x: t.x, z: t.z, r: t.r + 5, kind: 'plaza' } );
 		let steps = 0;
 		for ( const p of PLAN.PATHS ) {

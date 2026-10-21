@@ -16,7 +16,8 @@ import { srgb } from '../terrain/TerrainShading.js';
 //              vdata.w = the piece's length along u (m)
 //   pattern 4  garden soil (raised beds)
 //   pattern 5  granite boulder: grey, lichened (the glacial erratics, stream stones)
-// GLAZING: vdata: x seed, y lit (0..1, warm light inside), z 0 window / 1 door. uv: metres across the pane.
+// GLAZING: vdata: x seed, y lit (0..1, warm light inside), z 0 window / 1 door / 2 skylight / 3 hall window
+// (framing drawn in the shader). uv: metres across the pane.
 // GLOW: unlit pale blue light (the technology seams): vdata.x phase. Breathes slowly.
 
 const STONE_WGSL = /* wgsl */`
@@ -233,9 +234,18 @@ export function createGlazingMaterial() {
 	// the room glows warm by day (it is lit inside, and the sun reaches in) and brightly after dusk; the pane
 	// reflects the sky over it (low roughness)
 	let night = smoothstep( 0.1, 0.7, frame.night );
-	s.albedo = inside * 0.05;
-	s.roughness = 0.03 + room * 0.03;
-	s.emissive = inside * lit * mix( 1.6, 4.5, night );
+	// the halls' great windows (kind 3) carry their timber framing in the shader: mullions ~1.1 m apart,
+	// transoms every 2.2 m (uv in metres over the shell)
+	var frameK = 0.0;
+	if ( d.z > 2.5 ) {
+		let fu = abs( fract( uv.x / 1.1 + 0.5 ) - 0.5 ) * 1.1;
+		let fv = abs( fract( uv.y / 2.2 ) - 0.5 ) * 2.2;
+		let wu = fwidth( uv.x ) + 0.045;
+		frameK = max( 1.0 - smoothstep( wu, wu + 0.02, fu ), 1.0 - smoothstep( 0.05, 0.07, fv ) );
+	}
+	s.albedo = mix( inside * 0.05, ${ srgb( 0.36, 0.25, 0.16 ) }, frameK );
+	s.roughness = mix( 0.03 + room * 0.03, 0.7, frameK );
+	s.emissive = inside * lit * mix( 1.6, 4.5, night ) * ( 1.0 - frameK );
 	s.specularIntensity = 1.0;
 `;
 	return m;

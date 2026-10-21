@@ -110,7 +110,7 @@ export function buildTower( B, t, y0, rand ) {
 			let inside = - 1e9;
 			for ( const o of ops ) inside = Math.max( inside, insideOpening( o, th, y, r ) );
 			const k = Math.min( 1, Math.max( 0, inside / 0.22 + 0.5 ) );
-			const rr = Math.max( 0.02, r - DEPTH * k * nr ) ;
+			const rr = Math.max( 0.02, r - DEPTH * k * nr );
 			const yy = y - DEPTH * k * ny;
 			// world: th = 0 faces the tower's yaw direction (local +z)
 			const ca = Math.cos( th ), sa = Math.sin( th );
@@ -129,8 +129,9 @@ export function buildTower( B, t, y0, rand ) {
 
 		const a = j * W + i, b = a + 1, c = a + W, d = c + 1;
 		const tri = ( p, q, r ) => ( IN[ p ] > 0.12 && IN[ q ] > 0.12 && IN[ r ] > 0.12 ? glass : stone ).push( p, q, r );
-		tri( a, c, d );
-		tri( a, d, b );
+		// outward winding (th grows toward +x at the front, j upward)
+		tri( a, d, c );
+		tri( a, b, d );
 
 	}
 
@@ -163,7 +164,7 @@ export function buildTower( B, t, y0, rand ) {
 
 	B.part( 'stone', sub( stone ), t.x, y0, t.z, { ry: t.yaw, data: [ seed, 0, 0.3, 0 ], tint: [ 1.02, 1.0, 0.98 ] } );
 	// glass in metres across the pane for the glazing material
-	B.part( 'glazing', sub( glass ), t.x, y0, t.z, { ry: t.yaw, data: [ seed, 0.95, 0, 0 ] } );
+	B.part( 'glazing', sub( glass ), t.x, y0, t.z, { ry: t.yaw, data: [ seed, 0.95, 3, 0 ] } );
 	// a stone plinth ring round the foot, broken at the doors
 	const n = 40;
 	for ( let i = 0; i < n; i ++ ) {
