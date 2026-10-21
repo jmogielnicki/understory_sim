@@ -66,6 +66,9 @@ export const VIEWS = {
 	sailing: { p: [ 340, 2.2, 182 ], yaw: - 0.6, pitch: 0.03, time: 16.0 },
 	// across the lake to the hamlet on the point, from the end of the dock
 	hamlet: { p: [ 400.5, 1.8, - 212 ], agl: true, yaw: 2.05, pitch: 0.02, time: 17.0 },
+	// a loon (the first of the wildlife's), seen from a few metres off on the water: p is the offset from it
+	loon: { follow: 'loon', p: [ 3.6, 0.55, 0.9 ], pitch: - 0.1, time: 16.0 },
+	loonPair: { follow: 'loon', p: [ 8, 1.4, 6 ], pitch: - 0.1, time: 16.0 },
 	// the hamlet close to, from the water
 	hamletNear: { p: [ - 560, 2.5, 330 ], yaw: 1.65, pitch: 0.0, time: 16.0 },
 	// key art candidates: down over the homes and the halls to the lake; across the green from hillside B
@@ -78,9 +81,28 @@ export const VIEWS = {
 // world position of a view (agl: height above the ground / water at p)
 export function viewPosition( app, v ) {
 
+	const t = followTarget( app, v );
+	if ( t ) return new Vector3( t.x + v.p[ 0 ], Math.max( app.terrainData.heightAt( t.x + v.p[ 0 ], t.z + v.p[ 2 ] ), 0 ) + v.p[ 1 ], t.z + v.p[ 2 ] );
 	const p = new Vector3( ...v.p );
 	if ( v.agl ) p.y = Math.max( app.terrainData.heightAt( p.x, p.z ), 0 ) + v.p[ 1 ];
 	return p;
+
+}
+
+// heading of a view: its own, or toward what it follows
+export function viewYaw( app, v ) {
+
+	return followTarget( app, v ) ? Math.atan2( v.p[ 0 ], v.p[ 2 ] ) : v.yaw;
+
+}
+
+// follow: 'loon' -> the first visible loon's position (null without the wildlife)
+function followTarget( app, v ) {
+
+	if ( v.follow !== 'loon' ) return null;
+	const b = app.wildlife && app.wildlife.birds;
+	const a = b && b.agents.find( ( a ) => a.kind === 'loon' && a.visible );
+	return a ? { x: a.f.x, z: a.f.z } : null;
 
 }
 
@@ -101,7 +123,7 @@ export function installDebugViews( app ) {
 		if ( ! v ) return 'unknown view';
 		if ( v.time !== undefined ) app.settings.timeOfDay = v.time;
 		if ( app.setFreeCam ) app.setFreeCam( true );
-		app.fly.setPose( viewPosition( app, v ), v.yaw, v.pitch );
+		app.fly.setPose( viewPosition( app, v ), viewYaw( app, v ), v.pitch );
 		app.fly.velocity.set( 0, 0, 0 );
 		return name;
 

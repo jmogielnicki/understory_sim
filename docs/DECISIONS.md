@@ -49,6 +49,21 @@ Each is easy to reverse; the file or setting is named.
   has warm path lights, and the bible's blue is kept for the technology in the homes.
 - **Where you start.** On the path above the first rows, looking down over the roofs to the halls and the lake.
 
+## Wildlife
+
+- **Common loons**, the lake's signature bird (Squam is known for them): four pairs and two single birds,
+  each with a home stretch of open water chosen from the lake bed (deep, well off the shore). They swim low,
+  look about, peer under the surface, dive for 15-40 s and come up 25-90 m away; a mate dives with its
+  partner and surfaces near it; now and then one rears up for a wing-flap. A boat or swimmer within ~28 m
+  makes them dive and come up farther off. Every few minutes one of the singles runs ~40 m across the water
+  to take off, flies to another bay at ~20-35 m and skids down onto the water. Breeding plumage: black head,
+  striped necklace and throat bar, chequered back, red eye. `addLoons` in `src/world/wildlife/Birds.js`.
+- **No island animals.** Tidewater's gulls, terns, pelicans, frigatebirds, sanderlings and crabs are left out
+  (`lake: true` on `Wildlife`); with the loons present the soundscape's gull and tern calls fall silent.
+- **No loon calls yet.** Tidewater's audio uses field recordings only, never synthesis, and I can't audition
+  a recording from here; a public-domain wail / tremolo (US government recordings are) would be the single
+  most evocative sound for the lake. Easy to add as a one-shot from the loons, like the gulls' calls.
+
 ## The woods and the planting
 
 - **Forest mix.** Eastern white pine (shores, ledges, emergent), eastern hemlock (ravines, north slopes, by
@@ -80,7 +95,7 @@ Each is easy to reverse; the file or setting is named.
 ## Still Tidewater (not yet adapted)
 
 - The boat is Tidewater's diesel fishing boat; the bible would want something quieter (sail or electric).
-- No wildlife yet (the gulls, crabs and the whale were island animals): loons would be the obvious first.
+- Songbirds still sing from Tidewater's samples (generic woodland birds; no New England species).
 - The sound bed is Tidewater's (surf is near silent at the lake's wave height; the birds are generic).
 
 ## Performance

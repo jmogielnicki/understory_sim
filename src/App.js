@@ -304,8 +304,12 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 		this.wake = new WakeSim( renderer, { terrainGPU: this.terrainGPU, boat: this.boatCtl, colliders: this.colliders } );
 		this.surface.wake = this.wake;
 		this.player = new Player( { camera, input: this.input, terrain: this.terrainData, colliders: this.colliders, query: this.query, boat: this.boatCtl, reef: this.reef } );
-		// birds, beach crabs, sanderlings (after spray / query / boat, which they use)
-		this.wildlife = null;
+		// loons on the lake (after spray / query / boat, which they use)
+		this.wildlife = qs.has( 'noWildlife' ) ? null : new Wildlife( {
+			scene, renderer, terrain: this.terrainData, terrainGPU: this.terrainGPU, village: this.village,
+			colliders: this.colliders, boat: this.boatCtl, boatModel: this.boat, query: this.query, spray: this.spray,
+			csm: this.csm, lake: true,
+		} );
 		this.freeCam = qs.has( 'fly' );
 
 		// ---------------------------------------------------------------- post

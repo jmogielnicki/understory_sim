@@ -17,7 +17,7 @@ import * as THREE from '../../engine/index.js';
 // Legs are built in the shader from the posed knee / foot: A = ( side, segment, t, 8 ),
 // B = ( cos, sin, radius scale, 0 ), C = toe offset (feet).
 
-export const BIRD = { GULL: 0, TERN: 1, PELICAN: 2, FRIGATE: 3, SANDERLING: 4 };
+export const BIRD = { GULL: 0, TERN: 1, PELICAN: 2, FRIGATE: 3, SANDERLING: 4, LOON: 5 };
 
 // body stations: [ z, y, half width, half height above, half height below ] from the tail base
 // to the forehead. neck: z range blending body -> head; pivot: neck joint (head rotation)
@@ -121,6 +121,22 @@ export const SPECIES = [
 		fold: { front: 0.035, tip: - 0.1, top: 0.022, h: 0.03, minX: 0.005 },
 		legs: { hip: [ 0.011, - 0.021, 0.004 ], tibia: 0.02, tarsus: 0.024, r: 0.0019, toe: 0.017, web: 0 },
 		eye: [ 0.081, 0.025, 0.0024 ],
+	},
+	{
+		// common loon (breeding): long, low body riding deep in the water, thick neck, dagger bill, legs set far back
+		name: 'common loon', length: 0.8, span: 1.3,
+		body: [ [ -0.29, 0.0145, 0.0362, 0.0217, 0.0217 ], [ -0.232, 0.0072, 0.087, 0.058, 0.0653 ], [ -0.116, 0.0, 0.1232, 0.087, 0.1015 ], [ 0.0, 0.0, 0.1276, 0.0899, 0.1044 ], [ 0.1015, 0.0116, 0.1087, 0.0841, 0.0928 ], [ 0.174, 0.0435, 0.0725, 0.0725, 0.0725 ], [ 0.2175, 0.087, 0.058, 0.0609, 0.058 ], [ 0.2537, 0.1131, 0.0508, 0.0522, 0.0435 ], [ 0.2828, 0.116, 0.0406, 0.0435, 0.0348 ], [ 0.3074, 0.1102, 0.0232, 0.0261, 0.0203 ] ],
+		neck: [ 0.145, 0.232 ], pivot: [ 0, 0.058, 0.1885 ],
+		bill: { z: 0.2972, y: 0.1073, len: 0.1131, pitch: - 0.05, w: 0.0116, up: 0.0116, low: 0.0101, hook: 0, gonys: 0.0029, pouch: 0 },
+		tail: { z: -0.2755, y: 0.0174, w: 0.0362, len: [ 0.0725, 0.0725, 0.0725, 0.0725 ], spread: 0.2 },
+		wing: {
+			root: [ 0.058, 0.0435, 0.058 ], span: 0.62, elbow: 0.25, wrist: 0.5, thick: [ 0.14, 0.08, 0.035 ],
+			le: [ [ 0, 0.055 ], [ 0.25, 0.06 ], [ 0.5, 0.05 ], [ 0.75, 0.01 ], [ 0.9, - 0.04 ], [ 1, - 0.09 ] ],
+			chord: [ [ 0, 0.2 ], [ 0.25, 0.19 ], [ 0.5, 0.165 ], [ 0.75, 0.12 ], [ 0.9, 0.07 ], [ 1, 0.018 ] ],
+		},
+		fold: { front: 0.145, tip: -0.29, top: 0.0725, h: 0.1015, minX: 0.0145 },
+		legs: { hip: [ 0.0435, -0.0725, -0.174 ], tibia: 0.058, tarsus: 0.1015, r: 0.0101, toe: 0.116, web: 1 },
+		eye: [ 0.2726, 0.1276, 0.0058 ],
 	},
 ];
 

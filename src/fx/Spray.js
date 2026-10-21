@@ -238,6 +238,15 @@ fn sprayRand( a: u32, b: u32 ) -> f32 {
 
 	}
 
+	// kill every live particle (e.g. before a frozen-clock reference shot, where they would never age)
+	clear() {
+
+		this.info.write( new Float32Array( this.N * 4 ) );
+		this.nReq = 0;
+		this.nReqParticles = 0;
+
+	}
+
 	// Emit along a polyline: countPerSegment particles spread over each segment. velocity is a Vector3,
 	// or an array with one per point (each segment uses the velocity of its start point).
 	emitAlongPoints( points, velocity, countPerSegment, size = 0.04, kind = SPRAY.DROPLET, opts = {} ) {

@@ -71,13 +71,15 @@ class WaterHeights {
 //
 // csm: the SunShadows instance (birds cast into its near cascade only).
 //
+// lake: true for a lake world: common loons only (no crabs, no shorebirds on a swash).
+//
 // update( dt, camera, player ): player = null for the free camera (it only scares animals when
 // it is near the ground).
 export class Wildlife {
 
 	constructor( {
 		scene, renderer, terrain, terrainGPU = null, shore = null, village = null, colliders = null, vegetation = null,
-		boat = null, boatModel = null, query = null, spray = null, csm = null,
+		boat = null, boatModel = null, query = null, spray = null, csm = null, lake = false,
 	} ) {
 
 		this.terrain = terrain;
@@ -85,11 +87,11 @@ export class Wildlife {
 		scene.add( this.birdBatch.mesh );
 		this.critterBatch = new CritterBatch();
 		scene.add( this.critterBatch.mesh );
-		this.crabs = new Crabs( { terrain, village, colliders, vegetation } );
+		this.crabs = lake ? null : new Crabs( { terrain, village, colliders, vegetation } );
 		this.blobs = new ShadowBlobs();
 		scene.add( this.blobs.mesh );
 		let probe = null;
-		if ( shore && terrainGPU ) {
+		if ( shore && terrainGPU && ! lake ) {
 
 			try {
 
@@ -103,9 +105,9 @@ export class Wildlife {
 
 		}
 
-		this.shorebirds = new Shorebirds( { terrain, probe } );
+		this.shorebirds = lake ? null : new Shorebirds( { terrain, probe } );
 		this.water = new WaterHeights( query );
-		this.birds = new Birds( { terrain, village, colliders, boat, boatModel, water: this.water, spray } );
+		this.birds = new Birds( { terrain, village, colliders, boat, boatModel, water: this.water, spray, lake } );
 		this.viewer = { x: 0, y: 0, z: 0, speed: 0, mode: 'walk', px: 0, pz: 0, init: false };
 		this.test = null;
 		this.cpuMs = 0;
@@ -157,8 +159,8 @@ export class Wildlife {
 		else {
 
 			this.birds.update( dt, viewer, this.birdBatch, camera );
-			this.shorebirds.update( dt, viewer, this.birdBatch, camera, this.blobs );
-			this.crabs.update( dt, viewer, this.critterBatch, camera, this.blobs );
+			if ( this.shorebirds ) this.shorebirds.update( dt, viewer, this.birdBatch, camera, this.blobs );
+			if ( this.crabs ) this.crabs.update( dt, viewer, this.critterBatch, camera, this.blobs );
 
 		}
 

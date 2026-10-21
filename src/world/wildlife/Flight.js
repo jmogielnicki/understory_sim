@@ -28,6 +28,11 @@ export const FLIGHT = {
 		speed: 9, minSpeed: 6, maxBank: 0.55, roll: 1.2, climb: 1.2, sink: 0.45, freq: 2.0, amp: 0.55,
 		glide: { elev: 0.1, sweep: - 0.18, twist: 0.03, elbow: 0.42, wrist: 0.85, hand: - 0.28 }, duty: 0.02,
 	},
+	[ BIRD.LOON ]: {
+		// fast and direct on small, pointed wings, never gliding
+		speed: 20, minSpeed: 14, maxBank: 0.5, roll: 1.6, climb: 1.4, sink: 0.6, freq: 4.4, amp: 0.55,
+		glide: { elev: 0.04, sweep: - 0.08, twist: 0.02, elbow: 0.15, wrist: 0.3, hand: - 0.08 }, duty: 1,
+	},
 	[ BIRD.SANDERLING ]: {
 		speed: 13, minSpeed: 6, maxBank: 1.0, roll: 4, climb: 2.5, sink: 1.2, freq: 11, amp: 0.8,
 		glide: { elev: 0.08, sweep: - 0.05, twist: 0.02, elbow: 0.3, wrist: 0.55, hand: - 0.15 }, duty: 0.8,

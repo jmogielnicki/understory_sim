@@ -3,7 +3,7 @@ import { GPU } from '../engine/gpu/GPU.js';
 import { Texture } from '../engine/gpu/Texture.js';
 import { readTexture } from '../engine/gpu/Readback.js';
 import { G } from './Globals.js';
-import { VIEWS, viewPosition } from './DebugViews.js';
+import { VIEWS, viewPosition, viewYaw } from './DebugViews.js';
 
 // Frame-time benchmark (?bench in the URL; console: `await __bench.run()`).
 //
@@ -183,7 +183,7 @@ export class Bench {
 		const v = VIEWS[ name ];
 		if ( v.time !== undefined ) app.settings.timeOfDay = v.time;
 		app.setFreeCam( true );
-		app.fly.setPose( viewPosition( app, v ), v.yaw, v.pitch );
+		app.fly.setPose( viewPosition( app, v ), viewYaw( app, v ), v.pitch );
 		app.fly.velocity.set( 0, 0, 0 );
 
 	}
@@ -293,6 +293,8 @@ export class Bench {
 		for ( const name of views ) {
 
 			this.pose( name );
+			// spray from before (a loon's dive, the boat) would hang in the air with the clock stopped
+			if ( app.spray && app.spray.clear ) app.spray.clear();
 			app.post.outputTexture = this._out;
 			try {
 

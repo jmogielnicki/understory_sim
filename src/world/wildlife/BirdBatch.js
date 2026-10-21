@@ -353,6 +353,30 @@ export class BirdBatch {
 		rough = 0.55;
 		trans *= 0.3;
 
+	} else if ( species == 5.0 ) {
+
+		// common loon (breeding): glossy black head and neck with a white-striped collar, black back
+		// chequered with white spots, white breast and belly, black bill
+		let black = ${ srgb( 0.025, 0.035, 0.03 ) }; let white = ${ srgb( 0.9, 0.9, 0.88 ) };
+		// neck and head black from the shoulders; the necklace is a narrow band of short white streaks
+		// running along the neck round its sides and back, with a smaller striped bar on the throat
+		let headK = smoothstep( 0.115, 0.14, P.z );
+		let around = atan2( N.y, N.x );
+		let streaks = step( 0.35, fract( around * 4.2 + P.z * 30.0 ) );
+		let side = smoothstep( 0.25, 0.55, abs( N.x ) ) + smoothstep( 0.2, 0.6, N.y );
+		let collar = smoothstep( 0.168, 0.174, P.z ) * smoothstep( 0.196, 0.19, P.z ) * min( side, 1.0 ) * streaks;
+		let throat = smoothstep( 0.226, 0.231, P.z ) * smoothstep( 0.246, 0.241, P.z ) * smoothstep( -0.4, -0.75, N.y ) * streaks;
+		let upper = smoothstep( -0.25, 0.15, N.y );
+		let spots = step( 0.55, fract( P.x * 70.0 ) ) * step( 0.55, fract( P.z * 55.0 + floor( P.x * 70.0 ) * 0.5 ) );
+		var body = mix( white, mix( black, white, spots * 0.85 * smoothstep( 0.17, 0.1, P.z ) ), upper );
+		body = mix( body, black, headK );
+		body = mix( body, white, max( collar, throat ) );
+		let wingTop = mix( black, white, spots * 0.7 );
+		c = select( select( body, black, isTail ), select( mix( white, ${ srgb( 0.4, 0.4, 0.4 ) }, smoothstep( 0.6, 0.9, u ) ), wingTop, top ), isWing );
+		c = select( c, ${ srgb( 0.03, 0.03, 0.03 ) }, isBill || isLeg );
+		rough = 0.45;
+		trans *= 0.2;
+
 	} else {
 
 		// sanderling (winter): pale grey above with dark feather centres, white below, dark
@@ -374,7 +398,7 @@ export class BirdBatch {
 	let onHead = part < 2.5 && abs( P.x ) > 0.004;
 	let iris = smoothstep( eye.w, eye.w * 0.8, ed ) * select( 0.0, 1.0, onHead );
 	let pupil = smoothstep( eye.w * 0.6, eye.w * 0.45, ed ) * select( 0.0, 1.0, onHead );
-	c = mix( mix( c, select( ${ srgb( 0.05, 0.03, 0.02 ) }, ${ srgb( 0.8, 0.75, 0.55 ) }, species == 2.0 ), iris ), ${ srgb( 0.01, 0.01, 0.01 ) }, pupil );
+	c = mix( mix( c, select( select( ${ srgb( 0.05, 0.03, 0.02 ) }, ${ srgb( 0.55, 0.04, 0.03 ) }, species == 5.0 ), ${ srgb( 0.8, 0.75, 0.55 ) }, species == 2.0 ), iris ), ${ srgb( 0.01, 0.01, 0.01 ) }, pupil );
 	rough = mix( select( rough, 0.4, isBill || isLeg ), 0.15, iris );
 	// fine feather texture, darker feather bases toward the trailing edge of the wings
 	c *= ( fnz * 0.06 + 1.0 ) * select( 1.0, mix( 1.0, 0.92, smoothstep( 0.5, 1.0, v ) * ( 1.0 - fold ) ), isWing );

@@ -45,6 +45,10 @@ water, terrain, vegetation, lighting and post-processing it reuses and adapts.
 - Eastern white pines and hemlocks, maples, red oaks, beeches and paper birches, mountain laurel, hobblebush
   and blueberry, ferns on the forest floor; meadow grass with lupines and daisies in the village, a mown green.
 
+**The lake**
+- Common loons out on the open water, in pairs and alone: swimming, peering, diving and surfacing somewhere
+  else, the odd wing-flap; now and then one runs across the water to take off and flies to another bay.
+
 **From Tidewater**
 - Physically based sky and atmosphere, volumetric clouds, cascaded shadows, ambient occlusion, temporal
   upscaling, bloom and haze; an FFT water surface (tuned to a lake's short wind chop) with refraction, caustics
@@ -80,6 +84,7 @@ water, terrain, vegetation, lighting and post-processing it reuses and adapts.
 | `noCaustics` | Skip caustics |
 | `noVeg` | Skip the plants |
 | `noVillage` | The bare land, without the village |
+| `noWildlife` | No loons |
 
 ## Running locally
 
