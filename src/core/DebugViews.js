@@ -34,6 +34,8 @@ export const VIEWS = {
 	green: { p: [ 330, 1.7, - 304 ], agl: true, yaw: - 0.15, pitch: 0.06, time: 16.0 },
 	// in front of a home (A1b), its terrace and arches
 	homeFront: { p: [ 321, 1.7, - 318 ], agl: true, yaw: 0.08, pitch: 0.08, time: 15.5 },
+	// on a terrace (A1b), close to its arches
+	homeClose: { p: [ 324, 1.6, - 333.5 ], agl: true, yaw: 0.0, pitch: 0.05, time: 15.5 },
 	// from the dock, the communal buildings
 	towers: { p: [ 401, 1.7, - 232 ], agl: true, yaw: 0.9, pitch: 0.12, time: 16.5 },
 	// the great hall (T1) from its forecourt
@@ -42,6 +44,9 @@ export const VIEWS = {
 	pond: { p: [ 254, 1.7, - 298 ], agl: true, yaw: 0.85, pitch: 0.0, time: 16.0 },
 	// the village's east edge, toward the woods (birches, pines, the forest floor)
 	woodsEdge: { p: [ 470, 1.7, - 360 ], agl: true, yaw: - 1.2, pitch: 0.05, time: 15.0 },
+	// key art candidates: down over the homes and the halls to the lake; across the green from hillside B
+	keyart: { p: [ 290, 6, - 400 ], agl: true, yaw: - 2.5, pitch: - 0.12, time: 16.5 },
+	keyartEast: { p: [ 520, 5, - 330 ], agl: true, yaw: 1.83, pitch: - 0.08, time: 16.5 },
 	// the top of the Rattlesnake cliffs (outside the walkable area: the far terrain), looking south
 	summit: { p: [ - 140, 30, - 790 ], agl: true, yaw: Math.PI * 0.9, pitch: - 0.18, time: 14.0 },
 };

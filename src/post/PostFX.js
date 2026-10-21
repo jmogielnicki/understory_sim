@@ -74,9 +74,10 @@ export class PostFX {
 			aoStrength: [ 'f32', 1.0 ],
 			bloom: [ 'f32', 0.05 ],
 			vignette: [ 'f32', 0.28 ],
-			saturation: [ 'f32', 1.06 ],
-			contrast: [ 'f32', 1.04 ],
-			warmth: [ 'f32', 0.02 ],
+			// a warm, saturated summer afternoon (docs/REFERENCE.md)
+			saturation: [ 'f32', 1.14 ],
+			contrast: [ 'f32', 1.05 ],
+			warmth: [ 'f32', 0.05 ],
 			grain: [ 'f32', 0.012 ],
 			sharpen: [ 'f32', 0.45 ], // RCAS strength (0 = off, 1 = strong)
 		}, { label: 'post' } );

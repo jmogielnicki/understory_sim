@@ -468,8 +468,9 @@ export class Grading {
 			}
 
 			// ---- under each arch the ground stays at the floor back past the glazing (the headwall's thick top
-			// and the glazing hide the mound's cut behind it)
-			if ( lz > - 1.3 ) {
+			// and the glazing hide the mound's cut behind it). The cut sits a texel and more behind the glass:
+			// the 1 m heightmap ramps up across a whole texel in front of it
+			if ( lz > - 2.2 ) {
 
 				let open = false;
 				for ( const a of arches ) if ( Math.abs( lx - a.o ) < a.span / 2 + 0.75 ) open = true;

@@ -122,8 +122,9 @@ export function buildPineNear( seed = 61 ) {
 
 	}
 
-	// whorls of limbs from ~40 % of the height; a few dead stubs below
-	const crownBase = H * 0.38;
+	// whorls of limbs from low on the trunk (an open-grown pine keeps them; in the forest the shader drops
+	// those below ~38 % of the height: see ConiferMaterials, the instance's seed >= 2)
+	const crownBase = H * 0.13;
 	let y = crownBase;
 	let whorl = 0;
 	let az = rand() * Math.PI * 2;

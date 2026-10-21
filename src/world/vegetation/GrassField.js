@@ -641,9 +641,9 @@ const srgb = ( r, g, b ) => `vec3f( ${ _lin( r ).toFixed( 6 ) }, ${ _lin( g ).to
 // the grass field (blade base colour): both evaluate it from the same inputs, so the geometric
 // grass fades into the ground without a visible boundary.
 const MEADOW = {
-	lush: srgb( 0.12, 0.2, 0.05 ),
-	green: srgb( 0.23, 0.32, 0.1 ),
-	olive: srgb( 0.33, 0.37, 0.14 ),
+	lush: srgb( 0.15, 0.25, 0.06 ),
+	green: srgb( 0.28, 0.39, 0.12 ),
+	olive: srgb( 0.37, 0.41, 0.16 ),
 	yellow: srgb( 0.46, 0.45, 0.2 ),
 	straw: srgb( 0.58, 0.53, 0.33 ),
 	soil: srgb( 0.17, 0.13, 0.08 ),

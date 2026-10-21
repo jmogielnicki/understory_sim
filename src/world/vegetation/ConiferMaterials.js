@@ -15,7 +15,8 @@ import { CONIFER_DROP, CONIFER_VARIANTS, MAX_WHORLS } from './ConiferGeometry.js
 //   R coverage, G brightness (lighter tips / new growth) / 1.4, B per-spray random
 // WGSL: fn conNeedleSample( st: vec2f, tile: f32 ) -> vec4f
 //
-// Instances: iDat = ( yaw, vertical scale (negative: hemlock), height, seed ).
+// Instances: iDat = ( yaw, vertical scale (negative: hemlock), height, seed ). A pine grown in the forest
+// carries seed + 2 (>= 2): it has shed the limbs of its lower third (open-grown pines keep them).
 // Parts (aMat.x): 0 pine bark, 1 pine needles, 2 hemlock bark, 3 hemlock needles.
 
 const SIZE = 1024;
@@ -282,7 +283,9 @@ export function createConiferMaterial( needles ) {
 	// the crown variant: a dropped whorl's limbs and needles fold onto the trunk
 	let lobe = v.aLobe;
 	if ( lobe.w >= 0.0 ) {
-		let k = 1.0 - conKeep( seed, lobe.w );
+		// forest-grown pines: the lower whorls are gone (self-pruned), with a ragged limit
+		let pruned = select( 0.0, 1.0, seed >= 1.5 && iDat.y > 0.0 && hf < 0.34 + fract( lobe.w * 0.37 + seed ) * 0.08 );
+		let k = max( 1.0 - conKeep( seed, lobe.w ), pruned );
 		let yaw = iDat.x; let cy = cos( yaw ); let sy = sin( yaw );
 		let sv = abs( iDat.y );
 		P += vec3f( lobe.x * cy + lobe.z * sy, lobe.y * sv, lobe.z * cy - lobe.x * sy ) * sc * k;
@@ -362,7 +365,7 @@ export function createConiferBakeMaterials( needles ) {
 		attributes: { aMat: 'vec4f' },
 		varyings: { vMat: 'vec4f', vLocalN: 'vec3f' },
 		vertex: 'o.vMat = v.aMat; o.vLocalN = v.normal;',
-		surface: head + '\n\tif ( ! ( isBark || L.x > 0.36 ) ) { discard; }',
+		surface: head + '\n\tif ( ! ( isBark || L.x > 0.18 ) ) { discard; }',
 		output: which === 'albedo' ? head + /* wgsl */`
 	let barkN = vegNoise( vec2f( st.x * 26.0, st.y * 1.6 ) ) * 0.6 + vegNoise( vec2f( st.x * 5.0, st.y * 0.5 ) ) * 0.4;
 	let bright = select( L.y, barkN * 0.5 + 0.4, isBark );

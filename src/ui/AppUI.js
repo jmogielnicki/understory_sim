@@ -3,7 +3,7 @@ import { UI } from './UI.js';
 import { G } from '../core/Globals.js';
 import { GroundBounce } from '../materials/GroundBounce.js';
 
-// Binds the Tidewater UI (panel + HUD) to the running app.
+// Binds the UI (panel + HUD) to the running app.
 // Lake conditions: wind waves on a short fetch, no ocean swell, ripples lapping the shore
 const SEA = {
 	Still: { wind: 1.2, fetch: 3, chop: 0.6, swell: 0, surf: 0.008, period: 1.6, whitecaps: 0, icon: 'calm' },

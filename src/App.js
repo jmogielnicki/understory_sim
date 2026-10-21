@@ -74,7 +74,7 @@ export class App {
 	constructor() {
 
 		this.settings = {
-			timeOfDay: 16.2,
+			timeOfDay: 16.5,
 			sunAzimuth: 0, // degrees: turns the sun's daily path about the vertical
 			timeSpeed: 0, // hours per real second
 			exposure: 0.55,
@@ -157,11 +157,11 @@ export class App {
 		// the land beyond the walkable area, to the horizon
 		this.farTerrain = new FarTerrain( { scene, terrainData: this.terrainData, terrainGPU: this.terrainGPU } );
 		// granite: shore boulders, erratics, talus, cobbles on the lake bed
-		this.rocks = new Rocks( { scene, terrain: this.terrain, village: this.village, colliders: this.colliders } );
+		this.rocks = qs.has( 'noRocks' ) ? null : new Rocks( { scene, terrain: this.terrain, village: this.village, colliders: this.colliders } );
 		this.debris = null;
 		// these apply the heightfield sun shadow in their own lighting model (see UnderwaterLighting)
 		this.terrain.mesh.material.appliesHillShadow = true;
-		this.rocks.material.appliesHillShadow = true;
+		if ( this.rocks ) this.rocks.material.appliesHillShadow = true;
 		this.reef = null;
 
 		this.boat = new BoatModel();
@@ -181,6 +181,8 @@ export class App {
 		this.foamTexture = createFoamTexture( renderer );
 		this.oceanLOD = new CDLOD( { gridSize: Number( qs.get( 'G' ) || 32 ), leafSize: 8, levels: 12, minY: - 25, maxY: 25 } );
 		this.surface = new WaterSurface( { fft: this.fft, cdlod: this.oceanLOD, foamTexture: this.foamTexture } );
+		// a small lake's chop is low: the spectrum's heights, scaled down (the slopes keep the sparkle)
+		this.surface.amplitude.value = 0.55;
 		this.surface.terrain = this.terrainGPU;
 		this.seaDetail = new SeaDetail();
 		this.surface.detail = this.seaDetail;

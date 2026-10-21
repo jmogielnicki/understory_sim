@@ -141,11 +141,11 @@ function headwall( B, arches, top, seed, wear ) {
 	// the wall is thick: its top runs back over the openings to the mound (covers the ground's cut there),
 	// a capping course sloping gently back into the soil
 	const cap = [], cn = [], cu = [], ci = [];
-	const D = 1.45;
+	const D = 3.3;
 	for ( let i = 0; i <= n; i ++ ) {
 
 		const q = clean[ clean.length - 1 - ( n - i ) ];
-		cap.push( q.x, q.y, 0.02, q.x, q.y - 0.18, - D );
+		cap.push( q.x, q.y, 0.02, q.x, q.y - 0.3, - D );
 		cn.push( 0, 0.99, 0.12, 0, 0.99, 0.12 );
 		cu.push( q.x - xa, 0, q.x - xa, D );
 		if ( i > 0 ) {
@@ -501,6 +501,20 @@ export function buildEarthHome( B, h, g, rand, groundAt, drapes = null, planting
 			B.lathe( 'stone', p.x, p.y, p.z, [ [ r * 0.72, 0 ], [ r, hgt * 0.92 ], [ r * 1.1, hgt * 0.95 ], [ r * 1.1, hgt ], [ r * 0.92, hgt ] ], { segs: 14, data: [ rand.next(), 6, 0, 0 ] } );
 			B.lathe( 'stone', p.x, p.y + hgt - 0.06, p.z, [ [ r * 0.92, 0 ], [ 0.01, 0.02 ] ], { segs: 14, data: [ rand.next(), 4, 0, 0 ] } );
 			plantings.push( { x: p.x, z: p.z, y: p.y + hgt - 0.05, s: r * 1.6, kind: rand.next() < 0.6 ? 'shrub' : 'fern' } );
+
+		}
+
+	}
+
+	// a planted bank below the terrace's front wall: shrubs and ferns along its foot
+	if ( plantings ) {
+
+		for ( let lx = g.xl; lx < g.xr; lx += 1.4 + rand.next() * 1.2 ) {
+
+			if ( rand.next() < 0.3 ) continue;
+			const lz = g.terrace + 0.9 + rand.next() * 0.9;
+			const p = toWorld( lx, 0, lz );
+			plantings.push( { x: p.x, z: p.z, y: groundAt( p.x, p.z ) - 0.05, s: 0.7 + rand.next() * 0.5, kind: rand.next() < 0.5 ? 'shrub' : 'fern' } );
 
 		}
 

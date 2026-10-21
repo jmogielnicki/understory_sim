@@ -38,3 +38,35 @@ Each is easy to reverse; the file or setting is named.
   four timber footbridges. The pond and stream water are opaque, dark, reflective surfaces (not see-through).
 - **Paths.** Worn earth paths on the terrain, flagged stone along the lake shore, dressed stone steps
   wherever a path is steeper than ~1 in 7.
+
+## The woods and the planting
+
+- **Forest mix.** Eastern white pine (shores, ledges, emergent), eastern hemlock (ravines, north slopes, by
+  the water), maple, red oak, beech and paper birch; mountain laurel, hobblebush and lowbush blueberry; ferns.
+  Placement rules: `src/world/vegetation/ForestScatter.js`.
+- **The village clearing.** The homes stand in an open meadow (`CLEARING` in `Plan.js`) with scattered birches,
+  pines and oaks, as in the references; the forest closes in at a ragged edge.
+- **Open-grown pines keep their low limbs**; pines in the forest have shed their lower third.
+- **Ground flora.** Knee-high meadow grass on the roofs and in the clearing, a short mown lawn on the green,
+  drifts of lupine (purple-blue, some pink and white) through the meadows and crowding round the homes, daisies
+  and clover in the lawn. Tidewater's tropical grass kinds were repurposed (dune grass → lawn, sea oats →
+  lupines, beach creeper → daisies).
+- **Vines** spill over the arch crowns and wall tops, with small purple and white flowers; terracotta pots
+  with shrubs and ferns on the terraces, shrubs and ferns along the foot of each terrace wall.
+- **Boulders.** Granite erratics through the woods and the meadows, boulder-strewn shores, rounded stones
+  round the pond and along the stream.
+
+## Look
+
+- **Grade.** A little warmer and more saturated than Tidewater's (saturation 1.14, warmth 0.05, contrast 1.05)
+  toward the references' warm summer afternoon (`src/post/PostFX.js`). Default time 16:30.
+- **Lake.** Short wind chop (3.5 m/s over 3 km of fetch), wave heights scaled to 55 %, ripples lapping the
+  shore instead of surf; clear water with a faint tea tint (absorption 0.46 / 0.10 / 0.12 per metre). The
+  settings call the conditions Still / Light air / Breezy / Windy.
+- **Key art** for the loading screen is a render of the village (`public/ui/keyart*.jpg`, view `keyart`).
+
+## Still Tidewater (not yet adapted)
+
+- The boat is Tidewater's diesel fishing boat; the bible would want something quieter (sail or electric).
+- No wildlife yet (the gulls, crabs and the whale were island animals): loons would be the obvious first.
+- The sound bed is Tidewater's (surf is near silent at the lake's wave height; the birds are generic).

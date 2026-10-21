@@ -182,7 +182,9 @@ export function scatterForest( site, seed = 2026 ) {
 			if ( ! occT.free( x, z, r * 0.8, 1 ) ) return;
 			occT.add( x, z, r * 0.8 );
 			occ.add( x, z, 0.5 * s );
-			out.pines.push( { x, y: site.groundY( x, z, 0.5 ) - 0.2, z, s, sy, yaw, la: yaw, l: sy, H: PINE_H * s * sy, seed: rand() } );
+			// in the forest (not the clearing, not right on the shore) the pine has shed its lower limbs
+			const grownIn = forest > 0.5 && shoreK < 0.6;
+			out.pines.push( { x, y: site.groundY( x, z, 0.5 ) - 0.2, z, s, sy, yaw, la: yaw, l: sy, H: PINE_H * s * sy, seed: rand() + ( grownIn ? 2 : 0 ) } );
 
 		} else if ( u < wPine + wHem ) {
 
