@@ -346,7 +346,7 @@ const TERRAIN_SURFACE = /* wgsl */`
 
 		// ---- beach sand: pale coral sand, drifts of warmer / coarser sand, grain
 		let dryK = smoothstep( 0.2, 1.0, h );
-		var sand = mix( ${ S( 0.5, 0.44, 0.34 ) }, ${ S( 0.6, 0.53, 0.42 ) }, smoothstep( 0.3, 0.72, mcr + dryK * 0.2 ) );
+		var sand = mix( ${ S( 0.42, 0.37, 0.29 ) }, ${ S( 0.5, 0.44, 0.35 ) }, smoothstep( 0.3, 0.72, mcr + dryK * 0.2 ) );
 		sand = mix( sand, ${ S( 0.66, 0.55, 0.42 ) }, smoothstep( 0.55, 0.8, dM.w + ( macroB - 0.5 ) * 0.6 ) * 0.45 );
 		sand = sand * ( ( dM.w - 0.5 ) * 0.16 + 1.0 ) * ( ( dN.w - 0.5 ) * 0.1 + 1.0 );
 		sand = sand * ( ( grain - 0.45 ) * 0.3 + 0.97 ) * ( ( grainF - 0.45 ) * 0.2 + 1.0 );

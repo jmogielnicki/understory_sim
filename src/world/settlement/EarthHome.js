@@ -140,24 +140,31 @@ function headwall( B, arches, top, seed, wear ) {
 	B.part( 'stone', part( p, nn, uv, idx ), 0, 0, 0, { data: [ seed, 0, wear, 0 ] } );
 	// the wall is thick: its top runs back over the openings to the mound (covers the ground's cut there),
 	// a capping course sloping gently back into the soil
-	const cap = [], cn = [], cu = [], ci = [];
-	const D = 3.3;
-	for ( let i = 0; i <= n; i ++ ) {
+	// a narrow stone coping at the front, then turf running back into the roof meadow
+	const strip = ( z0, z1, y1, pattern, w ) => {
 
-		const q = clean[ clean.length - 1 - ( n - i ) ];
-		cap.push( q.x, q.y, 0.02, q.x, q.y - 0.3, - D );
-		cn.push( 0, 0.99, 0.12, 0, 0.99, 0.12 );
-		cu.push( q.x - xa, 0, q.x - xa, D );
-		if ( i > 0 ) {
+		const cap = [], cn = [], cu = [], ci = [];
+		for ( let i = 0; i <= n; i ++ ) {
 
-			const b = i * 2;
-			ci.push( b - 2, b - 1, b + 1, b - 2, b + 1, b );
+			const q = clean[ clean.length - 1 - ( n - i ) ];
+			cap.push( q.x, q.y - ( z0 < - 0.01 ? 0.04 : 0 ), z0, q.x, q.y - y1, z1 );
+			cn.push( 0, 0.99, 0.12, 0, 0.99, 0.12 );
+			cu.push( q.x - xa, 0, q.x - xa, z0 - z1 );
+			if ( i > 0 ) {
+
+				const b = i * 2;
+				ci.push( b - 2, b - 1, b + 1, b - 2, b + 1, b );
+
+			}
 
 		}
 
-	}
+		B.part( 'stone', part( cap, cn, cu, ci ), 0, 0, 0, { data: [ seed + 0.5, pattern, w, 0 ] } );
 
-	B.part( 'stone', part( cap, cn, cu, ci ), 0, 0, 0, { data: [ seed + 0.5, 1, Math.min( 1, wear + 0.3 ), 0 ] } );
+	};
+
+	strip( 0.02, - 0.4, 0.04, 1, Math.min( 1, wear + 0.3 ) );
+	strip( - 0.4, - 3.3, 0.3, 7, 0 );
 	return { xa, xb };
 
 }

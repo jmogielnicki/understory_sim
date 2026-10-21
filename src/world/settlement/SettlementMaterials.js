@@ -17,15 +17,16 @@ import { srgb } from '../terrain/TerrainShading.js';
 //   pattern 4  garden soil (raised beds)
 //   pattern 5  granite boulder: grey, lichened (the glacial erratics, stream stones)
 //   pattern 6  terracotta (plant pots): warm clay, a little salt bloom near the rim
+//   pattern 7  turf: the planted top of a wall running back into the roof meadow (the meadow's tones)
 // GLAZING: vdata: x seed, y lit (0..1, warm light inside), z 0 window / 1 door / 2 skylight / 3 hall window
 // (framing drawn in the shader). uv: metres across the pane.
 // GLOW: unlit light: the pale blue technology seams (vdata.x phase: they breathe slowly) and, with vdata.y = 1,
 // the warm path lamps (steady, lit after dusk).
 
 const STONE_WGSL = /* wgsl */`
-const STN_A: vec3f = ${ srgb( 0.75, 0.66, 0.52 ) }; // cream
-const STN_B: vec3f = ${ srgb( 0.7, 0.58, 0.42 ) };  // honey
-const STN_C: vec3f = ${ srgb( 0.8, 0.74, 0.63 ) }; // pale
+const STN_A: vec3f = ${ srgb( 0.79, 0.7, 0.55 ) }; // cream
+const STN_B: vec3f = ${ srgb( 0.75, 0.62, 0.44 ) };  // honey
+const STN_C: vec3f = ${ srgb( 0.83, 0.77, 0.65 ) }; // pale
 const STN_MOSS: vec3f = ${ srgb( 0.32, 0.38, 0.17 ) };
 const STN_GRIME: vec3f = ${ srgb( 0.5, 0.46, 0.38 ) };
 
@@ -122,7 +123,7 @@ fn stnSample( uv: vec2f, P: vec3f, pattern: f32, seed: f32, wear: f32, tint: vec
 	col = col * ( 0.94 + grain * 0.08 );
 	// joints: deep, darker; a grimy rim along the bottom of each block
 	let inJoint = 1.0 - smoothstep( joint * 0.6, joint + 0.006, b.edge );
-	col = mix( col, col * vec3f( 0.42, 0.4, 0.36 ), inJoint );
+	col = mix( col, col * vec3f( 0.58, 0.55, 0.5 ), inJoint );
 	// weathering: moss and grime creep up from the ground and in from the joints where wear is high
 	let lowK = 1.0 - smoothstep( 0.0, 0.9, uv.y );
 	let mossN = perlin2( uv * 1.3 + seed ) * 0.5 + 0.5;
@@ -187,7 +188,15 @@ export function createStoneMaterial() {
 	let pattern = d.y;
 	var st: StnSample;
 	var hd = 0.0;
-	if ( pattern > 5.5 ) {
+	if ( pattern > 6.5 ) {
+		let n = perlin2( in.P.xz * 0.9 ) * 0.5 + 0.5;
+		let n2 = perlin2( in.P.xz * 7.0 + 3.0 ) * 0.5 + 0.5;
+		st.col = mix( ${ srgb( 0.2, 0.3, 0.09 ) }, ${ srgb( 0.33, 0.42, 0.14 ) }, n * 0.6 + n2 * 0.4 );
+		st.col = mix( st.col, ${ srgb( 0.42, 0.42, 0.2 ) }, smoothstep( 0.7, 0.9, n2 ) * 0.4 );
+		st.rough = 0.95;
+		st.h = n2 * 0.02;
+		st.ao = 0.85 + n2 * 0.15;
+	} else if ( pattern > 5.5 ) {
 		let n = perlin2( in.uv * vec2f( 3.0, 9.0 ) + d.x * 11.0 ) * 0.5 + 0.5;
 		st.col = mix( ${ srgb( 0.6, 0.33, 0.2 ) }, ${ srgb( 0.72, 0.43, 0.27 ) }, n );
 		st.col = mix( st.col, ${ srgb( 0.78, 0.72, 0.62 ) }, smoothstep( 0.7, 0.95, in.uv.x ) * 0.25 * n );

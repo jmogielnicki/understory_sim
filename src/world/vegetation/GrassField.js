@@ -865,8 +865,9 @@ function createGrassMaterial( field ) {
 	let oatStalk = mix( ${ C( 0x3c5524 ) }, ${ C( 0x56702f ) }, hf );
 	let lupineSp = fract( rnd * 7.31 );
 	var oatHead = mix( ${ C( 0x4a3f9e ) }, ${ C( 0x7c5cc4 ) }, fract( rnd * 3.7 ) );
-	oatHead = select( oatHead, mix( ${ C( 0xb8679e ) }, ${ C( 0xd48cb8 ) }, rnd ), lupineSp > 0.78 );
-	oatHead = select( oatHead, ${ C( 0xeee8f0 ) }, lupineSp > 0.93 );
+	oatHead = select( oatHead, mix( ${ C( 0xb8679e ) }, ${ C( 0xd48cb8 ) }, rnd ), lupineSp > 0.68 );
+	// white: white lupines and Queen Anne's lace among them
+	oatHead = select( oatHead, ${ C( 0xf1ede4 ) }, lupineSp > 0.82 );
 	// the buds at the tip of the spike stay green
 	oatHead = mix( oatHead, ${ C( 0x56702f ) }, smoothstep( 0.93, 1.0, hf ) * 0.7 );
 	let centre = in.vs.vVegGrass2.y; // 1 at leaf / flower centre
