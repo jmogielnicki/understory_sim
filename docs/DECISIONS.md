@@ -26,8 +26,11 @@ Each is easy to reverse; the file or setting is named.
 - **Homes.** One main arch (7–9 m span, ~4 m rise) with up to two smaller side arches; vault 8.5–10 m deep
   into the hill; a flagged terrace 4–5 m deep; 1–3 oval skylights in the planted roof. Floors are set ~0.45 m
   below the natural ground so terraces need little fill (lower retaining walls).
-- **Glazing.** Opaque (no interiors yet), painted as a warm, lived-in room that glows softly by day and
-  brightly after dusk. Main arches have glazed double doors; side arches have windows over a low sill wall.
+- **Glazing.** Clear glass with a room behind it: each arch shows its vaulted interior, traced in the glazing
+  shader (no geometry): warm plaster vault with faint stone ribs, a plank floor and a rug, shelves of books or a
+  doorway at the back, a table and chairs and a potted plant, a pendant lamp under the crown. Daylight falls
+  off toward the back; after dusk the lamp lights it. Main arches have glazed double doors; side arches have
+  windows over a low sill wall. (Real interiors, walkable, are later work.)
 - **The blue seam.** Every third home or so has the pale breathing blue line round its door arch (bible:
   everyday technology shown quietly). `seam: true` per home in `Plan.js`.
 - **The halls.** Three tall catenary "teardrop" halls (25 m, 20 m, 16.5 m) between the green and the cove,

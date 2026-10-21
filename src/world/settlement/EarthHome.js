@@ -338,7 +338,9 @@ function glazing( B, a, rand, { kind, lit, seed } ) {
 			}
 
 			for ( let i = 0; i < N; i ++ ) idx.push( i * 2, i * 2 + 2, i * 2 + 3, i * 2, i * 2 + 3, i * 2 + 1 );
-			B.part( 'glazing', part( p, n, uv, idx ), 0, 0, 0, { data: [ seed + k * 0.13, lit, door ? 1 : 0, 0 ] } );
+			// vdata.w: the arch's rise and half-span packed (round( rise * 100 ) * 100 + half-span) for the room
+			// the glazing shader draws behind the pane
+			B.part( 'glazing', part( p, n, uv, idx ), 0, 0, 0, { data: [ seed + k * 0.13, lit, door ? 1 : 0, Math.round( bi * 100 ) * 100 + ai ] } );
 
 		}
 

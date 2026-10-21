@@ -252,6 +252,100 @@ export function createGlazingMaterial() {
 	// the room glows warm by day (it is lit inside, and the sun reaches in) and brightly after dusk; the pane
 	// reflects the sky over it (low roughness)
 	let night = smoothstep( 0.1, 0.7, frame.night );
+	// a home's arch (vData.w packs its rise and half-span): the vaulted room behind the glass, found by
+	// tracing the view ray from the pane (uv: metres from the arch's centre, above its floor) into a
+	// half-elliptic vault ~2.2 half-spans deep: plastered vault with faint stone ribs, a plank floor and a
+	// rug, a back wall with shelves or a doorway on, a table and chairs and a plant part way in, and a
+	// pendant lamp under the crown. Lit by the window by day (falling off toward the back) and by the
+	// lamp after dusk.
+	var illum = 1.0;
+	let traced = d.z < 1.5 && d.w > 1.0;
+	if ( traced ) {
+		let bi = floor( d.w / 100.0 ) / 100.0;
+		let ai = d.w - floor( d.w / 100.0 ) * 100.0;
+		let D = 2.2 * ai + 1.2;
+		let Nw = normalize( in.N );
+		let Tw = normalize( vec3f( Nw.z, 0.0, - Nw.x ) );
+		let Vw = - normalize( in.V );
+		let rd = vec3f( dot( Vw, Tw ), Vw.y, min( dot( Vw, Nw ), -0.02 ) );
+		let ro = vec3f( uv.x, uv.y, 0.0 );
+		let h1 = hash21( vec2f( floor( seed * 7.0 ), 3.1 ) );
+		let h2 = hash21( vec2f( floor( seed * 7.0 ), 8.7 ) );
+		var t = D / - rd.z;
+		var hit = 2; // 0 vault, 1 floor, 2 back wall, 3 furniture, 4 lamp
+		if ( rd.y < -1e-4 ) { let tf = - ro.y / rd.y; if ( tf < t ) { t = tf; hit = 1; } }
+		let ia = 1.0 / ( ai * ai ); let ib = 1.0 / ( bi * bi );
+		let qa = rd.x * rd.x * ia + rd.y * rd.y * ib;
+		let qb = 2.0 * ( ro.x * rd.x * ia + ro.y * rd.y * ib );
+		let qc = ro.x * ro.x * ia + ro.y * ro.y * ib - 1.0;
+		let disc = qb * qb - 4.0 * qa * qc;
+		if ( disc > 0.0 && qa > 1e-6 ) { let tv = ( - qb + sqrt( disc ) ) / ( 2.0 * qa ); if ( tv > 0.0 && tv < t ) { t = tv; hit = 0; } }
+		// furniture: a table with two chairs and a potted plant, cut out of a plane part way in
+		let zc = 2.0 + h1 * 1.6;
+		let tc = zc / - rd.z;
+		var fcol = vec3f( 0.0 );
+		if ( tc < t ) {
+			let c = ro + rd * tc;
+			let tx = ( h2 - 0.5 ) * ai * 0.6;
+			let dxT = abs( c.x - tx );
+			let top = dxT < 0.85 && abs( c.y - 0.74 ) < 0.035;
+			let legs = abs( dxT - 0.75 ) < 0.035 && c.y < 0.74;
+			let chairX = abs( dxT - 1.15 );
+			let chair = ( chairX < 0.22 && abs( c.y - 0.45 ) < 0.03 ) || ( abs( chairX - 0.2 ) < 0.03 && c.y < 0.95 && dxT > 1.15 );
+			let px = select( ai * 0.62, - ai * 0.62, h2 > 0.5 );
+			let leaf = length( ( c.xy - vec2f( px, 1.05 ) ) / vec2f( 0.42, 0.55 ) ) < 1.0 + perlin2( c.xy * 6.0 + seed ) * 0.35;
+			let pot = abs( c.x - px ) < 0.2 - ( 0.45 - c.y ) * 0.1 && c.y < 0.45;
+			if ( top || legs || chair ) { fcol = ${ srgb( 0.32, 0.2, 0.11 ) }; t = tc; hit = 3; }
+			else if ( pot ) { fcol = ${ srgb( 0.55, 0.3, 0.18 ) }; t = tc; hit = 3; }
+			else if ( leaf ) { fcol = ${ srgb( 0.14, 0.24, 0.08 ) } * ( 0.8 + perlin2( c.xy * 14.0 ) * 0.3 ); t = tc; hit = 3; }
+		}
+		// the pendant lamp under the crown
+		let lp = vec3f( 0.0, bi - 0.95, - D * 0.42 );
+		let oc = ro - lp;
+		let lb = dot( oc, rd ); let lc = dot( oc, oc ) - 0.2 * 0.2;
+		let ld = lb * lb - lc * dot( rd, rd );
+		if ( ld > 0.0 ) { let tl = ( - lb - sqrt( ld ) ) / dot( rd, rd ); if ( tl > 0.0 && tl < t ) { t = tl; hit = 4; } }
+		let H = ro + rd * t;
+		let back = sat( - H.z / D );
+		var col = vec3f( 0.0 );
+		if ( hit == 0 ) {
+			let rib = smoothstep( 0.07, 0.0, abs( fract( H.z / 1.7 + h1 ) - 0.5 ) - 0.43 );
+			col = mix( ${ srgb( 0.76, 0.6, 0.42 ) }, ${ srgb( 0.87, 0.74, 0.55 ) }, perlin2( H.xz * 0.8 + seed ) * 0.5 + 0.5 ) * ( 1.0 - rib * 0.2 );
+		} else if ( hit == 1 ) {
+			let plank = floor( H.x / 0.19 );
+			let seam = smoothstep( 0.012, 0.0, abs( fract( H.x / 0.19 ) - 0.5 ) - 0.47 );
+			col = mix( ${ srgb( 0.42, 0.27, 0.15 ) }, ${ srgb( 0.55, 0.37, 0.21 ) }, hash21( vec2f( plank, seed ) ) ) * ( 1.0 - seam * 0.4 );
+			let rugIn = abs( H.x ) < ai * 0.48 && H.z < - D * 0.2 && H.z > - D * 0.7;
+			let rugEdge = abs( H.x ) > ai * 0.42 || H.z > - D * 0.25 || H.z < - D * 0.65;
+			let rug = mix( mix( ${ srgb( 0.5, 0.16, 0.1 ) }, ${ srgb( 0.18, 0.24, 0.42 ) }, step( 0.5, h1 ) ), ${ srgb( 0.78, 0.66, 0.42 ) }, select( 0.0, 1.0, rugEdge ) );
+			col = select( col, rug, rugIn );
+		} else if ( hit == 2 ) {
+			col = ${ srgb( 0.72, 0.58, 0.41 ) };
+			if ( h2 > 0.45 ) {
+				// shelves of books and jars
+				let shelf = abs( H.x ) < ai * 0.62 && H.y > 0.3 && H.y < 2.1;
+				let row = floor( H.y / 0.42 );
+				let board = fract( H.y / 0.42 ) < 0.08;
+				let book = hash21( vec2f( floor( H.x / 0.07 ), row + seed ) );
+				let bk = mix( mix( ${ srgb( 0.45, 0.12, 0.08 ) }, ${ srgb( 0.12, 0.2, 0.32 ) }, step( 0.4, book ) ), ${ srgb( 0.6, 0.5, 0.3 ) }, step( 0.75, book ) );
+				let filled = fract( H.y / 0.42 ) < 0.08 + 0.75 * step( 0.15, book );
+				if ( shelf ) { col = select( select( col * 0.5, bk, filled ), ${ srgb( 0.36, 0.24, 0.13 ) }, board ); }
+			} else {
+				// a doorway on to the next room
+				let door = length( vec2f( H.x / 0.6, H.y / 2.1 ) ) < 1.0;
+				col = select( col, col * 0.22, door );
+			}
+		} else if ( hit == 3 ) {
+			col = fcol;
+		}
+		// light: from the window by day, falling off toward the back; the lamp's pool after dusk
+		let lampPool = 1.0 / ( 1.0 + dot( H - lp, H - lp ) * 0.25 );
+		// (sunlight through the glass warms the room by day)
+		illum = mix( mix( 0.95, 0.4, back ), 0.25 + lampPool * 1.6, night );
+		col *= mix( ${ srgb( 1.0, 0.9, 0.76 ) }, vec3f( 1.0 ), night );
+		inside = col;
+		if ( hit == 4 ) { inside = ${ srgb( 1.0, 0.8, 0.5 ) }; illum = mix( 2.5, 5.0, night ); }
+	}
 	// the halls' great windows (kind 3) carry their timber framing in the shader: mullions ~1.1 m apart,
 	// transoms every 2.2 m (uv in metres over the shell)
 	var frameK = 0.0;
@@ -263,7 +357,7 @@ export function createGlazingMaterial() {
 	}
 	s.albedo = mix( inside * 0.05, ${ srgb( 0.36, 0.25, 0.16 ) }, frameK );
 	s.roughness = mix( 0.03 + room * 0.03, 0.7, frameK );
-	s.emissive = inside * lit * mix( 1.6, 4.5, night ) * ( 1.0 - frameK );
+	s.emissive = inside * illum * lit * select( mix( 1.6, 4.5, night ), mix( 1.1, 3.4, night ), traced ) * ( 1.0 - frameK );
 	s.specularIntensity = 1.0;
 `;
 	return m;
