@@ -355,7 +355,9 @@ export function buildDock( B, d, groundAt, rand ) {
 
 // Low stone lamps along a path, every ~`every` metres on alternate sides: a dressed post with a warm glowing
 // cap. Returns the light positions (world).
-export function buildPathLights( B, p, groundAt, rand, every = 16 ) {
+// style 'post' (the stairs, as in reference/neighborhood-v2.png): a timber post with an arm and an iron lantern
+// hung from it.
+export function buildPathLights( B, p, groundAt, rand, every = 16, style = 'low' ) {
 
 	const out = [];
 	const pts = p.pts;
@@ -370,6 +372,23 @@ export function buildPathLights( B, p, groundAt, rand, every = 16 ) {
 			const x = ax + dx * acc - dz * side * ( p.w + 0.55 ), z = az + dz * acc + dx * side * ( p.w + 0.55 );
 			const g = groundAt( x, z );
 			const yaw = Math.atan2( dx, dz );
+			if ( style === 'post' ) {
+
+				// the arm reaches over the stair
+				const ax2 = x + dz * side * 0.55, az2 = z - dx * side * 0.55;
+				B.box( 'wood', x, g + 1.0, z, 0.12, 2.4, 0.12, { data: [ rand.next(), 0, 0, 0.6 ], tint: [ 0.6, 0.55, 0.48 ] } );
+				B.beam( 'wood', [ x, g + 2.1, z ], [ ax2, g + 2.1, az2 ], 0.07, 0.08, { extend: 0.08, data: [ rand.next(), 0, 0, 0.6 ], tint: [ 0.6, 0.55, 0.48 ] } );
+				B.rod( 'hard', [ ax2, g + 1.85, az2 ], [ ax2, g + 2.07, az2 ], 0.006, 0.006, { data: [ rand.next(), 0.2, 0, 0 ], tint: [ 0.18, 0.16, 0.15 ] } );
+				B.lathe( 'hard', ax2, g + 1.78, az2, [ [ 0.12, 0 ], [ 0.02, 0.08 ], [ 0.001, 0.09 ] ], { segs: 6, data: [ rand.next(), 0.2, 0, 0 ], tint: [ 0.18, 0.16, 0.15 ] } );
+				B.lathe( 'glazing', ax2, g + 1.5, az2, [ [ 0.07, 0 ], [ 0.09, 0.1 ], [ 0.09, 0.18 ], [ 0.06, 0.26 ] ], { segs: 6, data: [ rand.next(), 1, 1, 0 ] } );
+				B.box( 'hard', ax2, g + 1.5, az2, 0.14, 0.02, 0.14, { data: [ rand.next(), 0.2, 0, 0 ], tint: [ 0.18, 0.16, 0.15 ] } );
+				out.push( new Vector3( ax2, g + 1.6, az2 ) );
+				side = - side;
+				acc += every * ( 0.85 + rand.next() * 0.3 );
+				continue;
+
+			}
+
 			B.box( 'stone', x, g + 0.3, z, 0.2, 0.75, 0.2, { ry: yaw, data: [ rand.next(), 3, 0.5, 0.2 ] } );
 			B.box( 'glow', x, g + 0.69, z, 0.14, 0.05, 0.14, { ry: yaw, data: [ rand.next(), 1, 0, 0 ], tint: [ 1.0, 0.72, 0.42 ] } );
 			B.box( 'stone', x, g + 0.75, z, 0.26, 0.06, 0.26, { ry: yaw, data: [ rand.next(), 3, 0.5, 0.26 ] } );

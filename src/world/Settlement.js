@@ -103,6 +103,29 @@ export class Settlement {
 
 		}
 
+		// small fruit trees in the gaps between homes that neither stairs nor gardens use, a little behind the
+		// line of their fronts
+		PLAN.ROWS.forEach( ( row, r ) => {
+
+			const used = new Set();
+			for ( const st of PLAN.STAIRS ) if ( st.rows[ 0 ] === r ) for ( const g of st.gaps ) used.add( g );
+			for ( let i = 0; i < row.length - 1; i ++ ) {
+
+				const a = PLAN.HOMES.find( ( q ) => q.id === row[ i ] ), b = PLAN.HOMES.find( ( q ) => q.id === row[ i + 1 ] );
+				if ( used.has( i ) || b.garden ) continue;
+				for ( let k = 0; k < 2; k ++ ) {
+
+					const t = 0.4 + k * 0.2 + ( rand.next() - 0.5 ) * 0.08;
+					const back = - 2 - rand.next() * 4;
+					const x = a.x + ( b.x - a.x ) * t + Math.sin( a.yaw ) * back, z = a.z + ( b.z - a.z ) * t + Math.cos( a.yaw ) * back;
+					this.plantings.push( { x, z, y: ground( x, z ) - 0.1, s: 0.42 + rand.next() * 0.12, kind: 'tree' } );
+
+				}
+
+			}
+
+		} );
+
 		// the festival ground on the green: oaks, lantern strings, long tables
 		for ( const l of buildFestival( B, PLAN.FESTIVAL, ground, rand, this.plantings, this.footprints ) ) this.lights.push( l );
 
@@ -113,6 +136,8 @@ export class Settlement {
 			steps += buildSteps( B, p, rand, ground );
 			// lamps along the longer walks
 			if ( p.pts.length > 3 ) for ( const position of buildPathLights( B, p, ground, rand ) ) this.lights.push( { position, color: new Color( 1.0, 0.7, 0.4 ), intensity: 1.6, kind: 'pathLight' } );
+			// lanterns on posts up the stairs between the rows
+			if ( p.stair ) for ( const position of buildPathLights( B, p, ground, rand, 7, 'post' ) ) this.lights.push( { position, color: new Color( 1.0, 0.68, 0.38 ), intensity: 1.2, kind: 'lantern' } );
 
 		}
 
