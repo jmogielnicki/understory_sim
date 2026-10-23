@@ -23,12 +23,12 @@ const SHADER = /* wgsl */`
 	let edge = 1.0 - smoothstep( 0.2, 1.0, abs( u - curl ) / ( w * 0.5 + 1e-3 ) );
 	let dens = smoothstep( 0.3, 0.62, n ) * edge * pow( 1.0 - t, 0.6 ) * smoothstep( 0.0, 0.05, t );
 	if ( dens < 0.02 ) { discard; }
-	s.albedo = vec3f( 0.7, 0.7, 0.7 ) * ( 0.85 + n * 0.2 );
+	s.albedo = vec3f( 0.55, 0.56, 0.58 ) * ( 0.85 + n * 0.2 );
 	s.roughness = 1.0;
 	s.metalness = 0.0;
 	s.normal = normalize( in.V );
-	s.translucency = vec3f( 0.25 );
-	s.alpha = dens * 0.35;
+	s.translucency = vec3f( 0.12 );
+	s.alpha = dens * 0.18;
 `;
 
 const SWAY = /* wgsl */`

@@ -169,7 +169,11 @@ export function scatterForest( site, seed = 2026 ) {
 		// (docs/REFERENCE.md: the village stands among trees); the mown green stays open but for its edges
 		const forest = 1 - smoothstep( 0.25, 0.75, c.open );
 		const lawn = site.inLawn ? site.inLawn( x, z ) : 0;
-		let p = 0.92 * forest + ( 1 - forest ) * 0.3 * smoothstep( - 0.4, 0.3, patch ) * ( 1 - lawn * 0.95 );
+		// (reference/neighborhood-v2.png: the rows of homes are open, flowery shelves; few trees right among
+		// them, more between the rows' ends and above them)
+		const od = site.obstacleDist( x, z );
+		const amongHomes = smoothstep( 14, 5, od );
+		let p = 0.92 * forest + ( 1 - forest ) * 0.3 * smoothstep( - 0.4, 0.3, patch ) * ( 1 - lawn * 0.95 ) * ( 1 - amongHomes * 0.75 );
 		// thinner on the ledges and steep ground
 		p *= 1 - smoothstep( 0.3, 0.6, c.rock ) * 0.6 - smoothstep( 0.45, 0.62, c.slope ) * 0.5;
 		if ( rand() > p ) return;

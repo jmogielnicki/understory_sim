@@ -60,7 +60,7 @@ Each is easy to reverse; the file or setting is named.
 - **Walks and stairs.** A walk runs along the front of each row's terraces (generated from `ROWS`), and long
   straight stone stairs climb between homes to the row above (`STAIRS`), as in the neighbourhood image. The
   green's top path is the first row's walk.
-- **Chimney smoke.** A thin wisp from about a third of the chimneys, always Mimi's (the painting has one). The
+- **Chimney smoke.** A faint wisp from about one chimney in seven, always Mimi's (the painting has one). The
   bible rules out routine combustion; I read these as bread ovens and the odd hearth fire, not heating or
   power. Easy to remove (`smoke` per home, `Smoke.js`).
 - **Lanterns up the stairs** on timber posts with an arm (the neighbourhood painting); low stone lamps stay
@@ -109,7 +109,9 @@ Each is easy to reverse; the file or setting is named.
   open-grown red oaks and maples with broad, low crowns, birches in twos and threes, a few pines, glades of
   meadow between (`CLEARING` in `Plan.js`, rules in `ForestScatter.js`); trees keep ~4.5 m off the homes and
   the forest closes in at a ragged edge. The clearing now reaches the shore (the tall shore pines there made it
-  look unlike the paintings' broadleaf lakeside) and grows ~50 % more trees than before.
+  look unlike the paintings' broadleaf lakeside). Few trees right among the homes (a quarter of the density
+  within ~14 m of a home): the neighbourhood painting's rows are open, flowery shelves, with the big trees on
+  the green and above the village.
 - **Designed vistas.** Corridors from the starting point down over the green to the cove are kept free of
   trees (`VISTAS` in `Plan.js`).
 - **Fuller crowns.** Every broadleaf tree carries ~1.3x the leaf clusters it had in Tidewater (the crowns read
