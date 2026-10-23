@@ -98,7 +98,7 @@ export function buildFestival( B, F, ground, rand, plantings, footprints ) {
 				prof.reverse();
 				B.lathe( 'lantern', p.x, p.y, p.z, prof, { segs: 10, data: [ rand.next(), 0, 0, 0 ], tint: c } );
 				B.box( 'hard', p.x, p.y - 0.04, p.z, 0.005, 0.08, 0.005, { data: [ 0, 0, 0, 0 ], tint: [ 0.2, 0.18, 0.15 ] } );
-				if ( li ++ % 4 === 0 ) lights.push( { position: new Vector3( p.x, p.y - 0.3, p.z ), color: new Color( 1.0, 0.7, 0.4 ), intensity: 0.9, kind: 'lantern' } );
+				if ( li ++ % 4 === 0 ) lights.push( { position: new Vector3( p.x, p.y - 0.3, p.z ), color: new Color( 1.0, 0.72, 0.45 ), intensity: 3.2, kind: 'festival' } );
 
 			} else {
 

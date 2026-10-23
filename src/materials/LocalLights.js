@@ -279,8 +279,8 @@ export function addBoatLights( lights, boat ) {
 // lights sit just outside the pane and only light outward (porches); lanterns flicker a little.
 export function addVillageLights( lights, village ) {
 
-	const K = { lantern: 1.5, pathLight: 1.0, window: 0.8 };
-	const R = { lantern: 11, pathLight: 7, window: 6 };
+	const K = { lantern: 1.5, pathLight: 1.0, window: 0.8, festival: 1.5 };
+	const R = { lantern: 11, pathLight: 7, window: 6, festival: 16 };
 	for ( const l of village.getLightSources() ) {
 
 		const kind = l.kind || 'lantern';
