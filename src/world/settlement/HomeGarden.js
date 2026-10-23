@@ -54,11 +54,11 @@ export function homeBoulders( B, s, g, groundL, rand, n = 3 ) {
 export function buildHomeGarden( B, h, g, ground, rand, drapes, plantings ) {
 
 	const c = Math.cos( h.yaw ), s = Math.sin( h.yaw );
-	const W = 11, x1 = - h.len / 2 - 1.6, x0 = x1 - W;
+	const W = typeof h.garden === 'number' ? h.garden : 11, x1 = - h.len / 2 - 1.6, x0 = x1 - W;
 	const toW = ( lx, lz ) => [ h.x + lx * c + lz * s, h.z - lx * s + lz * c ];
 	// raised beds in two rows (buildGarden lays them in a grid on the ground)
 	const [ gx, gz ] = toW( ( x0 + x1 ) / 2 + 0.6, 1.6 );
-	const beds = buildGarden( B, { x: gx, z: gz, yaw: h.yaw, rows: 2, cols: 2, bed: [ 1.3, 3.3 ] }, ground, rand );
+	const beds = buildGarden( B, { x: gx, z: gz, yaw: h.yaw, rows: 2, cols: 2, bed: [ 1.3, W < 10 ? 2.6 : 3.3 ] }, ground, rand );
 	for ( const b of beds ) {
 
 		const bc = Math.cos( b.yaw ), bs = Math.sin( b.yaw );

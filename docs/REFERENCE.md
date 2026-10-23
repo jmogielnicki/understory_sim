@@ -1,48 +1,49 @@
 # Understory: visual reference
 
-Three concept images supplied by the author guide the look of the world. The image files are kept
-next to this repository in `reference/` (not committed: they are the author's concept art).
+Concept images supplied by the author guide the look of the world. The image files are kept next to this
+repository in `reference/` (not committed: they are the author's concept art). The second set (2026-10-23)
+is the source of truth; the first set is kept for what it adds (interiors, the lake and islands).
 
 | File | What it shows |
 |---|---|
-| `reference/homes.jpg` | The homes: a hillside cluster of earth-sheltered houses, plus five detail panels (a sunken courtyard, two interiors, roof skylights in a meadow, an entrance, the village at night) |
-| `reference/interior-kitchen.jpg` | Inside a home: a vaulted kitchen opening onto a lake terrace (interiors are later work) |
-| `reference/village-layout.jpg` | An early layout: the village seen from the hill above, the lake and its islands beyond |
+| `reference/home-v2.png` | **Mimi's house** (main panel) and two views of its kitchen garden |
+| `reference/neighborhood-v2.png` | **The neighbourhood**: terraced homes on a hillside, a festival on the green, the stream, the lake |
+| `reference/homes.jpg` | First set: earth-sheltered vaults cut into a hill (superseded) |
+| `reference/interior-kitchen.jpg` | First set: a vaulted kitchen opening onto a lake terrace (interiors are later work) |
+| `reference/village-layout.jpg` | First set: an early layout with tall halls (superseded: the halls are gone) |
 
-## The homes
+## The homes (home-v2)
 
-- **Form.** Each home is a broad, low vault of pale, warm sandstone (cream to honey, never grey). The vault's
-  face is one big round or slightly elliptical arch, thick (half a metre or more) with a deep reveal. Smaller
-  arched openings sit beside the main one. The masonry reads as large, softly rounded blocks with fine joints.
-- **Earth.** The vault is buried in the hill. The roof is a continuous planted mound of grass and wildflowers
-  that runs back into the slope, with trailing vines and flowers spilling over the arch's crown. From behind
-  or above, a home is a meadow with a few oval glass skylights in it.
-- **Openings.** Under the arch: warm timber frames with big glazed panels and doors, lit golden from inside.
-  Some arches are open loggias with a table and chairs under them.
-- **Around each home.** A paved stone terrace in front, stone steps up and down the slope (wide, shallow,
-  softly worn), potted plants, boulders (lichen-grey glacial erratics) set into the planting.
-- **Technology.** A thin line of pale, softly glowing blue traces the arch of some doors: everyday
-  technology is shown this way, quietly, in natural materials.
-- **Planting.** White birches framing views, white pines and spruces, oaks; ferns, purple lupines,
-  Queen Anne's lace, daisies, low grasses. Abundant but tended.
-- **Water.** A lily-pad pond below the homes, edged with rounded stones, crossed by a low arched timber
-  footbridge.
-- **Light.** Warm afternoon sun, clear blue sky with summer cumulus; at night every arch glows amber and the
-  pond reflects the lights.
+- **Form.** A long, low, softly rounded body of warm cream-to-honey plaster, ends rounded like a drum, walls
+  swelling a little; over it a domed roof under a thick planted cap (grass, clover, ivy-like leaves, small white
+  and violet flowers) that overhangs the walls like a rolled lip, vines trailing down from it.
+- **The great arch.** At one end a big open arch (~5 m high) through the shell: a covered outdoor kitchen and
+  dining room, the thick arch rim rounded, a thin pale blue line along its face. Inside: a domed bread oven
+  with a fire, shelves of jars and pots, a long timber table with chairs, hanging lanterns, and a smaller arch
+  through the end wall looking out to the lake. A rain chain of little cups hangs at its edge into a basin.
+- **The rest of the front.** An arched plank door (honey oak, small arched lights), arched windows and round
+  windows (one high, near the lip), all set deep in the wall and lit warm; an iron wall lantern by the door; a
+  timber pergola over the front grown with flowering vines, a lantern hung from it.
+- **On the roof.** An oval skylight with radiating timber spokes in a raised rim; a round clay chimney pot.
+- **Around it.** A flagged terrace on a curved retaining wall of big rounded sandstone blocks; broad stone
+  steps down; terracotta pots; lavender everywhere; large rounded sandstone boulders bedded in the planting;
+  a rustic rail fence.
+- **The kitchen garden.** Raised beds (timber and stone edged) with leafy crops and tomatoes, A-frame bean
+  poles, a woodshed with a stacked log pile under a lean-to, a rain barrel with a watering can, a stone basin.
+- **Light.** Warm late-afternoon sun, deep blue sky; the lake and rolling hills behind.
 
-## The village layout
+## The neighbourhood (neighborhood-v2)
 
-- Homes terraced along **two facing hillsides**, each on its own level shelf, linked by stone stairs and
-  winding paths; the terraces step down toward the lake.
-- In the **valley between**: a large open **green** (mown grass) with natural play structures (log
-  climbing frames, balance logs, boulders), community **gardens** (rectangular raised beds, pergolas and
-  arbours), small orchards.
-- A **stream** comes down one side in small falls and pools, under two or three timber bridges, into a
-  **pond** at the green's edge.
-- Near the lake: a group of **tall communal buildings**: pointed, catenary (teardrop) arched shells of the
-  same pale stone, much taller than the homes, with smaller arched annexes and terraces with people.
-- Beyond: the **lake** with rocky, pine-covered islands, sailboats and kayaks; another earth-home settlement
-  on the far shore; layered blue mountains on the horizon.
+- Homes in **terraced rows** along a hillside, each on its own shelf with a retaining wall of big blocks below
+  it; long straight **stone staircases** climb between them; each home has a pergola or a canvas awning over
+  its front, pots and flowers along the terrace.
+- A **green** in the valley: big shade trees, **strings of paper lanterns and pennants** between tall poles and
+  the trees, long tables, people gathered (a festival).
+- A **stream** with stone-lined banks and boulders, crossed by an arched timber footbridge; raised garden beds
+  with fences in the foreground.
+- Beyond: the **lake**, and on the far hills more earth homes among cypress-like trees and a few large white
+  flower-like structures (sculptures or wind/light catchers; not yet built).
+- No tall communal halls.
 
 ## The world
 

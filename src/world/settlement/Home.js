@@ -332,7 +332,7 @@ function skylight( B, x, y, z, r, yaw, seed, rand ) {
 
 	}
 
-	B.part( 'glazing', lathePart( dome, 22 ), x, y, z, { ry: yaw, sx: 1.5, data: [ seed, 0.6, 2, 0 ] } );
+	B.part( 'glazing', lathePart( dome, 22 ), x, y, z, { ry: yaw, sx: 1.5, data: [ seed, 0.12, 2, 0 ] } );
 	B.pushAt( x, y, z, yaw );
 	for ( let k = 0; k < 8; k ++ ) {
 
@@ -428,7 +428,7 @@ function awning( B, x0, x1, out, rand, tint ) {
 // The terrace's retaining wall along a polyline of local points (the terrace's edge, its inside to the left
 // walking along it): a thick wall of big rounded blocks from the ground outside up to the floor, rising into
 // a low parapet where the drop is more than ~0.6 m. Only built where the ground has fallen away.
-function terraceWall( B, pts, groundAt, seed, parapet ) {
+function terraceWall( B, pts, groundAt, seed, parapet, gaps = [] ) {
 
 	const n = pts.length;
 	const t = 0.5;
@@ -465,13 +465,16 @@ function terraceWall( B, pts, groundAt, seed, parapet ) {
 	for ( const c of S ) {
 
 		c.g = groundAt( c.x + c.nx * 1.0, c.z + c.nz * 1.0 );
-		c.top = c.g < - 0.6 ? parapet : 0.03;
+		// (no parapet across the head of the steps: gaps are [ x0, x1 ] along the front)
+		const open = gaps.some( ( [ a, b ] ) => c.x > a && c.x < b && c.z > 0.5 );
+		c.gap = open;
+		c.top = c.g < - 0.6 && ! open ? parapet : 0.03;
 		c.bot = Math.min( c.g - 0.4, - 0.25 );
 
 	}
 
 	// smooth the parapet's ends into ramps
-	for ( let pass = 0; pass < 3; pass ++ ) for ( let i = 1; i < S.length - 1; i ++ ) S[ i ].top = Math.max( S[ i ].top, ( S[ i - 1 ].top + S[ i + 1 ].top ) / 2 - 0.1 );
+	for ( let pass = 0; pass < 3; pass ++ ) for ( let i = 1; i < S.length - 1; i ++ ) if ( S[ i ].top < parapet && ! S[ i ].gap ) S[ i ].top = Math.max( S[ i ].top, Math.min( ( S[ i - 1 ].top + S[ i + 1 ].top ) / 2 - 0.1, parapet ) );
 	if ( ! S.some( ( c ) => c.g < - 0.25 ) ) return false;
 	const pos = [], nn = [], uv = [], idx = [];
 	const strip = ( fn ) => {
@@ -631,12 +634,12 @@ export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = n
 	const xl = - s.L / 2 - 0.8, xr = s.L / 2 + 0.8;
 	const outline = terraceOutline( xl, xr, td );
 	B.slab( 'stone', outline.map( ( [ x, z ] ) => V( x, 0, z ) ), 0.3, { data: [ s.seed + 0.9, 1, 0.3, 0 ], up: V( 0, 1, 0 ) } );
-	terraceWall( B, outline, groundL, s.seed + 0.13, 0.5 );
+	const door0 = s.openings[ 0 ];
+	terraceWall( B, outline, groundL, s.seed + 0.13, 0.5, [ [ door0.x - 1.15, door0.x + 1.15 ] ] );
 
 	// steps down off the terrace's front where it stands above the ground (centred on the door)
 	{
 
-		const door0 = s.openings[ 0 ];
 		const drop = - groundL( door0.x, td + 1.2 );
 		if ( drop > 0.25 ) {
 
@@ -666,7 +669,6 @@ export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = n
 	// ---- over the front: a pergola or an awning, along the straight run beside the door
 	{
 
-		const door0 = s.openings[ 0 ];
 		const lo = s.loggia && s.loggia.sg < 0 ? s.loggia.xc + s.loggia.S / 2 + s.loggia.T + 0.4 : - s.L / 2 + s.rc * 0.6;
 		const hi = s.loggia && s.loggia.sg > 0 ? s.loggia.xc - s.loggia.S / 2 - s.loggia.T - 0.4 : s.L / 2 - s.rc * 0.6;
 		const kind = h.porch ?? ( rand.next() < 0.6 ? 'pergola' : 'awning' );

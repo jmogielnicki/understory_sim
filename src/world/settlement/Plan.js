@@ -14,7 +14,7 @@
 //   back into the hill; loggia = 'left' | 'right' | null: the great open arch (an outdoor kitchen under a
 //   vault) at that end; terrace = paved depth in front; seam = the pale blue technology line round the arch;
 //   porch = 'pergola' | 'awning' | 'none' over the front (default: either); garden = beds and a woodshed
-//   beside it; floor = optional floor height (default: the natural ground at the front, dug in a little).
+//   beside its left end (true, or its width in m: it fills the gap to the next home); floor = optional floor height (default: the natural ground at the front, dug in a little).
 // ROWS: the homes along each contour shelf (low to high per hillside); a walk runs in front of each row's
 //   terraces and stairs climb between the homes to the row above (see rowPaths below).
 export const HOMES = [
@@ -22,37 +22,37 @@ export const HOMES = [
 	{ id: 'A1a', x: 291, z: - 335, yaw: 0.06, len: 13, depth: 9, loggia: null, terrace: 5, porch: 'awning' },
 	{ id: 'A1b', name: 'Mimi', x: 324, z: - 338, yaw: - 0.02, len: 18, depth: 10, loggia: 'right', loggiaSpan: 6.6, loggiaRise: 4.7, wall: 3.3, roofRise: 2.4, terrace: 6.2, seam: true, porch: 'pergola', garden: true, skylights: 1 },
 	{ id: 'A1c', x: 352, z: - 340, yaw: 0.04, len: 14, depth: 9, loggia: null, terrace: 4.5, seam: true },
-	{ id: 'A1d', x: 378, z: - 342, yaw: - 0.08, len: 14.8, depth: 9.5, loggia: 'right', terrace: 5 },
+	{ id: 'A1d', x: 378, z: - 342, yaw: - 0.08, len: 14.8, depth: 9.5, loggia: 'right', terrace: 5 , garden: 9 },
 	{ id: 'A1e', x: 405, z: - 343, yaw: - 0.18, len: 12.5, depth: 8.5, loggia: null, terrace: 4.5 },
 	// ---- hillside A, row 2 (~22 m), staggered over row 1
 	{ id: 'A2a', x: 311, z: - 372, yaw: 0.05, len: 15, depth: 10, loggia: 'left', terrace: 5 },
 	{ id: 'A2b', x: 338, z: - 374, yaw: 0, len: 14.5, depth: 9, loggia: null, terrace: 4.5, seam: true },
-	{ id: 'A2c', x: 365, z: - 376, yaw: - 0.05, len: 15.6, depth: 10, loggia: 'right', terrace: 5.4 },
+	{ id: 'A2c', x: 365, z: - 376, yaw: - 0.05, len: 15.6, depth: 10, loggia: 'right', terrace: 5.4 , garden: 9 },
 	{ id: 'A2d', x: 393, z: - 378, yaw: - 0.1, len: 13.5, depth: 9, loggia: null, terrace: 4.5 },
-	{ id: 'A2e', x: 420, z: - 381, yaw: - 0.2, len: 12.7, depth: 9, loggia: null, terrace: 4.5, seam: true },
+	{ id: 'A2e', x: 420, z: - 381, yaw: - 0.2, len: 12.7, depth: 9, loggia: null, terrace: 4.5, seam: true , garden: 9 },
 	// ---- hillside A, row 3 (~29 m)
 	{ id: 'A3a', x: 325, z: - 410, yaw: 0.04, len: 14.3, depth: 9, loggia: 'right', terrace: 4.5 },
-	{ id: 'A3b', x: 352, z: - 410, yaw: 0, len: 14, depth: 10, loggia: null, terrace: 5, seam: true },
+	{ id: 'A3b', x: 352, z: - 410, yaw: 0, len: 14, depth: 10, loggia: null, terrace: 5, seam: true , garden: 9 },
 	{ id: 'A3c', x: 380, z: - 412, yaw: - 0.04, len: 13.9, depth: 9, loggia: null, terrace: 4.5 },
-	{ id: 'A3d', x: 407, z: - 414, yaw: - 0.1, len: 13, depth: 9.5, loggia: 'left', terrace: 5 },
+	{ id: 'A3d', x: 407, z: - 414, yaw: - 0.1, len: 13, depth: 9.5, loggia: 'left', terrace: 5 , garden: 9 },
 	{ id: 'A3e', x: 434, z: - 418, yaw: - 0.18, len: 13.5, depth: 9, loggia: null, terrace: 4.5 },
 	// ---- hillside A, row 4 (~36-45 m), the top row under the woods
 	{ id: 'A4a', x: 338, z: - 444, yaw: 0, len: 13.5, depth: 9, loggia: null, terrace: 4.5 },
-	{ id: 'A4b', x: 366, z: - 447, yaw: - 0.25, len: 14.1, depth: 9, loggia: 'left', terrace: 4.5, seam: true },
+	{ id: 'A4b', x: 366, z: - 447, yaw: - 0.25, len: 14.1, depth: 9, loggia: 'left', terrace: 4.5, seam: true , garden: 9 },
 	{ id: 'A4c', x: 394, z: - 449, yaw: 0.12, len: 15, depth: 10, loggia: null, terrace: 5 },
-	{ id: 'A4d', x: 422, z: - 451, yaw: - 0.2, len: 14.3, depth: 9, loggia: 'right', terrace: 4.5 },
+	{ id: 'A4d', x: 422, z: - 451, yaw: - 0.2, len: 14.3, depth: 9, loggia: 'right', terrace: 4.5 , garden: 9 },
 	{ id: 'A4e', x: 448, z: - 454, yaw: - 0.25, len: 12.1, depth: 8.5, loggia: null, terrace: 4.5, seam: true },
 	// ---- hillside A west of the stream, facing south-east over the pond
 	{ id: 'AWa', x: 226, z: - 356, yaw: 0.38, len: 14.5, depth: 9, loggia: 'right', terrace: 5, seam: true },
-	{ id: 'AWb', x: 238, z: - 392, yaw: 0.3, len: 13.5, depth: 9.5, loggia: null, terrace: 4.5 },
+	{ id: 'AWb', x: 238, z: - 392, yaw: 0.3, len: 13.5, depth: 9.5, loggia: null, terrace: 4.5 , garden: 9 },
 	{ id: 'AWc', x: 262, z: - 428, yaw: - 0.25, len: 14.5, depth: 9, loggia: 'right', terrace: 4.5 },
 	// ---- hillside B, facing south-west over the gardens and the cove
 	{ id: 'B1a', x: 449, z: - 304, yaw: - 0.72, len: 14.5, depth: 9, loggia: 'right', terrace: 5 },
 	{ id: 'B1b', x: 470, z: - 281, yaw: - 0.8, len: 14, depth: 9.5, loggia: null, terrace: 5.4, seam: true },
-	{ id: 'B1c', x: 490, z: - 257, yaw: - 0.9, len: 12.5, depth: 9, loggia: null, terrace: 4.5 },
+	{ id: 'B1c', x: 490, z: - 257, yaw: - 0.9, len: 12.5, depth: 9, loggia: null, terrace: 4.5 , garden: 9 },
 	{ id: 'B2a', x: 490, z: - 331, yaw: - 0.7, len: 14, depth: 9.5, loggia: null, terrace: 5 },
 	{ id: 'B2b', x: 514, z: - 307, yaw: - 0.78, len: 15.5, depth: 9, loggia: 'right', terrace: 4.5, seam: true },
-	{ id: 'B2c', x: 538, z: - 283, yaw: - 0.86, len: 15.2, depth: 10, loggia: 'right', terrace: 5.4 },
+	{ id: 'B2c', x: 538, z: - 283, yaw: - 0.86, len: 15.2, depth: 10, loggia: 'right', terrace: 5.4 , garden: 9 },
 	{ id: 'B3a', x: 512, z: - 362, yaw: - 0.6, len: 13.5, depth: 9, loggia: null, terrace: 4.5 },
 	{ id: 'B3b', x: 538, z: - 340, yaw: - 0.7, len: 13, depth: 9.5, loggia: 'left', terrace: 5, seam: true },
 	{ id: 'B4a', x: 532, z: - 392, yaw: - 0.45, len: 13.5, depth: 9, loggia: null, terrace: 4.5 },

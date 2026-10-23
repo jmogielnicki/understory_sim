@@ -173,17 +173,18 @@ fn stnShell( P: vec3f, uv: vec2f, seed: f32, turf: f32, above: f32, N: vec3f, ti
 	let l1 = perlin3( q ) * 0.5 + 0.5;
 	let l2 = perlin3( q * 2.3 + 7.0 ) * 0.5 + 0.5;
 	let clump = perlin3( P * 0.8 + seed * 5.0 ) * 0.5 + 0.5;
-	var tc = mix( ${ srgb( 0.09, 0.16, 0.04 ) }, ${ srgb( 0.27, 0.4, 0.11 ) }, smoothstep( 0.25, 0.75, l1 * 0.7 + l2 * 0.3 ) );
-	tc = mix( tc, ${ srgb( 0.46, 0.55, 0.17 ) }, smoothstep( 0.72, 0.9, l2 ) * 0.6 * smoothstep( 0.0, 0.6, N.y ) );
+	var tc = mix( ${ srgb( 0.09, 0.15, 0.05 ) }, ${ srgb( 0.26, 0.36, 0.13 ) }, smoothstep( 0.25, 0.75, l1 * 0.7 + l2 * 0.3 ) );
+	tc = mix( tc, ${ srgb( 0.44, 0.5, 0.2 ) }, smoothstep( 0.72, 0.9, l2 ) * 0.6 * smoothstep( 0.0, 0.6, N.y ) );
 	tc = mix( tc, tc * vec3f( 1.12, 1.05, 0.8 ), clump * 0.5 );
 	let fl = perlin3( P * 17.0 + seed * 3.0 ) * 0.5 + 0.5;
-	let flower = smoothstep( 0.83, 0.88, fl ) * smoothstep( 0.3, 0.7, clump );
+	let flower = smoothstep( 0.8, 0.85, fl ) * smoothstep( 0.25, 0.65, clump );
 	let violet = step( 0.5, fract( floor( P.x * 3.0 ) * 0.37 + floor( P.z * 3.0 ) * 0.71 ) );
 	tc = mix( tc, mix( ${ srgb( 0.9, 0.88, 0.8 ) }, ${ srgb( 0.55, 0.42, 0.8 ) }, violet ), flower * 0.85 );
 	// ---- where they meet: the cap's ragged edge, and stems trailing over the plaster below it
-	let along = P.x * 0.8 + P.z * 0.8;
-	let hang = ( perlin2( vec2f( along * 2.2, seed * 9.0 ) ) * 0.5 + 0.5 ) * 0.9 + ( perlin2( vec2f( along * 9.0, 1.0 ) ) * 0.5 + 0.5 ) * 0.35 - 0.3;
-	let trail = select( 0.0, smoothstep( - hang, - hang + 0.08, above ) * smoothstep( 0.4, 0.55, l1 * 0.6 + l2 * 0.4 + 0.15 ), above < 0.0 );
+	// (strands: a 3d noise squeezed vertically, so they run down the wall; most stop short)
+	let strand = perlin3( P * vec3f( 3.2, 0.35, 3.2 ) + seed * 7.0 ) * 0.5 + 0.5;
+	let hang = smoothstep( 0.55, 0.85, strand ) * 1.1 + ( perlin3( P * 1.1 + 4.0 ) * 0.5 + 0.5 ) * 0.25 - 0.1;
+	let trail = select( 0.0, smoothstep( - hang, - hang + 0.1, above ) * smoothstep( 0.4, 0.55, l1 * 0.6 + l2 * 0.4 + 0.15 ), above < 0.0 );
 	let edge = turf + ( l1 - 0.5 ) * 0.5;
 	let tk = max( smoothstep( 0.45, 0.55, edge ), trail );
 	var o: StnSample;
@@ -427,7 +428,9 @@ export function createGlazingMaterial() {
 		if ( hit == 4 ) { inside = ${ srgb( 1.0, 0.8, 0.5 ) }; illum = mix( 2.5, 5.0, night ); }
 	}
 	let frameK = 0.0;
-	s.albedo = mix( inside * 0.05, ${ srgb( 0.36, 0.25, 0.16 ) }, frameK );
+	// (skylights: blue-grey glass over a dim room, seen mostly by the sky they reflect)
+	let sky = d.z > 1.5 && d.z < 2.5;
+	s.albedo = select( mix( inside * 0.05, ${ srgb( 0.36, 0.25, 0.16 ) }, frameK ), ${ srgb( 0.08, 0.12, 0.16 ) }, sky );
 	s.roughness = mix( 0.03 + room * 0.03, 0.7, frameK );
 	s.emissive = inside * illum * lit * select( mix( 1.6, 4.5, night ), mix( 1.1, 3.4, night ), traced ) * ( 1.0 - frameK );
 	s.specularIntensity = 1.0;

@@ -39,6 +39,7 @@ export const VIEWS = {
 	// Mimi's house (A1b, reference/home-v2.png) from below its terrace; its great arch close to
 	mimi: { p: [ 331, 1.7, - 318 ], agl: true, yaw: 0.3, pitch: 0.06, time: 16.0 },
 	mimiHero: { p: [ 315, 3.4, - 324 ], agl: true, yaw: - 0.42, pitch: - 0.08, time: 16.5 },
+	mimiTop: { p: [ 322, 22, - 322 ], yaw: 0, pitch: - 1.2, time: 13.0 },
 	mimiGarden: { p: [ 309, 2.2, - 318 ], agl: true, yaw: - 0.35, pitch: - 0.08, time: 16.0 },
 	mimiArch: { p: [ 333.5, 1.6, - 327.5 ], agl: true, yaw: 0.15, pitch: 0.12, time: 16.0 },
 	// the neighbourhood as in reference/neighborhood-v2.png: from the hillside west of the rows, over the
@@ -88,7 +89,7 @@ export const VIEWS = {
 	// the hamlet close to, from the water
 	hamletNear: { p: [ - 560, 2.5, 330 ], yaw: 1.65, pitch: 0.0, time: 16.0 },
 	// key art candidates: down over the homes and the green to the lake; across the green from hillside B
-	keyart: { p: [ 290, 6, - 400 ], agl: true, yaw: - 2.5, pitch: - 0.12, time: 16.5 },
+	keyart: { p: [ 282, 12, - 384 ], agl: true, yaw: - 2.45, pitch: - 0.2, time: 16.5 },
 	keyartEast: { p: [ 520, 5, - 330 ], agl: true, yaw: 1.83, pitch: - 0.08, time: 16.5 },
 	// the top of the Rattlesnake cliffs (outside the walkable area: the far terrain), looking south
 	summit: { p: [ - 140, 30, - 790 ], agl: true, yaw: Math.PI * 0.9, pitch: - 0.18, time: 14.0 },

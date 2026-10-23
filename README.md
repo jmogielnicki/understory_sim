@@ -1,17 +1,17 @@
 # Understory
 
 A village of earth-sheltered homes on the north shore of Squam Lake, New Hampshire, to walk through in the
-browser: pale stone vaults under meadow roofs terraced up the slope of Rattlesnake Mountain, a green and
-gardens in the valley, a stream falling through a lily pond into a cove, three tall stone halls by the water,
+browser: rounded plaster homes under thick planted roofs, terraced up the slope of Rattlesnake Mountain, a
+festival green hung with lanterns and gardens in the valley, a stream falling through a lily pond into a cove,
 and the lake with its islands spread out below. The land is real (USGS lidar); the village is imagined
 (see [docs/REFERENCE.md](docs/REFERENCE.md) for the look it works toward and [docs/DECISIONS.md](docs/DECISIONS.md)
 for the creative calls made so far).
 
-![Down over the village to the halls and the lake](docs/screenshot.jpg)
+![Down over the village to the green and the lake](docs/screenshot.jpg)
 
-![The earth homes of the first row](docs/screenshot-homes.jpg)
+![Mimi's house](docs/screenshot-homes.jpg)
 
-![The village in its clearing, seen from the woods above](docs/screenshot-layout.jpg)
+![The village from over the cove: the festival green, the terraced rows, the stairs between them](docs/screenshot-layout.jpg)
 
 It is built on [Tidewater](https://github.com/dgreenheck/tidewater) by DRG Software Solutions (MIT): a
 real-time WebGPU world with its own small rendering engine (raw WebGPU and WGSL, no framework), whose sky,
@@ -34,12 +34,14 @@ water, terrain, vegetation, lighting and post-processing it reuses and adapts.
 - New Hampshire granite: ledges and talus under Rattlesnake's cliffs, boulder-strewn shores, glacial erratics.
 
 **The village** (`src/world/Settlement.js`, layout as data in `src/world/settlement/Plan.js`)
-- 34 earth homes on two hillsides: broad stone arches with glazed timber fronts and warm rooms behind, the
-  vaults buried under planted mounds with oval skylights, flagged terraces, vines spilling over the arches,
-  pots of plants; on some doors the pale blue seam of everyday technology.
-- Three tall catenary halls between the green and the cove, with framed great windows.
-- The green with log play frames, raised-bed gardens and pergolas, a stream with falls and timber footbridges,
-  a lily pond, stone steps on the steeper paths, a dock.
+- 34 homes in terraced rows on two hillsides, after the author's painting of Mimi's house: long, softly rounded
+  plaster bodies under thick planted roofs with an overhanging lip, arched doors and round windows, skylights
+  and chimneys; on many a great open arch at one end sheltering an outdoor kitchen (domed oven, long table,
+  lanterns); pergolas and awnings, curved block terraces, lavender, sandstone boulders, kitchen gardens; on some
+  arches the pale blue seam of everyday technology. Shells are meshed from distance fields at load.
+- Walks along the rows and long stone stairs between them; the green with log play frames and a festival
+  ground of oaks, lantern strings and long tables; raised-bed gardens and pergolas, a stream with falls and
+  timber footbridges, a lily pond, a dock.
 
 **The woods and meadows**
 - Eastern white pines and hemlocks, maples, red oaks, beeches and paper birches, mountain laurel, hobblebush
@@ -99,7 +101,7 @@ npm run build    # static build in dist/
 Reference shots of named views (`src/core/DebugViews.js`) from a headless Chrome, with the dev server running:
 
 ```sh
-node tools/shots/shoot.mjs villageAerial,homeFront,hall,green,pond --out=shots
+node tools/shots/shoot.mjs villageAerial,mimiHero,festival,green,pond --out=shots
 ```
 
 The terrain in `public/terrain/` is built by `tools/terrain/build_terrain.py` (Python 3 with numpy, scipy and
@@ -109,7 +111,7 @@ tifffile; it downloads and caches the USGS 3DEP data).
 
 | Folder | Contents |
 |---|---|
-| `src/world/settlement/` | The village: plan, earthworks, earth homes, halls, landscape (steps, bridges, gardens, dock), its water and vines |
+| `src/world/settlement/` | The village: plan, earthworks, homes (distance-field shells, `Sdf.js`), festival, landscape (steps, bridges, gardens, dock), its water and vines |
 | `src/world/` | Terrain (near, mid and far grids), far terrain, rocks, vegetation, the boat |
 | `src/world/vegetation/` | Placement (ForestScatter), conifers, broadleaf trees and shrubs, ferns, the grass field, impostors |
 | `src/engine/` | The rendering engine: math, scene graph and geometry, GPU resources, WGSL shader composition, materials, lighting and shadows |
