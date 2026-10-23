@@ -182,11 +182,11 @@ function pot( B, lx, ly, lz, r, rand, plantings, kind ) {
 }
 
 // a timber table with chairs round it (n chairs)
-function table( B, lx, lz, yaw, n, rand, len = 1.7 ) {
+function table( B, lx, lz, yaw, n, rand, len = 1.7, weather = 0.45 ) {
 
 	B.pushAt( lx, 0, lz, yaw );
 	const W = len, D = 0.85, H = 0.76;
-	const wood = { data: [ rand.next(), 0, 6, 0.45 ], tint: OAK };
+	const wood = { data: [ rand.next(), 0, 6, weather ], tint: OAK };
 	B.box( 'wood', 0, H - 0.025, 0, W, 0.05, D, wood );
 	for ( const [ x, z ] of [ [ - W / 2 + 0.1, - D / 2 + 0.1 ], [ W / 2 - 0.1, - D / 2 + 0.1 ], [ - W / 2 + 0.1, D / 2 - 0.1 ], [ W / 2 - 0.1, D / 2 - 0.1 ] ] ) B.box( 'wood', x, H / 2 - 0.02, z, 0.07, H - 0.05, 0.07, wood );
 	const chair = ( x, z, ry ) => {
@@ -244,7 +244,9 @@ function loggia( B, s, F, rand, lights, plantings, seam ) {
 	const ox = xc - sg * S * 0.2, oz = - Dl + 0.85;
 	B.box( 'stone', ox, 0.45, oz, 1.5, 0.9, 1.3, { data: [ seed + 0.1, 3, 0.2, 1.5 ] } );
 	B.lathe( 'stone', ox, 0.9, oz, [ [ 0.68, 0 ], [ 0.66, 0.2 ], [ 0.56, 0.45 ], [ 0.36, 0.66 ], [ 0.001, 0.75 ] ], { segs: 18, data: [ seed, 8, 0, - 3 ] } );
-	B.part( 'glow', flatPart( archOutline( 0.42, 0.9, 1.05, 0.2, 8 ), oz + 0.69, [ 0, 0 ] ), ox, 0, 0, { data: [ seed, 0, 0, 0 ], tint: [ 1.0, 0.42, 0.1 ] } );
+	// its mouth: a sooty arch, the fire glowing low inside it
+	B.part( 'stone', flatPart( archOutline( 0.46, 0.9, 1.07, 0.23, 8 ), oz + 0.685, [ 0, 0 ] ), ox, 0, 0, { data: [ seed, 4, 0, 0 ] } );
+	B.part( 'glow', flatPart( archOutline( 0.36, 0.9, 0.98, 0.16, 8 ), oz + 0.69, [ 0, 0 ] ), ox, 0, 0, { data: [ seed, 0, 0, 0 ], tint: [ 1.0, 0.38, 0.08 ] } );
 	B.box( 'stone', ox, 0.93, oz + 0.72, 0.62, 0.06, 0.18, { data: [ seed + 0.2, 3, 0.2, 0.62 ] } );
 	// its flue up into the vault
 	B.lathe( 'stone', ox, 1.6, oz - 0.2, [ [ 0.16, 0 ], [ 0.14, R - 1.3 ] ], { segs: 10, data: [ seed, 8, 0, - 3 ] } );
@@ -270,7 +272,7 @@ function loggia( B, s, F, rand, lights, plantings, seam ) {
 	B.box( 'stone', shx - 0.8, 0.43, - Dl + 0.4, 0.2, 0.86, 0.6, { data: [ seed + 0.3, 3, 0.2, 0.2 ] } );
 	B.box( 'stone', shx + 0.8, 0.43, - Dl + 0.4, 0.2, 0.86, 0.6, { data: [ seed + 0.4, 3, 0.2, 0.2 ] } );
 	// the long table and its chairs
-	table( B, xc, - Dl * 0.42, Math.PI / 2 * 0 + ( rand.next() - 0.5 ) * 0.06, 6 + Math.floor( rand.next() * 3 ), rand, 2.2 );
+	table( B, xc, - Dl * 0.42, Math.PI / 2 * 0 + ( rand.next() - 0.5 ) * 0.06, 6 + Math.floor( rand.next() * 3 ), rand, 2.2, 0.08 );
 	// lanterns hung from the vault over the table
 	for ( const dx of [ - 0.9, 0.9 ] ) {
 
