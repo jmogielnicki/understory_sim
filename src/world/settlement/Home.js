@@ -761,20 +761,55 @@ export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = n
 
 	B.pop();
 
-	// ---- vines trailing from the cap's lip over the front (more over the great arch)
+	// ---- vines trailing from the cap's lip, along the front and round the rounded ends (more over the great
+	// arch): walk the wall's outline at the eave, find the lip outward from it, hang a strand there
 	if ( drapes ) {
 
-		for ( let x = - s.L / 2 + 0.8; x < s.L / 2 - 0.8; x += 0.25 + rand.next() * 0.4 ) {
+		const hz = s.D / 2;
+		const plan = ( x, z ) => {
 
-			const y = F.eave( x ) + 0.02;
-			const zl = probe( F.all, 1.4, - 1.5, 0.04, ( t ) => [ x, y, t ] );
-			if ( zl === null ) continue;
-			const overArch = s.loggia && Math.abs( x - s.loggia.xc ) < s.loggia.S / 2 + s.loggia.T;
-			if ( rand.next() > ( overArch ? 0.7 : 0.5 ) ) continue;
-			const len = overArch ? 0.4 + rand.next() * 1.6 : 0.3 + rand.next() * 1.0;
-			drapes.strand( toWorld( x, y, zl + 0.03 ), facing, len, 0.4 + rand.next() * 0.4, rand.next(), 0.1 );
+			const qx = Math.abs( x ) - s.L / 2 + s.rc, qz = Math.abs( z + hz ) - hz + s.rc;
+			return Math.hypot( Math.max( qx, 0 ), Math.max( qz, 0 ) ) + Math.min( Math.max( qx, qz ), 0 ) - s.rc;
+
+		};
+
+		const pts = [];
+		// the front's straight run, then the two rounded corners and the ends back to mid depth
+		for ( let x = - s.L / 2 + s.rc; x < s.L / 2 - s.rc; x += 0.22 + rand.next() * 0.3 ) pts.push( [ x, 0 ] );
+		for ( const sd of [ - 1, 1 ] ) {
+
+			for ( let a = 0; a < Math.PI / 2; a += 0.12 + rand.next() * 0.1 ) pts.push( [ sd * ( s.L / 2 - s.rc + Math.sin( a ) * s.rc ), - s.rc + Math.cos( a ) * s.rc ] );
+			for ( let z = - s.rc; z > - s.D * 0.6; z -= 0.3 + rand.next() * 0.3 ) pts.push( [ sd * s.L / 2, z ] );
 
 		}
+
+		for ( const [ wx, wz ] of pts ) {
+
+			// outward normal of the plan here
+			const e = 0.05;
+			let nx = plan( wx + e, wz ) - plan( wx - e, wz ), nz = plan( wx, wz + e ) - plan( wx, wz - e );
+			const nl = Math.hypot( nx, nz ) || 1;
+			nx /= nl; nz /= nl;
+			const y = F.eave( wx ) + 0.02;
+			const t = probe( ( x, yy, z ) => - F.all( x, yy, z ), 0, 1.8, 0.04, ( tt ) => [ wx + nx * tt, y, wz + nz * tt ] );
+			if ( t === null ) continue;
+			const overArch = s.loggia && Math.abs( wx - s.loggia.xc ) < s.loggia.S / 2 + s.loggia.T && wz > - 0.1;
+			if ( rand.next() > ( overArch ? 0.75 : 0.6 ) ) continue;
+			const len = overArch ? 0.4 + rand.next() * 1.6 : 0.25 + rand.next() * 1.1;
+			drapes.strand( toWorld( wx + nx * ( t + 0.03 ), y, wz + nz * ( t + 0.03 ) ), new Vector3( nx * c + nz * sn, 0, - nx * sn + nz * c ), len, 0.4 + rand.next() * 0.4, rand.next(), 0.12 );
+
+		}
+
+	}
+
+	// lavender and small shrubs on the roof's shoulders (the painting: flowers in the roof meadow)
+	if ( lavender ) for ( let k = 0; k < Math.round( s.L / 4 ); k ++ ) {
+
+		const x = rand.range( - s.L / 2 + 1.2, s.L / 2 - 1.2 ), z = - rand.range( 0.6, 2.4 );
+		const y = probe( F.all, F.hi[ 1 ], 0, 0.05, ( t ) => [ x, t, z ] );
+		if ( y === null ) continue;
+		const p = toWorld( x, y - 0.05, z );
+		lavender.clump( p.x, p.y, p.z, 0.28 + rand.next() * 0.12, rand );
 
 	}
 
