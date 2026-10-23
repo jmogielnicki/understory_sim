@@ -29,14 +29,20 @@ const WATER = /* wgsl */`
 	let nT = normalize( vec3f( - hx / e * amp, - hy / e * amp, 1.0 ) );
 	s.normal = perturbNormalByMap( in.P, normalize( in.N ), uv, nT );
 	// tea-dark, faintly green; white water where it tumbles
-	let foam = select( smoothstep( 0.12, 0.35, slope ) * smoothstep( 0.35, 0.75, perlin2( q2 * 1.7 ) * 0.5 + 0.5 + slope ), 0.0, pond );
+	// (white water only where it drops steeply, and there in broken patches: the run between is clear)
+	// (streaks running with the flow: fine across it, long along it)
+	let streak = perlin2( vec2f( uv.x * 9.0, uv.y * 0.8 - t * speed * 0.6 ) ) * 0.5 + 0.5;
+	let foam = select( smoothstep( 0.35, 0.65, slope ) * ( 0.55 + 0.45 * smoothstep( 0.3, 0.7, streak ) ), 0.0, pond );
 	// the pond deep and tea-dark; the brook shallow over its stones: clear, golden brown, mottled
 	let stones = perlin2( uv * vec2f( 2.2, 1.3 ) + 7.0 ) * 0.5 + 0.5;
 	let brook = mix( ${ srgb( 0.12, 0.1, 0.06 ) }, ${ srgb( 0.26, 0.21, 0.12 ) }, stones );
 	let base = select( brook, ${ srgb( 0.035, 0.045, 0.03 ) }, pond );
 	s.albedo = mix( base, ${ srgb( 0.82, 0.84, 0.82 ) }, foam );
-	s.roughness = mix( 0.02, 0.55, foam );
+	s.roughness = mix( select( 0.06, 0.02, pond ), 0.55, foam );
 	s.metalness = 0.0;
+	// the brook is shallow and overhung: its bed shows through and it mirrors little of the open sky (the sky
+	// probe knows nothing of the trees over it)
+	s.specularIntensity = select( 0.35, 1.0, pond );
 `;
 
 export function createWaterMaterial() {

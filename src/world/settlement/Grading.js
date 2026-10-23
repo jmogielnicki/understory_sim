@@ -281,6 +281,17 @@ export class Grading {
 
 		}
 
+		// pools and falls (reference/neighborhood-v2.png): the bed held level for most of each ~0.5 m of drop,
+		// then stepping down over a short lip (monotonic still; not through the pond or below the lake)
+		const STEP = 0.5;
+		for ( const q of out ) {
+
+			if ( q.bed < 0.3 || ( pond && q.seg >= pond.inlet && q.seg < pond.outlet ) ) continue;
+			const v = q.bed / STEP, k = Math.floor( v ), f = v - k;
+			q.bed = ( k + smoothstep( 0.6, 1.0, f ) ) * STEP;
+
+		}
+
 		out[ out.length - 1 ].bed = Math.min( out[ out.length - 1 ].bed, - 0.6 );
 		for ( let i = 0; i < out.length; i ++ ) {
 

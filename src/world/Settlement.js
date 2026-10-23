@@ -202,18 +202,19 @@ export class Settlement {
 
 			}
 
-			for ( let i = 0; i < this.stream.length; i += 6 ) {
+			for ( let i = 0; i < this.stream.length; i += 3 ) {
 
 				const q = this.stream[ i ];
 				if ( q.water < 0.1 || ( q.seg >= P.inlet && q.seg < P.outlet ) ) continue;
-				const n = q.fall ? 4 : rand.next() < 0.5 ? 1 : 0;
+				// (more at the falls and at every lip between the pools)
+				const n = q.fall ? 4 : q.slope > 0.5 ? 2 : rand.next() < 0.3 ? 1 : 0;
 				for ( let k = 0; k < n; k ++ ) {
 
 					const side = rand.next() < 0.5 ? - 1 : 1;
 					const a = this.stream[ Math.min( this.stream.length - 1, i + 1 ) ];
 					const dx = a.x - q.x, dz = a.z - q.z, l = Math.hypot( dx, dz ) || 1;
 					const off = ( q.w * 0.5 + 0.2 + rand.next() * 0.5 ) * side;
-					terrain.rockSites.push( { x: q.x - dz / l * off, z: q.z + dx / l * off, r: 0.3 + rand.next() * ( q.fall ? 0.7 : 0.4 ), kind: 'stone' } );
+					terrain.rockSites.push( { x: q.x - dz / l * off, z: q.z + dx / l * off, r: 0.3 + rand.next() * ( q.fall || q.slope > 0.5 ? 0.6 : 0.4 ), kind: 'stone' } );
 
 				}
 
