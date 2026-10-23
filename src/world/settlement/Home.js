@@ -666,7 +666,7 @@ export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = n
 	}
 
 	// ---- sandstone boulders bedded beside the terrace
-	homeBoulders( B, s, g, groundL, rand, h.boulders ?? 2 + Math.floor( rand.next() * 3 ) );
+	homeBoulders( B, s, g, groundL, rand, h.boulders ?? 3 + Math.floor( rand.next() * 3 ), s.openings[ 0 ].x );
 
 	// ---- over the front: a pergola or an awning, along the straight run beside the door
 	{

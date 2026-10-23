@@ -21,8 +21,14 @@ export function sandstoneBoulder( B, x, y, z, r, rand ) {
 	const sy = 0.7 + rand.next() * 0.2;
 	const f = ( px, py, pz ) => {
 
-		let d = Infinity;
-		for ( const [ bx, by, bz, br ] of blobs ) d = smin( d, Math.hypot( px - bx, ( py - by ) / sy, pz - bz ) * Math.min( 1, sy ) - br, r * 0.4 );
+		let d = null;
+		for ( const [ bx, by, bz, br ] of blobs ) {
+
+			const e = Math.hypot( px - bx, ( py - by ) / sy, pz - bz ) * Math.min( 1, sy ) - br;
+			d = d === null ? e : smin( d, e, r * 0.4 );
+
+		}
+
 		return d + noise3( px * 1.6 / r + seed, py * 1.6 / r, pz * 1.6 / r ) * r * 0.12 + noise3( px * 5 / r, py * 5 / r + seed, pz * 5 / r ) * r * 0.03;
 
 	};
@@ -34,16 +40,30 @@ export function sandstoneBoulder( B, x, y, z, r, rand ) {
 
 }
 
-// a few boulders bedded round a home's terrace (local frame of the home; groundL = ground above the floor)
-export function homeBoulders( B, s, g, groundL, rand, n = 3 ) {
+// a few boulders bedded round a home's terrace (local frame of the home; groundL = ground above the floor):
+// beside its ends, and in the bank below its front wall, clear of the steps (the painting: big ones flanking
+// them)
+export function homeBoulders( B, s, g, groundL, rand, n = 3, stepX = 0 ) {
 
 	for ( let k = 0; k < n; k ++ ) {
 
-		const side = rand.next() < 0.5 ? - 1 : 1;
-		const lx = side * ( s.L / 2 + 1.4 + rand.next() * 2.0 );
-		const lz = rand.next() * g.terrace;
-		const r = 0.5 + rand.next() * 0.55;
-		sandstoneBoulder( B, lx, groundL( lx, lz ) - r * 0.35, lz, r, rand );
+		let lx, lz;
+		if ( k % 2 === 0 ) {
+
+			const side = rand.next() < 0.5 ? - 1 : 1;
+			lx = side * ( s.L / 2 + 1.6 + rand.next() * 1.8 );
+			lz = rand.next() * g.terrace;
+
+		} else {
+
+			lx = ( rand.next() - 0.5 ) * s.L;
+			if ( Math.abs( lx - stepX ) < 2.2 ) lx = stepX + Math.sign( lx - stepX || 1 ) * ( 2.2 + rand.next() );
+			lz = g.terrace + 1.3 + rand.next() * 1.2;
+
+		}
+
+		const r = 0.6 + rand.next() * 0.5;
+		sandstoneBoulder( B, lx, groundL( lx, lz ) - r * 0.3, lz, r, rand );
 
 	}
 

@@ -173,8 +173,10 @@ fn stnShell( P: vec3f, uv: vec2f, seed: f32, turf: f32, above: f32, N: vec3f, ti
 	let l1 = perlin3( q ) * 0.5 + 0.5;
 	let l2 = perlin3( q * 2.3 + 7.0 ) * 0.5 + 0.5;
 	let clump = perlin3( P * 0.8 + seed * 5.0 ) * 0.5 + 0.5;
-	var tc = mix( ${ srgb( 0.09, 0.15, 0.05 ) }, ${ srgb( 0.26, 0.36, 0.13 ) }, smoothstep( 0.25, 0.75, l1 * 0.7 + l2 * 0.3 ) );
-	tc = mix( tc, ${ srgb( 0.44, 0.5, 0.2 ) }, smoothstep( 0.72, 0.9, l2 ) * 0.6 * smoothstep( 0.0, 0.6, N.y ) );
+	var tc = mix( ${ srgb( 0.1, 0.17, 0.05 ) }, ${ srgb( 0.3, 0.42, 0.14 ) }, smoothstep( 0.25, 0.75, l1 * 0.7 + l2 * 0.3 ) );
+	// (sunlit tops: a fresher yellow-green, as in the painting; the lip's underside stays dark)
+	tc = mix( tc, tc * vec3f( 1.25, 1.2, 0.95 ), smoothstep( 0.2, 0.8, N.y ) * 0.6 );
+	tc = mix( tc, ${ srgb( 0.48, 0.56, 0.2 ) }, smoothstep( 0.68, 0.88, l2 ) * 0.6 * smoothstep( 0.0, 0.6, N.y ) );
 	tc = mix( tc, tc * vec3f( 1.12, 1.05, 0.8 ), clump * 0.5 );
 	let fl = perlin3( P * 17.0 + seed * 3.0 ) * 0.5 + 0.5;
 	let flower = smoothstep( 0.8, 0.85, fl ) * smoothstep( 0.25, 0.65, clump );
