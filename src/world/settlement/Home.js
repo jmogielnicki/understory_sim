@@ -526,7 +526,7 @@ export function terraceOutline( xl, xr, depth, r = 2.2 ) {
 }
 
 // Build one home. g: Grading.home() result. Returns the light sources, colliders and plants.
-export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = null ) {
+export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = null, lavender = null ) {
 
 	const s = homeShape( h, rand );
 	const F = homeField( s );
@@ -641,6 +641,13 @@ export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = n
 		if ( drop > 0.25 ) {
 
 			const n = Math.min( 9, Math.ceil( drop / 0.17 ) ), rise = drop / n;
+			if ( lavender ) for ( const sd of [ - 1, 1 ] ) {
+
+				const p = toWorld( door0.x + sd * 1.45, 0, td + 0.5 + n * 0.17 );
+				lavender.clump( p.x, groundAt( p.x, p.z ), p.z, 0.4, rand );
+
+			}
+
 			for ( let k = 0; k < n; k ++ ) {
 
 				const y = - rise * ( k + 1 ) + 0.02;
@@ -703,13 +710,35 @@ export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = n
 
 		}
 
-		// a planted bank below the terrace's front wall
-		for ( let x = xl; x < xr; x += 1.2 + rand.next() * 1.2 ) {
+		// a planted bank round the foot of the terrace wall: shrubs, ferns and lavender, thick where the wall
+		// is high
+		for ( let i = 0; i < outline.length - 1; i ++ ) {
 
-			if ( rand.next() < 0.25 ) continue;
-			const z = td + 0.9 + rand.next() * 0.9;
-			const p = toWorld( x, 0, z );
-			plantings.push( { x: p.x, z: p.z, y: groundAt( p.x, p.z ) - 0.05, s: 0.7 + rand.next() * 0.5, kind: rand.next() < 0.6 ? 'shrub' : 'fern' } );
+			const [ x0, z0 ] = outline[ i ], [ x1, z1 ] = outline[ i + 1 ];
+			const L = Math.hypot( x1 - x0, z1 - z0 ) || 1;
+			const nx = - ( z1 - z0 ) / L, nz = ( x1 - x0 ) / L;
+			for ( let t = rand.next() * 0.8; t < L; t += 0.6 + rand.next() * 0.9 ) {
+
+				const off = 0.8 + rand.next() * 1.3;
+				const lx = x0 + ( x1 - x0 ) * t / L + nx * off, lz = z0 + ( z1 - z0 ) * t / L + nz * off;
+				const gy = groundL( lx, lz );
+				if ( gy > - 0.3 && rand.next() < 0.6 ) continue; // (little bank where the ground is level)
+				const p = toWorld( lx, 0, lz );
+				const u = rand.next();
+				if ( lavender && u < 0.4 ) lavender.clump( p.x, groundAt( p.x, p.z ), p.z, 0.3 + rand.next() * 0.15, rand );
+				else plantings.push( { x: p.x, z: p.z, y: groundAt( p.x, p.z ) - 0.05, s: 0.6 + rand.next() * 0.6, kind: u < 0.8 ? 'shrub' : 'fern' } );
+
+			}
+
+		}
+
+		// lavender along the front wall between the openings, and by the steps
+		if ( lavender ) for ( let x = - s.L / 2 + 1; x < s.L / 2 - 1; x += 0.7 + rand.next() * 0.8 ) {
+
+			if ( s.openings.some( ( o ) => Math.abs( o.x - x ) < o.w / 2 + 0.4 ) || ( s.loggia && Math.abs( x - s.loggia.xc ) < s.loggia.S / 2 + 0.3 ) ) continue;
+			if ( rand.next() < 0.45 ) continue;
+			const p = toWorld( x, 0.02, 0.55 + rand.next() * 0.3 );
+			lavender.clump( p.x, p.y, p.z, 0.25 + rand.next() * 0.12, rand );
 
 		}
 

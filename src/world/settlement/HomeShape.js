@@ -183,7 +183,8 @@ export function homeField( s ) {
 		return d > 0.3 ? d : smax( d, - cut( x, y, z ), 0.05 );
 
 	};
-	const lo = [ - s.L / 2 - 1.2, - 1.0, - s.D - 1.2 ];
+	// (the box starts just under the floor: the underside is never seen, so it is left open)
+	const lo = [ - s.L / 2 - 1.2, - 0.4, - s.D - 1.2 ];
 	const hi = [ s.L / 2 + 1.2, Math.max( s.H + s.Hr, l ? l.R + l.T : 0 ) + 0.9, 1.3 ];
 	return { house, turf, cut, all, lo, hi, eave: ( x ) => eave( s, x ) };
 

@@ -10,6 +10,7 @@ import { smoothstep } from '../util/Noise.js';
 import { buildHome } from './settlement/Home.js';
 import { buildFestival } from './settlement/Festival.js';
 import { buildHomeGarden } from './settlement/HomeGarden.js';
+import { Lavender } from './settlement/Lavender.js';
 import { buildSteps, buildPavedPath, buildPathLights, buildBridge, buildPergola, buildGarden, buildPlay, buildDock } from './settlement/Landscape.js';
 import { waterMeshes } from './settlement/Water.js';
 import { Drapes } from './settlement/Drapes.js';
@@ -83,12 +84,13 @@ export class Settlement {
 		const ground = ( x, z ) => terrain.heightAt( x, z );
 		const B = new Builder();
 		const drapes = new Drapes();
+		const lavender = this.lavender = new Lavender();
 		// plants the village sets (pots on the terraces): { x, z, y, s, kind: 'shrub' | 'fern' }, for Vegetation
 		this.plantings = [];
 		let shellTris = 0;
 		for ( const { h, g } of this.homes ) {
 
-			const r = buildHome( B, h, g, rand, ground, drapes, this.plantings );
+			const r = buildHome( B, h, g, rand, ground, drapes, this.plantings, lavender );
 			shellTris += r.shape.triangles;
 			for ( const c of r.colliders ) colliders.addBox( c.center, c.half, c.yaw, { tag: 'home' } );
 			for ( const l of r.lights ) this.lights.push( { position: l.position, color: l.kind === 'fire' ? new Color( 1.0, 0.5, 0.2 ) : new Color( 1.0, 0.66, 0.36 ), intensity: l.kind === 'window' ? 1.8 : 1.0, kind: l.kind === 'window' ? 'window' : 'lantern' } );
@@ -223,6 +225,8 @@ export class Settlement {
 		this._assemble( B );
 		const dm = drapes.mesh();
 		if ( dm ) this.group.add( dm );
+		const lm = lavender.mesh();
+		if ( lm ) this.group.add( lm );
 		for ( const m of waterMeshes( this.stream, PLAN.POND, rand ) ) this.group.add( m );
 		scene.add( this.group );
 		this.timings = { grading: Math.round( t1 - t0 ), build: Math.round( performance.now() - t1 ), steps, shellTris, drapeVerts: drapes.batch.vcount, plantings: this.plantings.length };

@@ -38,6 +38,7 @@ export const VIEWS = {
 	homeClose: { p: [ 324, 1.6, - 333.5 ], agl: true, yaw: 0.0, pitch: 0.05, time: 15.5 },
 	// Mimi's house (A1b, reference/home-v2.png) from below its terrace; its great arch close to
 	mimi: { p: [ 331, 1.7, - 318 ], agl: true, yaw: 0.3, pitch: 0.06, time: 16.0 },
+	mimiHero: { p: [ 315, 3.4, - 324 ], agl: true, yaw: - 0.42, pitch: - 0.08, time: 16.5 },
 	mimiGarden: { p: [ 309, 2.2, - 318 ], agl: true, yaw: - 0.35, pitch: - 0.08, time: 16.0 },
 	mimiArch: { p: [ 333.5, 1.6, - 327.5 ], agl: true, yaw: 0.15, pitch: 0.12, time: 16.0 },
 	// the neighbourhood as in reference/neighborhood-v2.png: from the hillside west of the rows, over the
