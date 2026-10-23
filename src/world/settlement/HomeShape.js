@@ -62,7 +62,7 @@ export function homeShape( h, rand ) {
 
 	// a small round window high beside the door now and then (the reference: up under the roof's lip)
 	const hx = door.x + ( rand.next() < 0.5 ? - 1 : 1 ) * ( door.w / 2 + 0.6 );
-	if ( rand.next() < 0.5 && H > 2.8 && hx > x0 && hx < x1 && free( hx, 0.3 ) ) s.openings.push( { kind: 'round', x: hx, w: 0.52, y: H - 0.66, r: 0.24, high: true } );
+	if ( ( h.roundHigh || rand.next() < 0.5 ) && H > 2.8 && hx > x0 && hx < x1 && free( hx, 0.3 ) ) s.openings.push( { kind: 'round', x: hx, w: 0.52, y: H - 0.66, r: 0.24, high: true } );
 	s.recess = 0.34;
 	return s;
 

@@ -531,7 +531,7 @@ export function terraceOutline( xl, xr, depth, r = 2.2 ) {
 }
 
 // Build one home. g: Grading.home() result. Returns the light sources, colliders and plants.
-export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = null, lavender = null ) {
+export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = null, lavender = null, smoke = null ) {
 
 	const s = homeShape( h, rand );
 	const F = homeField( s );
@@ -626,6 +626,13 @@ export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = n
 
 			B.lathe( 'stone', x, y - 0.4, z, [ [ 0.3, 0 ], [ 0.27, 0.9 ], [ 0.33, 0.96 ], [ 0.33, 1.06 ], [ 0.24, 1.06 ] ], { segs: 14, data: [ rand.next(), 8, 0, - 3 ] } );
 			B.lathe( 'stone', x, y + 0.66, z, [ [ 0.15, 0 ], [ 0.17, 0.22 ], [ 0.13, 0.32 ], [ 0.14, 0.36 ], [ 0.11, 0.36 ] ], { segs: 12, data: [ rand.next(), 6, 0, 0 ] } );
+			// a thin wisp from some of them (the painting)
+			if ( smoke && ( h.smoke ?? rand.next() < 0.3 ) ) {
+
+				const w = B.toWorld( x, y + 1.0, z );
+				smoke.add( w.x, w.y, w.z, 4.5 + rand.next() * 2, rand );
+
+			}
 
 		}
 

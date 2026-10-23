@@ -20,7 +20,7 @@
 export const HOMES = [
 	// ---- hillside A, row 1 (~14 m above the lake), just above the green. A1b is Mimi's house.
 	{ id: 'A1a', x: 291, z: - 335, yaw: 0.06, len: 13, depth: 9, loggia: null, terrace: 5, porch: 'awning' },
-	{ id: 'A1b', name: 'Mimi', x: 324, z: - 338, yaw: - 0.02, len: 18, depth: 10, loggia: 'right', loggiaSpan: 6.6, loggiaRise: 4.7, wall: 3.3, roofRise: 2.4, terrace: 6.2, seam: true, porch: 'pergola', garden: true, skylights: 1 },
+	{ id: 'A1b', name: 'Mimi', x: 324, z: - 338, yaw: - 0.02, len: 18, depth: 10, loggia: 'right', loggiaSpan: 6.6, loggiaRise: 4.7, wall: 3.3, roofRise: 2.4, terrace: 6.2, seam: true, porch: 'pergola', garden: true, skylights: 1, smoke: true, roundHigh: true },
 	{ id: 'A1c', x: 352, z: - 340, yaw: 0.04, len: 14, depth: 9, loggia: null, terrace: 4.5, seam: true },
 	{ id: 'A1d', x: 378, z: - 342, yaw: - 0.08, len: 14.8, depth: 9.5, loggia: 'right', terrace: 5 , garden: 9 },
 	{ id: 'A1e', x: 405, z: - 343, yaw: - 0.18, len: 12.5, depth: 8.5, loggia: null, terrace: 4.5 },
