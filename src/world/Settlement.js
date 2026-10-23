@@ -7,12 +7,13 @@ import { Rand } from './Props.js';
 import { PATHS as TERRAIN_PATHS } from './terrain/Paths.js';
 import { Grading, frame, polygonDistance } from './settlement/Grading.js';
 import { smoothstep } from '../util/Noise.js';
-import { buildEarthHome } from './settlement/EarthHome.js';
-import { buildTower } from './settlement/Towers.js';
-import { buildSteps, buildPavedPath, buildPathLights, buildApron, buildBridge, buildPergola, buildGarden, buildPlay, buildDock } from './settlement/Landscape.js';
+import { buildHome } from './settlement/Home.js';
+import { buildFestival } from './settlement/Festival.js';
+import { buildHomeGarden } from './settlement/HomeGarden.js';
+import { buildSteps, buildPavedPath, buildPathLights, buildBridge, buildPergola, buildGarden, buildPlay, buildDock } from './settlement/Landscape.js';
 import { waterMeshes } from './settlement/Water.js';
 import { Drapes } from './settlement/Drapes.js';
-import { createStoneMaterial, createGlazingMaterial, createGlowMaterial, createSailMaterial } from './settlement/SettlementMaterials.js';
+import { createStoneMaterial, createGlazingMaterial, createGlowMaterial, createSailMaterial, createLanternMaterial } from './settlement/SettlementMaterials.js';
 import { buildBoats } from './settlement/Boats.js';
 import * as PLAN from './settlement/Plan.js';
 
@@ -67,21 +68,12 @@ export class Settlement {
 
 
 		G.smoothArea( PLAN.GREEN, { blur: 4, edge: 7 } );
-		G.smoothArea( PLAN.PLAZA, { blur: 4, flat: 0.75, edge: 6 } );
 		this.allPaths = [ ...PLAN.PATHS, ...PLAN.HAMLET_PATHS ];
 		for ( const p of this.allPaths ) G.path( p );
 		// the pond first: it settles its level under the natural rim, which the stream then runs through
 		G.pond( PLAN.POND );
 		this.stream = G.stream( PLAN.STREAM, PLAN.POND );
-		const towerY = PLAN.TOWERS.map( ( t ) => {
-
-			const y = terrain.heightAt( t.x, t.z );
-			G.pad( t.x, t.z, t.r + 1.5, y, 5 );
-			return y;
-
-		} );
-		this.homes = [ ...PLAN.HOMES, ...PLAN.HAMLET ].map( ( h ) => ( { h, g: G.home( { ...h, terrace: h.terrace * 0.82 } ) } ) );
-		this.annexes = PLAN.ANNEXES.map( ( h ) => ( { h: { ...h, terrace: 3, skylights: 0 }, g: G.home( { ...h, terrace: 3 } ) } ) );
+		this.homes = [ ...PLAN.HOMES, ...PLAN.HAMLET ].map( ( h ) => ( { h, g: G.home( h ) } ) );
 		// the paths join the terrain's own list (worn ground, kept clear of plants and debris)
 		for ( const p of this.allPaths ) TERRAIN_PATHS.push( p );
 		terrain.buildMinMax();
@@ -93,33 +85,25 @@ export class Settlement {
 		const drapes = new Drapes();
 		// plants the village sets (pots on the terraces): { x, z, y, s, kind: 'shrub' | 'fern' }, for Vegetation
 		this.plantings = [];
-		for ( const { h, g } of [ ...this.homes, ...this.annexes ] ) {
+		let shellTris = 0;
+		for ( const { h, g } of this.homes ) {
 
-			const r = buildEarthHome( B, h, g, rand, ground, drapes, this.plantings );
-			const c = r.collider;
-			colliders.addBox( c.center, c.half, c.yaw, { tag: 'home' } );
-			for ( const l of r.lights ) this.lights.push( { position: l.position, color: new Color( 1.0, 0.66, 0.36 ), intensity: 1.8, kind: l.kind } );
+			const r = buildHome( B, h, g, rand, ground, drapes, this.plantings );
+			shellTris += r.shape.triangles;
+			for ( const c of r.colliders ) colliders.addBox( c.center, c.half, c.yaw, { tag: 'home' } );
+			for ( const l of r.lights ) this.lights.push( { position: l.position, color: l.kind === 'fire' ? new Color( 1.0, 0.5, 0.2 ) : new Color( 1.0, 0.66, 0.36 ), intensity: l.kind === 'window' ? 1.8 : 1.0, kind: l.kind === 'window' ? 'window' : 'lantern' } );
+			if ( h.garden ) this.footprints.push( ...buildHomeGarden( B, h, g, ground, rand, drapes, this.plantings ) );
 			const f = frame( h.x, h.z, h.yaw );
-			const [ cx, cz ] = f.toW( ( g.xl + g.xr ) / 2, ( g.terrace - h.depth ) / 2 );
-			const R = Math.hypot( g.xr - g.xl, h.depth + g.terrace ) / 2 + 1;
+			const [ cx, cz ] = f.toW( 0, ( g.terrace - h.depth ) / 2 );
+			const R = Math.hypot( h.len + 2, h.depth + g.terrace ) / 2 + 0.5;
 			this.footprints.push( { x: cx, z: cz, r: R, kind: 'building' } );
-			this.buildings.push( { name: h.id, x: cx, z: cz, floorY: g.floorY, roofTop: g.floorY + h.rise + 1.2, footprint: { x: cx, z: cz, r: R } } );
+			this.buildings.push( { name: h.name ?? h.id, x: cx, z: cz, floorY: g.floorY, roofTop: g.floorY + 4.8, footprint: { x: cx, z: cz, r: R } } );
 
 		}
 
-		PLAN.TOWERS.forEach( ( t, i ) => {
+		// the festival ground on the green: oaks, lantern strings, long tables
+		for ( const l of buildFestival( B, PLAN.FESTIVAL, ground, rand, this.plantings, this.footprints ) ) this.lights.push( l );
 
-			const r = buildTower( B, t, towerY[ i ] - 0.05, rand );
-			colliders.addBox( r.collider.center, r.collider.half, r.collider.yaw, { tag: 'tower' } );
-			for ( const l of r.lights ) this.lights.push( { position: l.position, color: new Color( 1.0, 0.66, 0.36 ), intensity: 3, kind: 'window' } );
-			this.footprints.push( { x: t.x, z: t.z, r: t.r + 2, kind: 'building' } );
-			this.buildings.push( { name: t.id, x: t.x, z: t.z, floorY: towerY[ i ], roofTop: towerY[ i ] + t.h, footprint: { x: t.x, z: t.z, r: t.r + 1 } } );
-
-		} );
-
-		// aprons of flags round the communal buildings (each a little higher than the last where they overlap)
-		PLAN.TOWERS.forEach( ( t, i ) => buildApron( B, t, ground, 0.06 + i * 0.012 ) );
-		for ( const t of PLAN.TOWERS ) this.footprints.push( { x: t.x, z: t.z, r: t.r + 5, kind: 'plaza' } );
 		let steps = 0;
 		for ( const p of this.allPaths ) {
 
@@ -241,7 +225,7 @@ export class Settlement {
 		if ( dm ) this.group.add( dm );
 		for ( const m of waterMeshes( this.stream, PLAN.POND, rand ) ) this.group.add( m );
 		scene.add( this.group );
-		this.timings = { grading: Math.round( t1 - t0 ), build: Math.round( performance.now() - t1 ), steps, drapeVerts: drapes.batch.vcount, plantings: this.plantings.length };
+		this.timings = { grading: Math.round( t1 - t0 ), build: Math.round( performance.now() - t1 ), steps, shellTris, drapeVerts: drapes.batch.vcount, plantings: this.plantings.length };
 
 	}
 
@@ -255,6 +239,8 @@ export class Settlement {
 			glazing: createGlazingMaterial(),
 			glow: createGlowMaterial(),
 			sail: createSailMaterial(),
+			lantern: createLanternMaterial(),
+			fabric: village.fabric,
 			wood: village.wood,
 			hard: village.hard,
 		};
@@ -267,9 +253,9 @@ export class Settlement {
 			const mesh = new Mesh( b.build(), mats[ key ] );
 			mesh.name = 'village_' + key;
 			mesh.receiveShadow = key !== 'glow';
-			mesh.castShadow = key === 'stone' || key === 'wood' || key === 'hard' || key === 'sail';
+			mesh.castShadow = key === 'stone' || key === 'wood' || key === 'hard' || key === 'sail' || key === 'fabric';
 			mesh.staticVelocity = true;
-			if ( key === 'wood' || key === 'hard' ) mesh.onBeforeRender = () => this.textures.bake();
+			if ( key === 'wood' || key === 'hard' || key === 'fabric' ) mesh.onBeforeRender = () => this.textures.bake();
 			this.group.add( mesh );
 			this.meshes.push( mesh );
 

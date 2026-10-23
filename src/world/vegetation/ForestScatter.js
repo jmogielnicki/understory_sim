@@ -169,7 +169,7 @@ export function scatterForest( site, seed = 2026 ) {
 		// (docs/REFERENCE.md: the village stands among trees); the mown green stays open but for its edges
 		const forest = 1 - smoothstep( 0.25, 0.75, c.open );
 		const lawn = site.inLawn ? site.inLawn( x, z ) : 0;
-		let p = 0.92 * forest + ( 1 - forest ) * 0.2 * smoothstep( - 0.3, 0.3, patch ) * ( 1 - lawn * 0.95 );
+		let p = 0.92 * forest + ( 1 - forest ) * 0.3 * smoothstep( - 0.4, 0.3, patch ) * ( 1 - lawn * 0.95 );
 		// thinner on the ledges and steep ground
 		p *= 1 - smoothstep( 0.3, 0.6, c.rock ) * 0.6 - smoothstep( 0.45, 0.62, c.slope ) * 0.5;
 		if ( rand() > p ) return;
@@ -262,9 +262,10 @@ export function scatterForest( site, seed = 2026 ) {
 		const yaw = rand() * TAU;
 		if ( pl.kind === 'tree' ) {
 
-			// a fruit tree: short trunk, broad low crown (a beech-green canopy tree, squat)
-			const sy = 0.7 + rand() * 0.1;
-			out.trees.push( { x: pl.x, y: pl.y, z: pl.z, s: pl.s, sy, yaw, la: yaw, l: sy, H: 12.5 * pl.s * sy, seed: seedFor( 3, rand() ) } );
+			// a fruit tree: short trunk, broad low crown (a beech-green canopy tree, squat); or the species asked
+			// for (pl.sp: the green's oaks)
+			const sy = pl.sy ?? 0.7 + rand() * 0.1;
+			out.trees.push( { x: pl.x, y: pl.y, z: pl.z, s: pl.s, sy, yaw, la: yaw, l: sy, H: 12.5 * pl.s * sy, seed: seedFor( pl.sp ?? 3, rand() ) } );
 			occT.add( pl.x, pl.z, 2.5 * pl.s );
 
 		} else if ( pl.kind === 'shrub' ) {

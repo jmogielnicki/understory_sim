@@ -4,7 +4,7 @@ import { polylineDistance } from '../terrain/Paths.js';
 
 // The village's built landscape between the homes: stone steps where the paths climb, timber footbridges over
 // the stream, pergolas and raised beds in the gardens, log play frames on the green, flagged paving on the
-// halls' aprons and the lakeshore walk, and the dock. Builder keys as in EarthHome.js ('stone', 'wood', 'hard').
+// lakeshore walk, and the dock. Builder keys as in Home.js ('stone', 'wood', 'hard').
 
 const OAK = [ 0.62, 0.45, 0.3 ];
 const GREY_OAK = [ 0.66, 0.6, 0.52 ];
@@ -125,40 +125,6 @@ export function buildPavedPath( B, p, groundAt ) {
 
 }
 
-// a flagged apron round a hall's foot: a polar ring from the wall out to a gently wavering edge
-export function buildApron( B, t, groundAt, lift = 0.06 ) {
-
-	const N = 96, M = 8;
-	const r0 = t.r * 0.92, P = [], NN = [], UV = [], I = [];
-	for ( let i = 0; i <= N; i ++ ) {
-
-		const a = i / N * Math.PI * 2;
-		const edge = t.r + 4.2 + Math.sin( a * 3 + t.x ) * 0.8 + Math.sin( a * 7 + t.z ) * 0.35;
-		for ( let j = 0; j <= M; j ++ ) {
-
-			const r = r0 + ( edge - r0 ) * j / M;
-			const x = t.x + Math.cos( a ) * r, z = t.z + Math.sin( a ) * r;
-			P.push( x, groundAt( x, z ) + lift, z );
-			NN.push( 0, 1, 0 );
-			UV.push( x, z );
-
-		}
-
-	}
-
-	for ( let i = 0; i < N; i ++ ) for ( let j = 0; j < M; j ++ ) {
-
-		const a = i * ( M + 1 ) + j, b = a + M + 1;
-		I.push( a, b + 1, a + 1, a, b, b + 1 );
-
-	}
-
-	B.part( 'stone', new Part( P, NN, UV, I ), 0, 0, 0, { data: [ 0.71, 1, 0.45, 0 ] } );
-
-}
-
-// A timber footbridge, arching low over the stream: two curved stringers, deck planks across them, posts and
-// a handrail; stone abutments at the ends. Returns walkable collider boxes (world).
 export function buildBridge( B, b, groundAt, rand ) {
 
 	const c = Math.cos( b.yaw ), s = Math.sin( b.yaw );

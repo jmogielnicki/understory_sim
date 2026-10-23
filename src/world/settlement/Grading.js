@@ -72,6 +72,14 @@ function bounds( pts, pad ) {
 
 }
 
+// 2d rounded rectangle (centred, half sizes hx, hz, corner radius r; negative inside)
+function roundRect( x, z, hx, hz, r ) {
+
+	const qx = Math.abs( x ) - hx + r, qz = Math.abs( z ) - hz + r;
+	return Math.hypot( Math.max( qx, 0 ), Math.max( qz, 0 ) ) + Math.min( Math.max( qx, qz ), 0 ) - r;
+
+}
+
 export class Grading {
 
 	constructor( terrain ) {
@@ -374,73 +382,28 @@ export class Grading {
 
 	}
 
-	// A home: the terrace pad in front and the planted mound over the vault(s), into the hillside.
-	// Returns { floorY, frontTop( lx ) } (the mound's height at the facade, for the headwall).
+	// A home (settlement/Home.js): a level pad for the house and the open room under its arch, the terrace
+	// in front (retained by a wall where the ground falls away, cut back on a slope where it rises), the hill
+	// left against the back of the house (its back half is buried; the roof stands out of the slope).
+	// Returns { floorY, terrace, frame }.
 	home( h ) {
 
 		const T = this.T;
 		const f = frame( h.x, h.z, h.yaw );
 		// dug in a little: the terrace in front then needs less fill (lower walls on the downhill side)
 		const floorY = h.floor ?? this.natural( h.x, h.z ) - 0.45;
-		const arches = [ { o: 0, span: h.span, rise: h.rise }, ...( h.side || [] ).map( ( [ o, span, rise ] ) => ( { o, span, rise } ) ) ];
-		let xl = Infinity, xr = - Infinity;
-		for ( const a of arches ) {
-
-			xl = Math.min( xl, a.o - a.span / 2 - 1.0 );
-			xr = Math.max( xr, a.o + a.span / 2 + 1.0 );
-
-		}
-
-		const depth = h.depth, terrace = h.terrace ?? 5;
-		// the mound over one vault: an elliptical barrel ( ring + ~1 m of soil over the crown ), its back
-		// rounding off into the slope
-		const vault = ( a, lx, lz ) => {
-
-			const A = a.span / 2 + 1.6, B = a.rise + 1.05;
-			const u = ( lx - a.o ) / A;
-			if ( Math.abs( u ) >= 1.35 ) return - Infinity;
-			// shoulders flare out a little beyond the barrel (the soil slumps)
-			const prof = Math.abs( u ) < 1 ? Math.sqrt( 1 - u * u ) : 0;
-			const shoulder = Math.abs( u ) < 1 ? 0 : - ( Math.abs( u ) - 1 ) * 3.5;
-			const back = lz > - a.depth ? 1 : Math.sqrt( Math.max( 0, 1 - ( ( lz + a.depth ) / 5.5 ) ** 2 ) );
-			return floorY + ( B * prof + shoulder ) * back - ( 1 - back ) * 1.2;
-
-		};
-
-		for ( const a of arches ) a.depth = a.o === 0 ? depth : depth * 0.7;
-		const mound = ( lx, lz ) => {
-
-			// smooth maximum of the vaults
-			let m = - Infinity, s = 0;
-			for ( const a of arches ) {
-
-				const v = vault( a, lx, lz );
-				if ( v === - Infinity ) continue;
-				if ( m === - Infinity ) {
-
-					m = v;
-					continue;
-
-				}
-
-				const k = 1.2;
-				const hh = clamp( 0.5 + 0.5 * ( v - m ) / k, 0, 1 );
-				m = lerp( m, v, hh ) + k * hh * ( 1 - hh );
-				s ++;
-
-			}
-
-			return m;
-
-		};
-
-		const R = Math.max( xr - xl, depth + terrace ) + 12;
+		const L = h.len, D = h.depth, terrace = h.terrace ?? 5;
+		const rc = Math.min( 2.6, D * 0.35 );
+		const open = Math.min( D - 1.6, 4.6 ) + 0.4; // the depth the arch's room reaches back
+		const R = Math.max( L, D + terrace ) / 2 + 9;
 		this.each( h.x - R, h.z - R, h.x + R, h.z + R, ( k, x, z ) => {
 
 			const [ lx, lz ] = f.toL( x, z );
 			const hNow = T.heights[ k ];
-			// ---- terrace: level pad in front of the facade, retained on the downhill side (a stone wall there)
-			if ( lz >= 0 && lz <= terrace && lx >= xl - 0.6 && lx <= xr + 0.6 ) {
+			const dT = roundRect( lx, lz - terrace / 2, L / 2 + 0.8, terrace / 2, 2.2 );
+			const dp = roundRect( lx, lz + D / 2, L / 2, D / 2, rc );
+			// ---- the terrace and the pad under the front of the house
+			if ( dT < 0.05 || ( dp < 1.3 && lz > - open ) ) {
 
 				T.heights[ k ] = floorY - 0.03;
 				this.open( k );
@@ -449,76 +412,33 @@ export class Grading {
 
 			}
 
-			// around the terrace, uphill ground is cut back on a slope (downhill ground stays: the wall)
-			const ex = Math.max( xl - 0.6 - lx, lx - ( xr + 0.6 ), 0 );
-			const ez = Math.max( lz - terrace, 0 );
-			if ( lz >= 0 ) {
+			// ---- under and beside the back of the house: the pad giving way to the hill
+			if ( dp < 1.3 ) {
 
-				const e = Math.hypot( ex, ez );
-				if ( e < 3.5 && hNow > floorY ) {
-
-					const t = 1 - smoothstep( 0.4, 3.5, e );
-					T.heights[ k ] = lerp( hNow, floorY + e * 0.45, t );
-					this.open( k, t );
-
-				}
-
+				const t = smoothstep( - open, - open - 3, lz );
+				T.heights[ k ] = lerp( floorY - 0.03, hNow, t );
+				this.open( k );
 				return;
 
 			}
 
-			// ---- under each arch the ground stays at the floor back past the glazing (the headwall's thick top
-			// and the glazing hide the mound's cut behind it). The cut sits a texel and more behind the glass:
-			// the 1 m heightmap ramps up across a whole texel in front of it
-			if ( lz > - 2.2 ) {
+			// ---- round the front: uphill ground cut back on a slope (downhill ground stays: the wall)
+			const e = lz > - open ? Math.min( Math.max( dT, 0 ), Math.max( dp - 1.3, 0 ) ) : Math.max( dT, 0 );
+			if ( e < 3.5 && hNow > floorY ) {
 
-				let open = false;
-				for ( const a of arches ) if ( Math.abs( lx - a.o ) < a.span / 2 + 0.75 ) open = true;
-				if ( open ) {
-
-					T.heights[ k ] = floorY - 0.03;
-					this.open( k );
-					return;
-
-				}
+				const t = 1 - smoothstep( 0.4, 3.5, e );
+				T.heights[ k ] = lerp( hNow, floorY + e * 0.45, t );
+				this.open( k, t );
 
 			}
-
-			// ---- the mound behind the facade
-			const m = mound( lx, lz );
-			if ( m === - Infinity ) {
-
-				// beside the mound, ease the slope a little toward the floor level
-				return;
-
-			}
-
-			// the vault floor and walls are inside the hill: the mound is the ground wherever it rises above it;
-			// a soft maximum so the roof runs into the hillside without a crease
-			const kk = 0.9;
-			const hh = clamp( 0.5 + 0.5 * ( m - hNow ) / kk, 0, 1 );
-			const top = lerp( hNow, m, hh ) + kk * hh * ( 1 - hh );
-			// right behind the facade the mound is cut vertical (the headwall); beside the vaults it grades out
-			T.heights[ k ] = Math.max( top, floorY - 0.03 );
-			const roof = smoothstep( floorY + 0.3, floorY + 1.2, m );
-			this.open( k, roof );
 
 		} );
 
-		// the mound's height along the facade line, for the headwall (the mound itself, before the cut under
-		// the arches)
-		const top = ( lx ) => {
-
-			const [ x, z ] = f.toW( lx, - 1.4 );
-			return Math.max( mound( lx, - 0.5 ), Math.min( T.heightAt( x, z ), floorY + 8 ) );
-
-		};
-
-		return { floorY, xl, xr, terrace, frontTop: top, arches, frame: f };
+		return { floorY, terrace, frame: f };
 
 	}
 
-	// a level pad (the towers' footings, the dock's landing): radius r, blended over `edge`
+	// a level pad (the dock's landing): radius r, blended over `edge`
 	pad( x, z, r, y, edge = 4 ) {
 
 		const T = this.T;

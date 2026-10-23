@@ -35,7 +35,7 @@ export const WORLD = {
 
 	spawn: { position: new THREE.Vector3( 290, 0, - 400 ), yaw: - 2.5 },
 	// where the player starts: on the path above the first rows of homes, looking down over their roofs to the
-	// halls and the lake (the key art's view)
+	// green and the lake (the key art's view)
 	start: { position: new THREE.Vector3( 290, 0, - 400 ), yaw: - 2.5 },
 
 	// prevailing direction the (small) waves travel: north-westerlies blow down the lake toward the south-east

@@ -36,10 +36,15 @@ export const VIEWS = {
 	homeFront: { p: [ 321, 1.7, - 318 ], agl: true, yaw: 0.08, pitch: 0.08, time: 15.5 },
 	// on a terrace (A1b), close to its arches
 	homeClose: { p: [ 324, 1.6, - 333.5 ], agl: true, yaw: 0.0, pitch: 0.05, time: 15.5 },
-	// from the dock, the communal buildings
-	towers: { p: [ 401, 1.7, - 232 ], agl: true, yaw: 0.9, pitch: 0.12, time: 16.5 },
-	// the great hall (T1) from its forecourt
-	hall: { p: [ 350.5, 1.7, - 256 ], agl: true, yaw: 0.15, pitch: 0.28, time: 15.0 },
+	// Mimi's house (A1b, reference/home-v2.png) from below its terrace; its great arch close to
+	mimi: { p: [ 331, 1.7, - 318 ], agl: true, yaw: 0.3, pitch: 0.06, time: 16.0 },
+	mimiGarden: { p: [ 309, 2.2, - 318 ], agl: true, yaw: - 0.35, pitch: - 0.08, time: 16.0 },
+	mimiArch: { p: [ 333.5, 1.6, - 327.5 ], agl: true, yaw: 0.15, pitch: 0.12, time: 16.0 },
+	// the neighbourhood as in reference/neighborhood-v2.png: from the hillside west of the rows, over the
+	// terraces, the stream and the green to the lake
+	neighborhood: { p: [ 282, 12, - 384 ], agl: true, yaw: - 2.45, pitch: - 0.2, time: 16.5 },
+	// the festival ground on the green, looking up at the first rows
+	festival: { p: [ 352, 1.7, - 262 ], agl: true, yaw: 0.25, pitch: 0.1, time: 14.0 },
 	// by the pond, toward the bridge and the homes west of the stream
 	pond: { p: [ 254, 1.7, - 298 ], agl: true, yaw: 0.85, pitch: 0.0, time: 16.0 },
 	// the village's east edge, toward the woods (birches, pines, the forest floor)
@@ -59,7 +64,7 @@ export const VIEWS = {
 	// the pergola walk and the orchard beyond
 	orchard: { p: [ 472, 3.0, - 276 ], agl: true, yaw: 2.42, pitch: - 0.12, time: 15.5 },
 	// dusk over the village: the arches lit
-	dusk: { p: [ 330, 3.0, - 296 ], agl: true, yaw: - 0.05, pitch: 0.1, time: 19.6 },
+	dusk: { p: [ 334, 2.5, - 300 ], agl: true, yaw: 0.05, pitch: 0.06, time: 19.8 },
 	// the dock and the moored boat from the shore path
 	dock: { p: [ 400.5, 1.7, - 247 ], agl: true, yaw: Math.PI, pitch: - 0.05, time: 15.0 },
 	// the launch at the dock, from the water off its starboard quarter
@@ -68,7 +73,7 @@ export const VIEWS = {
 	sailing: { p: [ 340, 2.2, 182 ], yaw: - 0.6, pitch: 0.03, time: 16.0 },
 	// across the lake to the hamlet on the point, from the end of the dock
 	hamlet: { p: [ 400.5, 1.8, - 212 ], agl: true, yaw: 2.05, pitch: 0.02, time: 17.0 },
-	// the gardens west of the halls, toward the pond
+	// the gardens west of the green, toward the pond
 	westGardens: { p: [ 299, 3.2, - 259 ], agl: true, yaw: 1.13, pitch: - 0.14, time: 16.0 },
 	// the meadow on the slope between rows 1 and 2, looking east along it with the sun behind
 	meadow: { p: [ 330, 1.5, - 357 ], agl: true, yaw: - 1.45, pitch: - 0.12, time: 16.0 },
@@ -81,7 +86,7 @@ export const VIEWS = {
 	loonPair: { follow: 'loon', p: [ 8, 1.4, 6 ], pitch: - 0.1, time: 16.0 },
 	// the hamlet close to, from the water
 	hamletNear: { p: [ - 560, 2.5, 330 ], yaw: 1.65, pitch: 0.0, time: 16.0 },
-	// key art candidates: down over the homes and the halls to the lake; across the green from hillside B
+	// key art candidates: down over the homes and the green to the lake; across the green from hillside B
 	keyart: { p: [ 290, 6, - 400 ], agl: true, yaw: - 2.5, pitch: - 0.12, time: 16.5 },
 	keyartEast: { p: [ 520, 5, - 330 ], agl: true, yaw: 1.83, pitch: - 0.08, time: 16.5 },
 	// the top of the Rattlesnake cliffs (outside the walkable area: the far terrain), looking south

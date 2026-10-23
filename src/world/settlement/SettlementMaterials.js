@@ -18,7 +18,12 @@ import { srgb } from '../terrain/TerrainShading.js';
 //   pattern 5  granite boulder: grey, lichened (the glacial erratics, stream stones)
 //   pattern 6  terracotta (plant pots): warm clay, a little salt bloom near the rim
 //   pattern 7  turf: the planted top of a wall running back into the roof meadow (the meadow's tones)
-// GLAZING: vdata: x seed, y lit (0..1, warm light inside), z 0 window / 1 door / 2 skylight / 3 hall window
+//   pattern 9  big rounded blocks in courses (the terraces' retaining walls): u along the wall, v up
+//   pattern 10 a sandstone boulder (HomeGarden.js): world-space bands, moss on top
+//   pattern 8  a home's shell (Home.js): lime plaster, hand-finished, warm cream, and where vdata.z -> 1 the
+//              planted cap over it (a dense mat of leaves, clover and small flowers); vdata.w = height above
+//              the cap's edge (m): below it, trailing stems hang down over the plaster
+// GLAZING: vdata: x seed, y lit (0..1, warm light inside), z 0 window / 1 door or lantern / 2 skylight
 // (framing drawn in the shader). uv: metres across the pane.
 // GLOW: unlit light: the pale blue technology seams (vdata.x phase: they breathe slowly) and, with vdata.y = 1,
 // the warm path lamps (steady, lit after dusk).
@@ -104,6 +109,11 @@ fn stnSample( uv: vec2f, P: vec3f, pattern: f32, seed: f32, wear: f32, tint: vec
 	} else if ( pattern < 2.5 ) {
 		b = stnBlocks( vec2f( uv.x, uv.y + 0.01 ), 50.0, 50.0, 0.85, 1.15, seed + 5.0 );
 		bevel = 0.08;
+	} else if ( pattern > 8.5 ) {
+		// big rounded blocks (terrace walls): pillowed, deep soft joints
+		b = stnBlocks( uv, 0.36, 0.52, 0.55, 1.05, seed + 2.0 );
+		joint = 0.03;
+		bevel = 0.05;
 	} else {
 		// one dressed block per piece
 		b.id = vec2f( seed, 0.0 );
@@ -125,7 +135,9 @@ fn stnSample( uv: vec2f, P: vec3f, pattern: f32, seed: f32, wear: f32, tint: vec
 	col = col * ( 0.94 + grain * 0.08 );
 	// joints: deep, darker; a grimy rim along the bottom of each block
 	let inJoint = 1.0 - smoothstep( joint * 0.6, joint + 0.006, b.edge );
-	col = mix( col, col * vec3f( 0.8, 0.77, 0.72 ), inJoint );
+	col = mix( col, col * select( vec3f( 0.8, 0.77, 0.72 ), vec3f( 0.45, 0.42, 0.36 ), pattern > 8.5 ), inJoint );
+	// (the terrace walls' blocks differ more: honey, cream, a few rusty ones)
+	col = select( col, col * mix( vec3f( 0.9, 0.86, 0.8 ), vec3f( 1.06, 1.02, 0.96 ), bh2 ), pattern > 8.5 );
 	// weathering: moss and grime creep up from the ground and in from the joints where wear is high
 	let lowK = 1.0 - smoothstep( 0.0, 0.9, uv.y );
 	let mossN = perlin2( uv * 1.3 + seed ) * 0.5 + 0.5;
@@ -135,8 +147,68 @@ fn stnSample( uv: vec2f, P: vec3f, pattern: f32, seed: f32, wear: f32, tint: vec
 	var o: StnSample;
 	o.col = col;
 	o.rough = mix( 0.82, 0.92, inJoint ) - grain * 0.05;
-	o.h = rel * 0.03 + ( grain - 0.5 ) * 0.0015 + mott * 0.003;
+	// (the terrace walls' blocks are pillowed: a rounded face, not a flat one)
+	let c2 = b.local / max( b.size, vec2f( 1e-3 ) ) - 0.5;
+	let pil = select( 0.0, ( 1.0 - dot( c2, c2 ) * 2.6 ) * smoothstep( 0.0, 0.03, b.edge ), pattern > 8.5 );
+	o.h = rel * select( 0.03, 0.012, pattern > 8.5 ) + pil * 0.07 + ( grain - 0.5 ) * 0.0015 + mott * 0.003;
 	o.ao = mix( 1.0, 0.75, inJoint );
+	return o;
+}
+
+// lime plaster over the shell, and the planted cap (turf: 0..1; above: metres above the cap's edge)
+fn stnShell( P: vec3f, uv: vec2f, seed: f32, turf: f32, above: f32, N: vec3f, tint: vec3f ) -> StnSample {
+	// ---- plaster: broad soft trowel clouds, a fine sanded grain, pale where it faces the sky
+	let cloud = perlin3( P * 0.55 + seed * 17.0 ) * 0.6 + perlin3( P * 1.9 ) * 0.4;
+	let grain = perlin3( P * 23.0 ) * 0.5 + 0.5;
+	let trowel = perlin3( P * vec3f( 4.0, 1.3, 4.0 ) + 3.0 );
+	var pc = mix( ${ srgb( 0.8, 0.65, 0.44 ) }, ${ srgb( 0.88, 0.77, 0.57 ) }, sat( cloud * 0.8 + 0.5 ) );
+	pc = pc * ( 0.95 + grain * 0.07 + trowel * 0.025 ) * tint;
+	// weather: a little grime low down and soft rain-darkening under the cap's lip
+	let low = 1.0 - smoothstep( 0.0, 0.7, uv.y );
+	pc = mix( pc, pc * ${ srgb( 0.78, 0.74, 0.66 ) }, low * 0.35 );
+	let drip = smoothstep( -1.4, -0.1, above ) * smoothstep( 0.45, 0.8, perlin3( P * vec3f( 5.0, 0.45, 5.0 ) ) * 0.5 + 0.5 );
+	pc = mix( pc, pc * 0.86, drip * 0.4 );
+	// ---- the planted cap: leaves (clumps of light and dark), clover, small white and violet flowers
+	let q = P * 6.5;
+	let l1 = perlin3( q ) * 0.5 + 0.5;
+	let l2 = perlin3( q * 2.3 + 7.0 ) * 0.5 + 0.5;
+	let clump = perlin3( P * 0.8 + seed * 5.0 ) * 0.5 + 0.5;
+	var tc = mix( ${ srgb( 0.09, 0.16, 0.04 ) }, ${ srgb( 0.27, 0.4, 0.11 ) }, smoothstep( 0.25, 0.75, l1 * 0.7 + l2 * 0.3 ) );
+	tc = mix( tc, ${ srgb( 0.46, 0.55, 0.17 ) }, smoothstep( 0.72, 0.9, l2 ) * 0.6 * smoothstep( 0.0, 0.6, N.y ) );
+	tc = mix( tc, tc * vec3f( 1.12, 1.05, 0.8 ), clump * 0.5 );
+	let fl = perlin3( P * 17.0 + seed * 3.0 ) * 0.5 + 0.5;
+	let flower = smoothstep( 0.83, 0.88, fl ) * smoothstep( 0.3, 0.7, clump );
+	let violet = step( 0.5, fract( floor( P.x * 3.0 ) * 0.37 + floor( P.z * 3.0 ) * 0.71 ) );
+	tc = mix( tc, mix( ${ srgb( 0.9, 0.88, 0.8 ) }, ${ srgb( 0.55, 0.42, 0.8 ) }, violet ), flower * 0.85 );
+	// ---- where they meet: the cap's ragged edge, and stems trailing over the plaster below it
+	let along = P.x * 0.8 + P.z * 0.8;
+	let hang = ( perlin2( vec2f( along * 2.2, seed * 9.0 ) ) * 0.5 + 0.5 ) * 0.9 + ( perlin2( vec2f( along * 9.0, 1.0 ) ) * 0.5 + 0.5 ) * 0.35 - 0.3;
+	let trail = select( 0.0, smoothstep( - hang, - hang + 0.08, above ) * smoothstep( 0.4, 0.55, l1 * 0.6 + l2 * 0.4 + 0.15 ), above < 0.0 );
+	let edge = turf + ( l1 - 0.5 ) * 0.5;
+	let tk = max( smoothstep( 0.45, 0.55, edge ), trail );
+	var o: StnSample;
+	o.col = mix( pc, tc, tk );
+	o.rough = mix( 0.86 - grain * 0.06, 0.78, tk );
+	o.h = mix( cloud * 0.004 + grain * 0.0015 + trowel * 0.002, l1 * 0.05 + l2 * 0.025, tk );
+	o.ao = mix( 1.0, 0.55 + l1 * 0.45, tk );
+	return o;
+}
+
+// a sandstone boulder: honey and cream in soft bands, darker hollows, moss and lichen on its top
+fn stnBoulder( P: vec3f, seed: f32, N: vec3f ) -> StnSample {
+	let n = perlin3( P * 1.3 + seed * 11.0 ) * 0.5 + 0.5;
+	let n2 = perlin3( P * 6.0 ) * 0.5 + 0.5;
+	let band = sin( P.y * 7.0 + perlin3( P * 0.8 ) * 3.0 ) * 0.5 + 0.5;
+	var c = mix( ${ srgb( 0.66, 0.53, 0.36 ) }, ${ srgb( 0.82, 0.71, 0.53 ) }, n * 0.6 + band * 0.25 + n2 * 0.15 );
+	let top = smoothstep( 0.45, 0.9, N.y );
+	let moss = top * smoothstep( 0.5, 0.7, perlin3( P * 2.2 + seed ) * 0.5 + 0.5 + n2 * 0.2 );
+	c = mix( c, ${ srgb( 0.27, 0.34, 0.13 ) }, moss * 0.8 );
+	c = mix( c, ${ srgb( 0.75, 0.75, 0.66 ) }, smoothstep( 0.8, 0.88, n2 ) * 0.3 * ( 1.0 - moss ) );
+	var o: StnSample;
+	o.col = c;
+	o.rough = 0.85;
+	o.h = n2 * 0.02 + n * 0.03;
+	o.ao = 0.85 + n * 0.15;
 	return o;
 }
 
@@ -190,7 +262,13 @@ export function createStoneMaterial() {
 	let pattern = d.y;
 	var st: StnSample;
 	var hd = 0.0;
-	if ( pattern > 6.5 ) {
+	if ( pattern > 7.5 && pattern < 8.5 ) {
+		st = stnShell( in.P, in.uv, d.x, d.z, d.w, normalize( in.N ), in.vs.vTint );
+	} else if ( pattern > 9.5 ) {
+		st = stnBoulder( in.P, d.x, normalize( in.N ) );
+	} else if ( pattern > 8.5 ) {
+		st = stnSample( in.uv, in.P, pattern, d.x, d.z, in.vs.vTint );
+	} else if ( pattern > 6.5 && pattern < 7.5 ) {
 		let n = perlin2( in.P.xz * 0.9 ) * 0.5 + 0.5;
 		let n2 = perlin2( in.P.xz * 7.0 + 3.0 ) * 0.5 + 0.5;
 		st.col = mix( ${ srgb( 0.2, 0.3, 0.09 ) }, ${ srgb( 0.33, 0.42, 0.14 ) }, n * 0.6 + n2 * 0.4 );
@@ -348,15 +426,7 @@ export function createGlazingMaterial() {
 		inside = col;
 		if ( hit == 4 ) { inside = ${ srgb( 1.0, 0.8, 0.5 ) }; illum = mix( 2.5, 5.0, night ); }
 	}
-	// the halls' great windows (kind 3) carry their timber framing in the shader: mullions ~1.1 m apart,
-	// transoms every 2.2 m (uv in metres over the shell)
-	var frameK = 0.0;
-	if ( d.z > 2.5 ) {
-		let fu = abs( fract( uv.x / 1.1 + 0.5 ) - 0.5 ) * 1.1;
-		let fv = abs( fract( uv.y / 2.2 ) - 0.5 ) * 2.2;
-		let wu = fwidth( uv.x ) + 0.045;
-		frameK = max( 1.0 - smoothstep( wu, wu + 0.02, fu ), 1.0 - smoothstep( 0.05, 0.07, fv ) );
-	}
+	let frameK = 0.0;
 	s.albedo = mix( inside * 0.05, ${ srgb( 0.36, 0.25, 0.16 ) }, frameK );
 	s.roughness = mix( 0.03 + room * 0.03, 0.7, frameK );
 	s.emissive = inside * illum * lit * select( mix( 1.6, 4.5, night ), mix( 1.1, 3.4, night ), traced ) * ( 1.0 - frameK );
@@ -401,6 +471,30 @@ export function createSailMaterial() {
 	s.albedo = in.vs.vTint * ( 0.93 + perlin2( in.uv * 30.0 ) * 0.04 ) * ( 1.0 - seams * 0.12 );
 	s.roughness = 0.7;
 	s.translucency = in.vs.vTint * 0.35;
+`;
+	return m;
+
+}
+
+// paper lanterns (the festival strings): coloured paper lit by the sun by day, glowing from within after dusk
+// (tint: the paper's colour; vdata.x seed)
+export function createLanternMaterial() {
+
+	const m = standard( {
+		name: 'SettlementLanterns', roughness: 0.75, metalness: 0,
+		attributes: ATTRIBUTES, varyings: VARYINGS,
+	} );
+	m.modules = [ commonModule ];
+	m.vertex = PASS;
+	m.surface = /* wgsl */`
+	let night = smoothstep( 0.1, 0.7, frame.night );
+	// paper ribs round the lantern
+	let rib = smoothstep( 0.02, 0.0, abs( fract( in.uv.y * 9.0 ) - 0.5 ) - 0.46 );
+	let c = in.vs.vTint * ( 0.92 + perlin2( in.uv * 13.0 + in.vs.vData.x * 9.0 ) * 0.06 ) * ( 1.0 - rib * 0.25 );
+	s.albedo = c;
+	s.roughness = 0.75;
+	s.translucency = c * 0.6;
+	s.emissive = c * ( 0.12 + night * 3.2 ) * ( 1.0 - rib * 0.5 );
 `;
 	return m;
 
