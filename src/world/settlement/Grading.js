@@ -423,12 +423,24 @@ export class Grading {
 
 			}
 
-			// ---- under and beside the back of the house: the pad giving way to the hill
+			// ---- under and beside the back of the house: the pad giving way to the hill, but never burying more
+			// than the lower part of the walls (on a steep slope the ground is cut back round the house in a bowl,
+			// so the roof stands clear)
+			const cap = floorY + 1.6 + Math.max( 0, dp - 1.3 ) * 0.75;
 			if ( dp < 1.3 ) {
 
 				const t = smoothstep( - open, - open - 3, lz );
-				T.heights[ k ] = lerp( floorY - 0.03, hNow, t );
+				T.heights[ k ] = Math.min( lerp( floorY - 0.03, hNow, t ), cap );
 				this.open( k );
+				return;
+
+			}
+
+			if ( lz < 0 && hNow > cap ) {
+
+				const t = 1 - smoothstep( 4, 9, dp );
+				T.heights[ k ] = lerp( hNow, cap, t );
+				this.open( k, t );
 				return;
 
 			}

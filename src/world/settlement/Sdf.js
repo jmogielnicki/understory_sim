@@ -11,6 +11,8 @@ export const clamp = ( x, a, b ) => x < a ? a : x > b ? b : x;
 // polynomial smooth minimum / maximum (k = blend radius, m)
 export function smin( a, b, k ) {
 
+	// (an infinite side has no say: and Infinity - Infinity would be NaN)
+	if ( ! Number.isFinite( a ) || ! Number.isFinite( b ) ) return Math.min( a, b );
 	const h = clamp( 0.5 + 0.5 * ( b - a ) / k, 0, 1 );
 	return b + ( a - b ) * h - k * h * ( 1 - h );
 

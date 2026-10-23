@@ -26,7 +26,7 @@ Each is easy to reverse; the file or setting is named.
   barrel, the planted cap, the openings) written as distance functions (`HomeShape.js`) and meshed once at load
   with surface nets (`Sdf.js`, 15 cm cells). This gives the painting's rounded, hand-plastered forms with no
   hand-built seams, and every home still varies and sits on its own terrace. Chosen over Blender (the author
-  agreed). Cost: ~2.1 s at load for all 40 shells; no measurable change in GPU frame time.
+  agreed). Cost: ~2.6 s at load for all 40 shells; no measurable change in GPU frame time.
 - **Size.** 34 homes in four rows on the north hillside (A), three west of the stream, four short rows on the
   east hillside (B), six more in the hamlet across the water (coarser meshes: they are only seen from afar).
   Positions kept from the first layout; the reference packs homes closer, which is easy to try in `Plan.js`.
@@ -60,8 +60,14 @@ Each is easy to reverse; the file or setting is named.
 - **Walks and stairs.** A walk runs along the front of each row's terraces (generated from `ROWS`), and long
   straight stone stairs climb between homes to the row above (`STAIRS`), as in the neighbourhood image. The
   green's top path is the first row's walk.
+- **Chimney smoke.** A thin wisp from about a third of the chimneys, always Mimi's (the painting has one). The
+  bible rules out routine combustion; I read these as bread ovens and the odd hearth fire, not heating or
+  power. Easy to remove (`smoke` per home, `Smoke.js`).
+- **Lanterns up the stairs** on timber posts with an arm (the neighbourhood painting); low stone lamps stay
+  along the longer walks. Small fruit trees fill the gaps between homes that stairs and gardens don't use.
 - **Stream and pond.** The stream drops ~45 m from the ravine to the cove through a lily pond (level 7.2 m);
-  four timber footbridges. The pond and stream water are opaque, dark, reflective surfaces (not see-through).
+  four timber footbridges. It steps down in pools over little falls (~0.5 m each), white water only at the
+  lips, as in the neighbourhood painting. The pond and stream water are opaque, dark, reflective surfaces (not see-through).
 - **Paths.** The village's walks are surfaced with crushed sandstone (pale and warm like the homes, as in the
   layout image) and about 2.5 m wide; trails in the woods stay worn earth; flagged stone along the lake shore,
   dressed stone steps wherever a path is steeper than ~1 in 7.
@@ -148,5 +154,5 @@ Each is easy to reverse; the file or setting is named.
 
 On this Mac (headless Chrome), 2560 x 1267: about 19-23 ms of GPU time per frame across the benchmark views
 (the forest view is the heaviest); dynamic resolution takes it from there. The new homes left the total
-unchanged (189.9 ms over the nine views, against 190.1 before). Building the home shells adds ~2.1 s to load.
+unchanged (189.9 ms over the nine views, against 190.1 before). Building the home shells adds ~2.6 s to load.
 Measure with `node tools/shots/shoot.mjs --bench`.
