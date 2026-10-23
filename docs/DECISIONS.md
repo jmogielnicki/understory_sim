@@ -161,5 +161,7 @@ Each is easy to reverse; the file or setting is named.
 
 On this Mac (headless Chrome), 2560 x 1267: about 19-23 ms of GPU time per frame across the benchmark views
 (the forest view is the heaviest); dynamic resolution takes it from there. The new homes left the total
-unchanged (189.9 ms over the nine views, against 190.1 before). Building the home shells adds ~2.6 s to load.
+unchanged (189.9 ms over the nine views, against 190.1 before); lavender, boulders, sky flowers, smoke and
+the stair lanterns added ~2 % more (measured against the earlier commit in the same session, since the
+machine's own timings drift by ~3 % between runs). Building the home shells adds ~2.6 s to load.
 Measure with `node tools/shots/shoot.mjs --bench`.
