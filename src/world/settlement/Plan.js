@@ -70,6 +70,14 @@ export const STAIRS = [
 	{ rows: [ 4, 5 ], gaps: [ 0 ] }, { rows: [ 5, 6 ], gaps: [ 0 ] }, { rows: [ 6, 7 ], gaps: [ 0 ] },
 ];
 
+// Sky flowers (SkyFlowers.js): the village's solar collectors, tall white flowers over the trees (reference/
+// neighborhood-v2.png has them on the far hillside): [ x, z, height (m), yaw ]. On the hamlet's point across
+// the water and on the slope above the village's top rows.
+export const SKY_FLOWERS = [
+	[ - 646, 236, 34, 0.3 ], [ - 664, 345, 38, 1.1 ], [ - 652, 448, 33, 2.0 ], [ - 612, 395, 30, 0.7 ],
+	[ 300, - 463, 34, 0.4 ], [ 478, - 470, 38, 1.4 ], [ 590, - 380, 32, 2.6 ],
+];
+
 // The village clearing: the tended land the homes stand in (meadows, scattered trees, gardens); the forest
 // closes in beyond it (a ragged edge, see Settlement)
 export const CLEARING = [

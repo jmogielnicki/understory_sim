@@ -15,7 +15,8 @@ import { Smoke } from './settlement/Smoke.js';
 import { buildSteps, buildPavedPath, buildPathLights, buildBridge, buildPergola, buildGarden, buildPlay, buildDock } from './settlement/Landscape.js';
 import { waterMeshes } from './settlement/Water.js';
 import { Drapes } from './settlement/Drapes.js';
-import { createStoneMaterial, createGlazingMaterial, createGlowMaterial, createSailMaterial, createLanternMaterial } from './settlement/SettlementMaterials.js';
+import { createStoneMaterial, createGlazingMaterial, createGlowMaterial, createSailMaterial, createLanternMaterial, createPetalMaterial } from './settlement/SettlementMaterials.js';
+import { buildSkyFlower } from './settlement/SkyFlowers.js';
 import { buildBoats } from './settlement/Boats.js';
 import * as PLAN from './settlement/Plan.js';
 
@@ -127,6 +128,15 @@ export class Settlement {
 			}
 
 		} );
+
+		// the sky flowers (solar collectors) over the trees
+		for ( const [ x, z, H, yaw ] of PLAN.SKY_FLOWERS ) {
+
+			buildSkyFlower( B, x, ground( x, z ), z, H, yaw, rand );
+			this.footprints.push( { x, z, r: 2.5, kind: 'play' } );
+			colliders.addCylinder( x, z, 0.45, ground( x, z ) - 0.5, ground( x, z ) + H, { tag: 'skyFlower' } );
+
+		}
 
 		// the festival ground on the green: oaks, lantern strings, long tables
 		for ( const l of buildFestival( B, PLAN.FESTIVAL, ground, rand, this.plantings, this.footprints ) ) this.lights.push( l );
@@ -274,6 +284,7 @@ export class Settlement {
 			glow: createGlowMaterial(),
 			sail: createSailMaterial(),
 			lantern: createLanternMaterial(),
+			petal: createPetalMaterial(),
 			fabric: village.fabric,
 			wood: village.wood,
 			hard: village.hard,
@@ -287,7 +298,7 @@ export class Settlement {
 			const mesh = new Mesh( b.build(), mats[ key ] );
 			mesh.name = 'village_' + key;
 			mesh.receiveShadow = key !== 'glow';
-			mesh.castShadow = key === 'stone' || key === 'wood' || key === 'hard' || key === 'sail' || key === 'fabric';
+			mesh.castShadow = key === 'stone' || key === 'wood' || key === 'hard' || key === 'sail' || key === 'fabric' || key === 'petal';
 			mesh.staticVelocity = true;
 			if ( key === 'wood' || key === 'hard' || key === 'fabric' ) mesh.onBeforeRender = () => this.textures.bake();
 			this.group.add( mesh );

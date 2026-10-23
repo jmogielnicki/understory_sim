@@ -42,7 +42,7 @@ is the source of truth; the first set is kept for what it adds (interiors, the l
 - A **stream** with stone-lined banks and boulders, crossed by an arched timber footbridge; raised garden beds
   with fences in the foreground.
 - Beyond: the **lake**, and on the far hills more earth homes among cypress-like trees and a few large white
-  flower-like structures (sculptures or wind/light catchers; not yet built).
+  flower-like structures on tall stems (built as solar collectors, `SkyFlowers.js`; see DECISIONS.md).
 - No tall communal halls.
 
 ## The world

@@ -504,3 +504,34 @@ export function createLanternMaterial() {
 	return m;
 
 }
+
+// the sky flowers' petals (SkyFlowers.js): smooth pale petal-white, faintly lilac toward the hub, with fine
+// veins running out along them that glow the pale technology blue (breathing slowly; brighter at night). The
+// sun shows through them a little. uv: u along the petal (0 hub .. 1 tip), v across (-1 .. 1).
+export function createPetalMaterial() {
+
+	const m = standard( {
+		name: 'SkyFlowerPetals', roughness: 0.35, metalness: 0, side: 'double',
+		attributes: ATTRIBUTES, varyings: VARYINGS,
+	} );
+	m.modules = [ commonModule ];
+	m.vertex = PASS;
+	m.surface = /* wgsl */`
+	let u = in.uv.x;
+	let v = in.uv.y;
+	var c = mix( ${ srgb( 0.78, 0.72, 0.86 ) }, in.vs.vTint, smoothstep( 0.0, 0.45, u ) );
+	// veins: the spine and a few running out to the edge
+	let spine = 1.0 - smoothstep( 0.015, 0.04, abs( v ) );
+	let side = 1.0 - smoothstep( 0.02, 0.05, abs( fract( v * 2.5 + u * 0.8 ) - 0.5 ) );
+	let vein = max( spine, side * smoothstep( 0.15, 0.4, u ) * 0.7 ) * ( 1.0 - smoothstep( 0.85, 1.0, u ) );
+	c = c * ( 1.0 - vein * 0.12 );
+	let night = smoothstep( 0.1, 0.7, frame.night );
+	let breathe = sin( frame.time * 0.7 + in.vs.vData.x * 6.28 ) * 0.25 + 0.75;
+	s.albedo = c;
+	s.roughness = 0.35;
+	s.translucency = c * 0.35;
+	s.emissive = vec3f( 0.42, 0.78, 1.0 ) * vein * breathe * mix( 0.15, 2.0, night );
+`;
+	return m;
+
+}

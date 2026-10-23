@@ -65,6 +65,11 @@ Each is easy to reverse; the file or setting is named.
   power. Easy to remove (`smoke` per home, `Smoke.js`).
 - **Lanterns up the stairs** on timber posts with an arm (the neighbourhood painting); low stone lamps stay
   along the longer walks. Small fruit trees fill the gaps between homes that stairs and gardens don't use.
+- **Sky flowers.** The neighbourhood painting has tall white flowers on stems over the far hillside's trees.
+  I read them as the village's solar collectors, grown rather than built: a pale plaster stem 30-38 m tall (the
+  pines here are 25-30 m) with six cupped white petals opening to the sky, veined with the technology blue
+  (faint by day, glowing at night). Four over the hamlet's point, three above the village's top rows
+  (`SKY_FLOWERS` in `Plan.js`, `SkyFlowers.js`). Their function is my guess; easy to recast or remove.
 - **Stream and pond.** The stream drops ~45 m from the ravine to the cove through a lily pond (level 7.2 m);
   four timber footbridges. It steps down in pools over little falls (~0.5 m each), white water only at the
   lips, as in the neighbourhood painting. The pond and stream water are opaque, dark, reflective surfaces (not see-through).
