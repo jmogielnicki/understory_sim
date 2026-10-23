@@ -47,6 +47,7 @@ export const VIEWS = {
 	festivalDusk: { p: [ 352, 1.7, - 262 ], agl: true, yaw: 0.25, pitch: 0.1, time: 20.0 },
 	skyFlowers: { p: [ 400.5, 1.7, - 222 ], agl: true, yaw: 0.05, pitch: 0.12, time: 16.0 },
 	skyFlowersHamlet: { p: [ - 480, 2.2, 340 ], yaw: 1.6, pitch: 0.08, time: 16.0 },
+	skyFlowersDusk: { p: [ 400.5, 1.7, - 222 ], agl: true, yaw: 0.05, pitch: 0.12, time: 20.2 },
 	mimiGarden: { p: [ 309, 2.2, - 318 ], agl: true, yaw: - 0.35, pitch: - 0.08, time: 16.0 },
 	mimiArch: { p: [ 333.5, 1.6, - 327.5 ], agl: true, yaw: 0.15, pitch: 0.12, time: 16.0 },
 	// the neighbourhood as in reference/neighborhood-v2.png: from the hillside west of the rows, over the
