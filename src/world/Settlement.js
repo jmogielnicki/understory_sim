@@ -92,7 +92,7 @@ export class Settlement {
 		let shellTris = 0;
 		for ( const { h, g } of this.homes ) {
 
-			const r = buildHome( B, h, g, rand, ground, drapes, this.plantings, lavender, smoke );
+			const r = buildHome( B, h, g, rand, ground, drapes, this.plantings, lavender, smoke, ( x, z, rr ) => terrain.pathDistance( x, z ) > rr + 0.4 );
 			shellTris += r.shape.triangles;
 			for ( const c of r.colliders ) colliders.addBox( c.center, c.half, c.yaw, { tag: 'home' } );
 			for ( const l of r.lights ) this.lights.push( { position: l.position, color: l.kind === 'fire' ? new Color( 1.0, 0.5, 0.2 ) : new Color( 1.0, 0.66, 0.36 ), intensity: l.kind === 'window' ? 1.8 : 1.0, kind: l.kind === 'window' ? 'window' : 'lantern' } );

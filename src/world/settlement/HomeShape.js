@@ -138,7 +138,8 @@ export function homeField( s ) {
 			if ( l.side ) {
 
 				// through the end wall: a smaller arch, centred on the room's depth
-				const zc = - l.Dl * 0.48, a = Math.min( 1.7, l.Dl * 0.36 ), b = l.R * 0.78;
+				// (large: in the painting it frames the lake beyond)
+				const zc = - l.Dl * 0.5, a = Math.min( 2.1, l.Dl * 0.44 ), b = l.R * 0.86;
 				const side = Math.max( sdEllipse( z - zc, y, a, b ), - y, - l.sg * ( x - l.xc ) );
 				c = Math.min( c, side );
 

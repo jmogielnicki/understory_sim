@@ -531,7 +531,7 @@ export function terraceOutline( xl, xr, depth, r = 2.2 ) {
 }
 
 // Build one home. g: Grading.home() result. Returns the light sources, colliders and plants.
-export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = null, lavender = null, smoke = null ) {
+export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = null, lavender = null, smoke = null, pathClear = null ) {
 
 	const s = homeShape( h, rand );
 	const F = homeField( s );
@@ -644,7 +644,7 @@ export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = n
 	const outline = terraceOutline( xl, xr, td );
 	B.slab( 'stone', outline.map( ( [ x, z ] ) => V( x, 0, z ) ), 0.3, { data: [ s.seed + 0.9, 1, 0.3, 0 ], up: V( 0, 1, 0 ) } );
 	const door0 = s.openings[ 0 ];
-	terraceWall( B, outline, groundL, s.seed + 0.13, 0.5, [ [ door0.x - 1.15, door0.x + 1.15 ] ] );
+	terraceWall( B, outline, groundL, s.seed + 0.13, 0.5, [ [ door0.x - ( h.stepWidth ?? 2.8 ) / 2 - 0.2, door0.x + ( h.stepWidth ?? 2.8 ) / 2 + 0.2 ] ] );
 
 	// steps down off the terrace's front where it stands above the ground (centred on the door)
 	{
@@ -655,7 +655,7 @@ export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = n
 			const n = Math.min( 9, Math.ceil( drop / 0.17 ) ), rise = drop / n;
 			if ( lavender ) for ( const sd of [ - 1, 1 ] ) {
 
-				const p = toWorld( door0.x + sd * 1.45, 0, td + 0.5 + n * 0.17 );
+				const p = toWorld( door0.x + sd * ( ( h.stepWidth ?? 2.8 ) / 2 + 0.5 + n * 0.12 ), 0, td + 0.5 + n * 0.17 );
 				lavender.clump( p.x, groundAt( p.x, p.z ), p.z, 0.4, rand );
 
 			}
@@ -664,7 +664,10 @@ export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = n
 
 				const y = - rise * ( k + 1 ) + 0.02;
 				const z = td + 0.2 + k * 0.34;
-				B.box( 'stone', door0.x, y - 0.25 + rise / 2, z + 0.17, 1.9, 0.5 + rise, 0.36, { data: [ rand.next(), 3, 0.3, 1.9 ] } );
+				// broad steps that widen as they go down (the painting), each a dressed block
+				const sw = h.stepWidth ?? 2.8;
+				const w = sw + k * 0.25;
+				B.box( 'stone', door0.x, y - 0.25 + rise / 2, z + 0.17, w, 0.5 + rise, 0.38, { data: [ rand.next(), 3, 0.3, w ] } );
 
 			}
 
@@ -673,7 +676,12 @@ export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = n
 	}
 
 	// ---- sandstone boulders bedded beside the terrace
-	homeBoulders( B, s, g, groundL, rand, h.boulders ?? 3 + Math.floor( rand.next() * 3 ), s.openings[ 0 ].x );
+	homeBoulders( B, s, g, groundL, rand, h.boulders ?? 3 + Math.floor( rand.next() * 3 ), s.openings[ 0 ].x, pathClear ? ( lx, lz, r ) => {
+
+		const w = toWorld( lx, 0, lz );
+		return pathClear( w.x, w.z, r );
+
+	} : null );
 
 	// ---- over the front: a pergola or an awning, along the straight run beside the door
 	{
@@ -728,12 +736,12 @@ export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = n
 			const [ x0, z0 ] = outline[ i ], [ x1, z1 ] = outline[ i + 1 ];
 			const L = Math.hypot( x1 - x0, z1 - z0 ) || 1;
 			const nx = - ( z1 - z0 ) / L, nz = ( x1 - x0 ) / L;
-			for ( let t = rand.next() * 0.8; t < L; t += 0.6 + rand.next() * 0.9 ) {
+			for ( let t = rand.next() * 0.6; t < L; t += 0.45 + rand.next() * 0.7 ) {
 
 				const off = 0.8 + rand.next() * 1.3;
 				const lx = x0 + ( x1 - x0 ) * t / L + nx * off, lz = z0 + ( z1 - z0 ) * t / L + nz * off;
 				const gy = groundL( lx, lz );
-				if ( gy > - 0.3 && rand.next() < 0.6 ) continue; // (little bank where the ground is level)
+				if ( gy > - 0.3 && rand.next() < 0.35 ) continue; // (less bank where the ground is level)
 				const p = toWorld( lx, 0, lz );
 				const u = rand.next();
 				if ( lavender && u < 0.4 ) lavender.clump( p.x, groundAt( p.x, p.z ), p.z, 0.3 + rand.next() * 0.15, rand );

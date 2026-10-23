@@ -43,9 +43,9 @@ export function sandstoneBoulder( B, x, y, z, r, rand ) {
 // a few boulders bedded round a home's terrace (local frame of the home; groundL = ground above the floor):
 // beside its ends, and in the bank below its front wall, clear of the steps (the painting: big ones flanking
 // them)
-export function homeBoulders( B, s, g, groundL, rand, n = 3, stepX = 0 ) {
+export function homeBoulders( B, s, g, groundL, rand, n = 3, stepX = 0, clear = null ) {
 
-	for ( let k = 0; k < n; k ++ ) {
+	for ( let k = 0, placed = 0; placed < n && k < n * 4; k ++ ) {
 
 		let lx, lz;
 		if ( k % 2 === 0 ) {
@@ -63,7 +63,10 @@ export function homeBoulders( B, s, g, groundL, rand, n = 3, stepX = 0 ) {
 		}
 
 		const r = 0.6 + rand.next() * 0.5;
+		// (never on a path: clear( lx, lz, r ) says whether the spot is free)
+		if ( clear && ! clear( lx, lz, r ) ) continue;
 		sandstoneBoulder( B, lx, groundL( lx, lz ) - r * 0.3, lz, r, rand );
+		placed ++;
 
 	}
 
