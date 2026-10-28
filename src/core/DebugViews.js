@@ -28,6 +28,8 @@ export const VIEWS = {
 	shallows: { p: [ 390, 3.0, - 230 ], yaw: Math.PI, pitch: - 0.6, time: 12.0 },
 	// the village from over the cove, looking up the hillsides
 	villageAerial: { p: [ 375, 62, - 170 ], yaw: - 0.05, pitch: - 0.32, time: 15.5 },
+	// straight down on the village (the plan: the clusters, their commons, the paths)
+	villageTop: { p: [ 395, 330, - 345 ], yaw: 0, pitch: - 1.5707, time: 13.0 },
 	// the layout view: from the hill above the village, out over it to the lake and the islands
 	villageLayout: { p: [ 400, 105, - 560 ], yaw: Math.PI + 0.12, pitch: - 0.36, time: 15.5 },
 	// on the green, looking up at the first rows of homes
@@ -43,8 +45,10 @@ export const VIEWS = {
 	pondTop: { p: [ 238, 45, - 300 ], yaw: 0, pitch: - 1.35, time: 13.0 },
 	mimiKitchen: { p: [ 327.0, 1.6, - 339.6 ], agl: true, yaw: - 1.3, pitch: 0.02, time: 16.5 },
 	awningHome: { p: [ 281, 1.7, - 322 ], agl: true, yaw: 0.05, pitch: 0.08, time: 16.0 },
-	// up a stair between homes of the first row, to the rows above
-	stairs: { p: [ 362, 1.7, - 326 ], agl: true, yaw: 0.05, pitch: 0.2, time: 16.0 },
+	// on the common of a cluster (Layout.js F), its homes round it up the slope
+	cluster: { p: [ 412, 1.7, - 378 ], agl: true, yaw: 0.05, pitch: 0.12, time: 16.0 },
+	// a cluster on hillside B (Layout.js I) from below, looking up toward its common
+	clusterEast: { p: [ 532, 1.7, - 272 ], agl: true, yaw: - 0.6, pitch: 0.08, time: 16.0 },
 	hamletTop: { p: [ - 640, 70, 330 ], yaw: 1.57, pitch: - 1.1, time: 13.0 },
 	festivalDusk: { p: [ 352, 1.7, - 262 ], agl: true, yaw: 0.25, pitch: 0.1, time: 20.0 },
 	skyFlowers: { p: [ 400.5, 1.7, - 222 ], agl: true, yaw: 0.05, pitch: 0.12, time: 16.0 },
@@ -91,9 +95,9 @@ export const VIEWS = {
 	westGardens: { p: [ 299, 3.2, - 259 ], agl: true, yaw: 1.13, pitch: - 0.14, time: 16.0 },
 	// the meadow on the slope between rows 1 and 2, looking east along it with the sun behind
 	meadow: { p: [ 330, 1.5, - 357 ], agl: true, yaw: - 1.45, pitch: - 0.12, time: 16.0 },
-	// the upper rows of hillside A from the walk in front of row 4
-	row4: { p: [ 376, 1.7, - 410 ], agl: true, yaw: 0.25, pitch: 0.14, time: 15.5 },
-	// hillside B's upper rows from the gardens' side
+	// from a high common (Layout.js J) down over the clusters below it to the lake
+	upper: { p: [ 392, 2.2, - 446 ], agl: true, yaw: 2.6, pitch: - 0.08, time: 15.5 },
+	// hillside B from the gardens' side
 	hillB: { p: [ 488, 2.0, - 352 ], agl: true, yaw: - 1.7, pitch: 0.06, time: 16.0 },
 	// a loon (the first of the wildlife's), seen from a few metres off on the water: p is the offset from it
 	loon: { follow: 'loon', p: [ 3.6, 0.55, 0.9 ], pitch: - 0.1, time: 16.0 },

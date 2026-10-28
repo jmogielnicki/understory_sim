@@ -196,7 +196,7 @@ export function homeField( s ) {
 export function shapeRand( h ) {
 
 	let a = 2166136261;
-	for ( const ch of String( h.id ) ) a = Math.imul( a ^ ch.charCodeAt( 0 ), 16777619 );
+	for ( const ch of String( h.seed ?? h.id ) ) a = Math.imul( a ^ ch.charCodeAt( 0 ), 16777619 );
 	const next = () => {
 
 		a = ( a + 0x6d2b79f5 ) | 0;

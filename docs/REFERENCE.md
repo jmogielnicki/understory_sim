@@ -44,6 +44,8 @@ is the source of truth; the first set is kept for what it adds (interiors, the l
 - Beyond: the **lake**, and on the far hills more earth homes among cypress-like trees and a few large white
   flower-like structures on tall stems (built as solar collectors, `SkyFlowers.js`; see DECISIONS.md).
 - No tall communal halls.
+- (The village departs from the painting's rows: the author asked for something less orderly, so the homes
+  stand in small clusters; see DECISIONS.md.)
 
 ## The world
 

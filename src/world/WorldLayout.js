@@ -34,7 +34,7 @@ export const WORLD = {
 	beach: { xMin: 300, xMax: 420 },
 
 	spawn: { position: new THREE.Vector3( 290, 0, - 400 ), yaw: - 2.5 },
-	// where the player starts: on the path above the first rows of homes, looking down over their roofs to the
+	// where the player starts: by the upper footbridge west of the homes, looking down over their roofs to the
 	// green and the lake (the key art's view)
 	start: { position: new THREE.Vector3( 290, 0, - 400 ), yaw: - 2.5 },
 

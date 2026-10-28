@@ -97,7 +97,11 @@ export class Settlement {
 		// the pond first: it settles its level under the natural rim, which the stream then runs through
 		G.pond( PLAN.POND );
 		this.stream = G.stream( PLAN.STREAM, PLAN.POND );
-		this.homes = [ ...PLAN.HOMES, ...PLAN.HAMLET ].map( ( h ) => ( { h, g: G.home( h ) } ) );
+		// (graded from the lowest up: a home's terrace is never cut away by the ground dug round the roof of one
+		// below it)
+		const graded = new Map();
+		for ( const h of [ ...PLAN.HOMES, ...PLAN.HAMLET ].sort( ( a, b ) => terrain.heightAt( a.x, a.z ) - terrain.heightAt( b.x, b.z ) ) ) graded.set( h, G.home( h ) );
+		this.homes = [ ...PLAN.HOMES, ...PLAN.HAMLET ].map( ( h ) => ( { h, g: graded.get( h ) } ) );
 		// the paths join the terrain's own list (worn ground, kept clear of plants and debris)
 		for ( const p of this.allPaths ) TERRAIN_PATHS.push( p );
 		terrain.buildMinMax();
@@ -127,27 +131,10 @@ export class Settlement {
 
 		}
 
-		// a small fruit tree in some gaps between homes that neither stairs nor gardens use: in the gap's middle,
-		// set back between the houses' rounded ends
-		PLAN.ROWS.forEach( ( row, r ) => {
-
-			const used = new Set();
-			for ( const st of PLAN.STAIRS ) if ( st.rows[ 0 ] === r ) for ( const g of st.gaps ) used.add( g );
-			for ( let i = 0; i < row.length - 1; i ++ ) {
-
-				const a = PLAN.HOMES.find( ( q ) => q.id === row[ i ] ), b = PLAN.HOMES.find( ( q ) => q.id === row[ i + 1 ] );
-				if ( used.has( i ) || b.garden || rand.next() < 0.35 ) continue;
-				// the right end of a and the left end of b along their fronts
-				const ax = a.x + Math.cos( a.yaw ) * a.len / 2, az = a.z - Math.sin( a.yaw ) * a.len / 2;
-				const bx = b.x - Math.cos( b.yaw ) * b.len / 2, bz = b.z + Math.sin( b.yaw ) * b.len / 2;
-				if ( Math.hypot( bx - ax, bz - az ) < 4.5 ) continue;
-				const yaw = ( a.yaw + b.yaw ) / 2, back = - 2.5 - rand.next() * 2.5;
-				const x = ( ax + bx ) / 2 + Math.sin( yaw ) * back, z = ( az + bz ) / 2 + Math.cos( yaw ) * back;
-				this.plantings.push( { x, z, y: ground( x, z ) - 0.1, s: 0.4 + rand.next() * 0.1, kind: 'tree' } );
-
-			}
-
-		} );
+		// a shade tree on each cluster's common, where its paths meet
+		for ( const [ x, z, k ] of PLAN.COMMONS ) this.plantings.push( { x, z, y: ground( x, z ) - 0.15, s: k, sy: 0.85, sp: 1, kind: 'tree' } );
+		// and groves in the meadow between the clusters
+		for ( const [ x, z, k, sp ] of PLAN.GROVES ) this.plantings.push( { x, z, y: ground( x, z ) - 0.15, s: k, sy: 0.85 + rand.next() * 0.15, sp, kind: 'tree' } );
 
 		// the sky flowers (solar collectors) over the trees
 		for ( const [ x, z, H, yaw ] of PLAN.SKY_FLOWERS ) {

@@ -1,7 +1,7 @@
 # Understory
 
 A village of earth-sheltered homes on the north shore of Squam Lake, New Hampshire, to walk through in the
-browser: rounded plaster homes under thick planted roofs, terraced up the slope of Rattlesnake Mountain, a
+browser: rounded plaster homes under thick planted roofs, in small clusters up the slope of Rattlesnake Mountain, a
 festival green hung with lanterns and gardens in the valley, a stream falling through a lily pond into a cove,
 and the lake with its islands spread out below. The land is real (USGS lidar); the village is imagined
 (see [docs/REFERENCE.md](docs/REFERENCE.md) for the look it works toward and [docs/DECISIONS.md](docs/DECISIONS.md)
@@ -11,7 +11,7 @@ for the creative calls made so far).
 
 ![Mimi's house](docs/screenshot-homes.jpg)
 
-![The village from over the cove: the festival green, the terraced rows, the stairs between them](docs/screenshot-layout.jpg)
+![The village from over the cove: the festival green, the clusters of homes, the paths between them](docs/screenshot-layout.jpg)
 
 It is built on [Tidewater](https://github.com/dgreenheck/tidewater) by DRG Software Solutions (MIT): a
 real-time WebGPU world with its own small rendering engine (raw WebGPU and WGSL, no framework), whose sky,
@@ -40,7 +40,8 @@ water, terrain, vegetation, lighting and post-processing it reuses and adapts.
   lanterns); pergolas and awnings, curved block terraces, lavender, sandstone boulders, kitchen gardens; on some
   arches the pale blue seam of everyday technology. Shells are meshed from distance fields at load, in workers.
 - People on the festival green and on a few terraces (Tidewater's Rocketbox characters, talking, waving).
-- Walks along the rows and long stone stairs between them; the green with log play frames and a festival
+- Homes in small clusters round little commons, groves between, and paths winding from one to the next (stone
+  stairs where they climb); the green with log play frames and a festival
   ground of oaks, lantern strings and long tables; raised-bed gardens and pergolas, a stream with falls and
   timber footbridges, a lily pond, a dock.
 

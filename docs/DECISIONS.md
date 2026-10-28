@@ -28,13 +28,19 @@ Each is easy to reverse; the file or setting is named.
   forms with no hand-built seams, and every home still varies and sits on its own terrace. Chosen over Blender
   (the author agreed). The shells are meshed in parallel Web Workers from the start of loading (`Shells.js`),
   so they are ready before the village is built; each home's shape comes from its own seed (its id).
-- **Spacing (2026-10-28, the author's request: match the neighbourhood painting).** 64 homes in terraced rows
-  on the two hillsides (six rows on A, four on B), plus three west of the stream and six in the hamlet. The rows
-  follow contours of the smoothed ground about 5.2 m of height apart (~20 m), so each row's terrace stands just
-  above the roofs of the row below; homes 5.5-7.5 m apart along a row, now and then a ~13 m gap with a kitchen
-  garden; each home faces square to its row. Laid out by `tools/layout/rows.mjs` (rerun it to re-lay the rows,
-  or edit `HOMES` by hand). Mimi's house is pinned where it was. The east part of row 1 stands ~2.5 m higher
-  than her end (the ground rises there). Trees among the rows at half the clearing's density.
+- **Layout: clusters, not rows (2026-10-28, the author's request: "too orderly and geometric").** The homes
+  stand in small groups with paths winding between them, rather than the painting's terraced rows: 46 homes
+  in 15 clusters of one to five (plus six in the hamlet). Each cluster is a loose blob of homes round a little
+  common with a shade tree where its paths meet, some above it and some below, each facing down the slope
+  give or take ~15 degrees (a little toward the common when above it), all at the heights the hill gives them.
+  Bigger clusters are 64 m apart or more; pairs and lone cottages fill some of the room between; groves of
+  oak, maple and birch stand in the meadow between them so each group reads as its own. The paths are routed
+  over the ground (cheapest route: gentle grades cheap, steep ones dear, houses, stream, pond and gardens in
+  the way), each common and then each home's steps joining the nearest path already laid, so they branch like
+  desire lines and turn to stairs where they climb. Laid out by `tools/layout/clusters.mjs` (seed 11; `--png=`
+  draws the plan), written to `src/world/settlement/Layout.js`, which can be edited by hand. Mimi's house is
+  pinned (`MIMI` in `Plan.js`). Homes are graded lowest first, so a terrace is never cut away by the ground dug
+  round the roof of a home below it. Views: `cluster`, `clusterEast`, `upper`, `villageAerial`, `villageTop`.
 - **Homes.** A long low body (12-18 m along the front, 8.5-10 m deep) of warm lime plaster with rounded ends,
   walls ~2.8-3.1 m swelling into a domed roof under a thick, lumpy planted cap that overhangs ~0.5 m like a lip
   (leaves, clover, small white and violet flowers; stems trail down the plaster below it). The back half is
@@ -44,11 +50,12 @@ Each is easy to reverse; the file or setting is named.
   The rest have a door and windows only. Every home: an arched plank door with small lights and iron rings, a
   wall lantern, arched windows and round windows deep in the wall, 1-2 oval skylights with timber spokes, a
   chimney pot, a pergola grown over with vines or a canvas awning over the front.
-- **Mimi's house** is A1b, on the first row above the green: the largest (18 m, taller walls and a bigger
+- **Mimi's house** (`MIMI`, id `mimi`; its details still drawn from its old id `A1b`) stands above the green,
+  in the cluster nearest it: the largest (18 m, taller walls and a bigger
   arch, after the painting), a pergola over its door, the blue seam round the arch, and a kitchen garden at its
   west end (raised beds, bean poles with climbing vines, a woodshed stacked with logs, a rain barrel and a
-  watering can, a stone trough, a rail fence). Ten other homes have smaller gardens in the gaps the stairs
-  don't use (`garden` in `Plan.js`). View: `mimiHero`, `mimi`, `mimiArch`, `mimiGarden`.
+  watering can, a stone trough, a rail fence). A few other homes have smaller gardens off one end
+  (`garden` in `Layout.js`). View: `mimiHero`, `mimi`, `mimiArch`, `mimiGarden`.
 - **Terraces.** Flagged, with rounded front corners, on a curved retaining wall of big pillowed sandstone
   blocks that rises into a low parapet where the drop is high; steps down from the door; lavender, shrubs and
   ferns along the foot of the wall; 2-4 rounded sandstone boulders bedded beside each terrace.
@@ -68,18 +75,18 @@ Each is easy to reverse; the file or setting is named.
   copied, so the crowd repeats two faces and outfits; more Rocketbox characters would vary it. They don't walk
   or sit: the models carry only standing clips. Copies share textures and geometry; animated within 70 m.
   `?noPeople` leaves them out. The style is more realistic than the paintings: worth a look.
-- **Walks and stairs.** A walk runs along the front of each row's terraces (generated from `ROWS`), and long
-  straight stone stairs climb between homes to the row above (`STAIRS`), as in the neighbourhood image; two
-  stairs climb from the green's top path to row 1, and the paths from the bridges join the rows' walks.
+- **Paths and stairs.** The shore path, the path along the top of the green and the paths by the pond and
+  gardens are laid by hand (`MANUAL_PATHS`); the rest are routed (`LANES`, see Layout above). Stone stairs
+  wherever a path climbs steeper than ~1 in 7.
 - **Chimney smoke.** A faint wisp from about one chimney in seven, always Mimi's (the painting has one). The
   bible rules out routine combustion; I read these as bread ovens and the odd hearth fire, not heating or
   power. Easy to remove (`smoke` per home, `Smoke.js`).
 - **Lanterns up the stairs** on timber posts with an arm (the neighbourhood painting); low stone lamps stay
-  along the longer walks. Small fruit trees fill the gaps between homes that stairs and gardens don't use.
+  along the longer walks.
 - **Sky flowers.** The neighbourhood painting has tall white flowers on stems over the far hillside's trees.
   I read them as the village's solar collectors, grown rather than built: a pale plaster stem 30-38 m tall (the
   pines here are 25-30 m) with six cupped white petals opening to the sky, veined with the technology blue
-  (faint by day, glowing at night). Four over the hamlet's point, three above the village's top rows
+  (faint by day, glowing at night). Four over the hamlet's point, three above the village's highest homes
   (`SKY_FLOWERS` in `Plan.js`, `SkyFlowers.js`). Their function is my guess; easy to recast or remove.
 - **Stream and pond.** The stream drops ~45 m from the ravine to the cove through a lily pond (level 7.2 m);
   four timber footbridges. It steps down in pools over little falls (~0.5 m each), white water only at the
@@ -99,7 +106,7 @@ Each is easy to reverse; the file or setting is named.
 - **Evening light.** Low stone lamps with a warm glow line the longer walks (lit after dusk); the blue seams
   breathe; every arch glows amber at night. Path lamps are warm rather than blue: the reference's night panel
   has warm path lights, and the bible's blue is kept for the technology in the homes.
-- **Where you start.** On the path above the first rows, looking down over the roofs to the green and the lake.
+- **Where you start.** By the upper footbridge west of the village, looking down over the roofs to the green and the lake.
 
 ## Wildlife
 
@@ -125,9 +132,8 @@ Each is easy to reverse; the file or setting is named.
   open-grown red oaks and maples with broad, low crowns, birches in twos and threes, a few pines, glades of
   meadow between (`CLEARING` in `Plan.js`, rules in `ForestScatter.js`); trees keep ~4.5 m off the homes and
   the forest closes in at a ragged edge. The clearing now reaches the shore (the tall shore pines there made it
-  look unlike the paintings' broadleaf lakeside). Few trees right among the homes (a quarter of the density
-  within ~14 m of a home): the neighbourhood painting's rows are open, flowery shelves, with the big trees on
-  the green and above the village.
+  look unlike the paintings' broadleaf lakeside). Few trees right among the homes (half the density within
+  ~14 m of a home), more in the groves between the clusters (`GROVES` in `Layout.js`).
 - **Designed vistas.** Corridors from the starting point down over the green to the cove are kept free of
   trees (`VISTAS` in `Plan.js`).
 - **Fuller crowns.** Every broadleaf tree carries ~1.3x the leaf clusters it had in Tidewater (the crowns read
