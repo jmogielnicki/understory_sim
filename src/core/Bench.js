@@ -206,10 +206,10 @@ export class Bench {
 	}
 
 	// ?bench&auto=tag: reference shots (tag-view.bgra), then the timings (bench-tag.json), both uploaded
-	// to `url` (a local collector, see shots())
-	async auto( tag, { url = 'http://127.0.0.1:5190/', runs = 1 } = {} ) {
+	// to `url` (a local collector, see shots()); &benchViews=a,b times those views instead of the default set
+	async auto( tag, { url = 'http://127.0.0.1:5190/', runs = 1, views = null } = {} ) {
 
-		const views = [ ...DEFAULT_VIEWS, 'boatHelm' ];
+		views = views || [ ...DEFAULT_VIEWS, 'boatHelm' ];
 		await this.shots( views, { tag, url } );
 		// per view the fastest of the runs (clock and thermal drift only ever add time)
 		let best = null;
@@ -290,6 +290,8 @@ export class Bench {
 		const { width, height } = app.engine.canvas;
 		if ( ! this._out || this._out.width !== width || this._out.height !== height ) this._out = new Texture( { width, height, format: GPU.format, usage: [ 'render', 'copySrc', 'sample' ], label: 'bench output' } );
 		G.time.value = 1000;
+		// (the village's people load in the background)
+		if ( app.village && app.village.ready ) await app.village.ready;
 		for ( const name of views ) {
 
 			this.pose( name );

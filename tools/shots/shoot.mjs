@@ -1,7 +1,7 @@
 // Reference shots of named views (core/DebugViews.js) from a headless Chrome, for visual checks:
 //   node tools/shots/shoot.mjs view1,view2 [--tag=name] [--out=dir] [--size=1280x634] [--url=http://127.0.0.1:5189/]
 //     [--chrome=path] [--timeout=600] [--headful] [--port=5191] [--extra=&foo&bar]
-//   node tools/shots/shoot.mjs --bench [--tag=name] [--size=...]: the frame-time benchmark (?bench&auto): the default
+//   node tools/shots/shoot.mjs --bench [--tag=name] [--size=...] [--extra=&benchViews=a,b]: the frame-time benchmark (?bench&auto): the default
 //     views' shots, then <out>/bench-<tag>.json with the wall / GPU ms per view
 // Needs the dev server (npm run dev). The page runs ?bench&shots=… (core/Bench.js), which renders each view with
 // the clock stopped and uploads it as raw BGRA8 (8-byte width / height header) to the collector here, which writes

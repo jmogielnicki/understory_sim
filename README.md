@@ -34,11 +34,12 @@ water, terrain, vegetation, lighting and post-processing it reuses and adapts.
 - New Hampshire granite: ledges and talus under Rattlesnake's cliffs, boulder-strewn shores, glacial erratics.
 
 **The village** (`src/world/Settlement.js`, layout as data in `src/world/settlement/Plan.js`)
-- 34 homes in terraced rows on two hillsides, after the author's painting of Mimi's house: long, softly rounded
+- 73 homes in terraced rows on two hillsides (and a hamlet across the water), after the author's painting of Mimi's house: long, softly rounded
   plaster bodies under thick planted roofs with an overhanging lip, arched doors and round windows, skylights
   and chimneys; on many a great open arch at one end sheltering an outdoor kitchen (domed oven, long table,
   lanterns); pergolas and awnings, curved block terraces, lavender, sandstone boulders, kitchen gardens; on some
-  arches the pale blue seam of everyday technology. Shells are meshed from distance fields at load.
+  arches the pale blue seam of everyday technology. Shells are meshed from distance fields at load, in workers.
+- People on the festival green and on a few terraces (Tidewater's Rocketbox characters, talking, waving).
 - Walks along the rows and long stone stairs between them; the green with log play frames and a festival
   ground of oaks, lantern strings and long tables; raised-bed gardens and pergolas, a stream with falls and
   timber footbridges, a lily pond, a dock.

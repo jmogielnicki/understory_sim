@@ -1,7 +1,6 @@
 import { Vector3 } from '../../engine/index.js';
 import { Part, lathePart } from '../village/GeoBuilder.js';
-import { meshField } from './Sdf.js';
-import { homeShape, homeField } from './HomeShape.js';
+import { homeShape, homeField, shapeRand, meshShell } from './HomeShape.js';
 import { homeBoulders } from './HomeGarden.js';
 
 // A home (reference/home-v2.png, docs/REFERENCE.md): the plastered shell with its planted cap (HomeShape.js,
@@ -15,7 +14,7 @@ import { homeBoulders } from './HomeGarden.js';
 // Builder keys: 'stone' (pattern 8 for the shell, see SettlementMaterials), 'glazing', 'wood', 'hard',
 // 'glow', 'fabric' (the village cloth: awnings).
 
-const CELL = 0.15; // the shell's mesh resolution (m)
+const CELL = 0.18; // the shell's mesh resolution (m; Mimi's, the hero, finer: Plan cell)
 const OAK = [ 0.62, 0.45, 0.3 ];
 const HONEY = [ 0.78, 0.55, 0.33 ];
 const GREY_OAK = [ 0.6, 0.55, 0.48 ];
@@ -531,9 +530,9 @@ export function terraceOutline( xl, xr, depth, r = 2.2 ) {
 }
 
 // Build one home. g: Grading.home() result. Returns the light sources, colliders and plants.
-export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = null, lavender = null, smoke = null, pathClear = null ) {
+export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = null, lavender = null, smoke = null, pathClear = null, shell = null ) {
 
-	const s = homeShape( h, rand );
+	const s = homeShape( h, shapeRand( h ) );
 	const F = homeField( s );
 	const floorY = g.floorY;
 	const c = Math.cos( h.yaw ), sn = Math.sin( h.yaw );
@@ -546,7 +545,8 @@ export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = n
 	// ---- the shell: meshed from the field; what is under the ground left out
 	{
 
-		const m = meshField( F.all, F.lo, F.hi, h.cell ?? CELL );
+		// (meshed ahead in a worker when it could be: shells, see ShellWorker.js)
+		const m = shell ?? meshShell( s, F, h.cell ?? CELL );
 		const nv = m.p.length / 3;
 		const keep = new Uint8Array( nv );
 		const uv = new Float32Array( nv * 2 );
@@ -567,14 +567,7 @@ export function buildHome( B, h, g, rand, groundAt, drapes = null, plantings = n
 		}
 
 		const seed = s.seed;
-		const ss = ( a, b, x ) => {
-
-			const t = Math.min( 1, Math.max( 0, ( x - a ) / ( b - a ) ) );
-			return t * t * ( 3 - 2 * t );
-
-		};
-
-		B.part( 'stone', new Part( m.p, m.n, uv, idx ), 0, 0, 0, { data: ( x, y, z ) => [ seed, 8, ss( - 0.07, 0.07, F.house( x, y, z ) - F.turf( x, y, z ) ), y - F.eave( x ) ] } );
+		B.part( 'stone', new Part( m.p, m.n, uv, idx ), 0, 0, 0, { data: ( x, y, z, v ) => [ seed, 8, m.turf[ v ], m.above[ v ] ] } );
 		s.triangles = idx.length / 3;
 
 	}

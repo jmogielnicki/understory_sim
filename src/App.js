@@ -26,6 +26,8 @@ import { computeShoreField } from './world/ShoreField.js';
 import { WORLD } from './world/WorldLayout.js';
 import { Colliders } from './world/Colliders.js';
 import { Settlement } from './world/Settlement.js';
+import { meshShells } from './world/settlement/Shells.js';
+import { HOMES, HAMLET } from './world/settlement/Plan.js';
 import { Reef } from './world/Reef.js';
 import { BoatModel } from './world/BoatModel.js';
 import { Rocks } from './world/Rocks.js';
@@ -94,6 +96,8 @@ export class App {
 			if ( typeof requestAnimationFrame === 'function' ) await new Promise( ( r ) => requestAnimationFrame( () => setTimeout( r, 0 ) ) );
 
 		};
+		// the village's home shells mesh in workers while the rest loads
+		const shells = qs.has( 'noVillage' ) ? null : meshShells( [ ...HOMES, ...HAMLET ] );
 		await progress( 0.02, 'Starting WebGPU…' );
 		const engine = this.engine = new Engine( document.getElementById( 'app' ) );
 		await engine.init();
@@ -140,7 +144,11 @@ export class App {
 		// the village shapes the ground (terraces, roof mounds, the stream and the pond): build it before any
 		// terrain data is derived (shore field, GPU textures, meshes)
 		await progress( 0.12, 'Building the village…' );
-		this.village = qs.has( 'noVillage' ) ? null : new Settlement( { scene, terrain: this.terrainData, colliders: this.colliders } );
+		const tw = performance.now();
+		const ready = await shells;
+		const waited = performance.now() - tw;
+		this.village = qs.has( 'noVillage' ) ? null : new Settlement( { scene, terrain: this.terrainData, colliders: this.colliders, shells: ready } );
+		if ( this.village ) console.info( '[village] built', JSON.stringify( { ...this.village.timings, shellWait: Math.round( waited ) } ) );
 		if ( ! qs.has( 'noVeg' ) ) {
 
 			await progress( 0.15, 'Planting the woods…' );
@@ -654,7 +662,7 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 		if ( this.rocks ) this.rocks.update( this.camera );
 		if ( this.debris ) this.debris.update( this.camera );
 		if ( this.reef ) this.reef.update( dt, this.camera.position );
-		if ( this.village ) this.village.update( dt );
+		if ( this.village ) this.village.update( dt, this.camera );
 		if ( this.vegetation ) this.vegetation.update( dt, this.camera );
 		if ( this.whale ) this.whale.update( dt, this.camera );
 		this.boat.update( dt );

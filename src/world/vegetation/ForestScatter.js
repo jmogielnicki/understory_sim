@@ -169,11 +169,11 @@ export function scatterForest( site, seed = 2026 ) {
 		// (docs/REFERENCE.md: the village stands among trees); the mown green stays open but for its edges
 		const forest = 1 - smoothstep( 0.25, 0.75, c.open );
 		const lawn = site.inLawn ? site.inLawn( x, z ) : 0;
-		// (reference/neighborhood-v2.png: the rows of homes are open, flowery shelves; few trees right among
-		// them, more between the rows' ends and above them)
+		// (reference/neighborhood-v2.png: the rows of homes are open, flowery shelves with a tree here and there;
+		// more between the rows' ends and above them)
 		const od = site.obstacleDist( x, z );
 		const amongHomes = smoothstep( 14, 5, od );
-		let p = 0.92 * forest + ( 1 - forest ) * 0.3 * smoothstep( - 0.4, 0.3, patch ) * ( 1 - lawn * 0.95 ) * ( 1 - amongHomes * 0.75 );
+		let p = 0.92 * forest + ( 1 - forest ) * 0.3 * smoothstep( - 0.4, 0.3, patch ) * ( 1 - lawn * 0.95 ) * ( 1 - amongHomes * 0.5 );
 		// thinner on the ledges and steep ground
 		p *= 1 - smoothstep( 0.3, 0.6, c.rock ) * 0.6 - smoothstep( 0.45, 0.62, c.slope ) * 0.5;
 		if ( rand() > p ) return;
@@ -298,7 +298,9 @@ export function scatterForest( site, seed = 2026 ) {
 		const clump = N2.fbm( x / 24 + 3.3, z / 24 - 7.1, 2 );
 		const od = site.obstacleDist( x, z );
 		const village = smoothstep( 0.4, 0.8, c.open ) * ( 0.06 + 0.5 * smoothstep( 9, 2.5, od ) );
-		const p = ( 0.16 * ( 1 - smoothstep( 0.4, 0.8, c.open ) ) + village ) * smoothstep( - 0.25, 0.25, clump );
+		// (none on the mown green: the festival ground's tables and poles are not walls to plant against)
+		const lawnS = site.inLawn ? site.inLawn( x, z ) : 0;
+		const p = ( 0.16 * ( 1 - smoothstep( 0.4, 0.8, c.open ) ) + village ) * smoothstep( - 0.25, 0.25, clump ) * ( 1 - lawnS );
 		if ( rand() > p ) return;
 		if ( ! ok( x, z, 0.4, { maxSlope: 0.55 } ) ) return;
 		const s = 0.75 + rand() * 0.5;
@@ -321,7 +323,7 @@ export function scatterForest( site, seed = 2026 ) {
 		const od = site.obstacleDist( x, z );
 		const forestFloor = ( 1 - smoothstep( 0.3, 0.7, c.open ) ) * ( 0.25 + 0.5 * smoothstep( 0.3, 2.0, c.hollow ) + 0.25 * Math.max( 0, c.north ) );
 		const village = smoothstep( 0.4, 0.8, c.open ) * 0.55 * smoothstep( 6, 1.5, od );
-		const p = ( forestFloor + village ) * smoothstep( - 0.3, 0.2, drift );
+		const p = ( forestFloor + village ) * smoothstep( - 0.3, 0.2, drift ) * ( 1 - ( site.inLawn ? site.inLawn( x, z ) : 0 ) );
 		if ( rand() > p ) return;
 		if ( ! ok( x, z, 0.2, { maxSlope: 0.6 } ) ) return;
 		const s = 0.75 + rand() * 0.6;

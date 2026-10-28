@@ -1,4 +1,4 @@
-import { clamp, smin, smax, sdRoundRect, sdEllipse, sdArchOpening, noise3 } from './Sdf.js';
+import { clamp, smin, smax, sdRoundRect, sdEllipse, sdArchOpening, noise3, meshField } from './Sdf.js';
 
 // The form of a home (reference/home-v2.png, docs/REFERENCE.md): a long, low body of pale plaster with
 // rounded ends, its walls swelling into a domed roof under a thick planted cap that overhangs them like a
@@ -188,5 +188,44 @@ export function homeField( s ) {
 	const lo = [ - s.L / 2 - 1.2, - 0.4, - s.D - 1.2 ];
 	const hi = [ s.L / 2 + 1.2, Math.max( s.H + s.Hr, l ? l.R + l.T : 0 ) + 0.9, 1.3 ];
 	return { house, turf, cut, all, lo, hi, eave: ( x ) => eave( s, x ) };
+
+}
+
+// A home's own random sequence (seeded from its id): its shape does not depend on the order the village is
+// built in, so the shells can be meshed apart (ShellWorker.js) and still match
+export function shapeRand( h ) {
+
+	let a = 2166136261;
+	for ( const ch of String( h.id ) ) a = Math.imul( a ^ ch.charCodeAt( 0 ), 16777619 );
+	const next = () => {
+
+		a = ( a + 0x6d2b79f5 ) | 0;
+		let t = Math.imul( a ^ ( a >>> 15 ), 1 | a );
+		t = ( t + Math.imul( t ^ ( t >>> 7 ), 61 | t ) ) ^ t;
+		return ( ( t ^ ( t >>> 14 ) ) >>> 0 ) / 4294967296;
+
+	};
+
+	return { next, range: ( lo, hi ) => lo + ( hi - lo ) * next() };
+
+}
+
+// The shell of a home as triangles: positions, normals, indices, and per vertex the planted cap's share
+// (0 plaster .. 1 turf) and the height above the cap's edge (the shell material's vdata.z, .w)
+export function meshShell( s, F, cell ) {
+
+	const m = meshField( F.all, F.lo, F.hi, cell );
+	const nv = m.p.length / 3;
+	const turf = new Float32Array( nv ), above = new Float32Array( nv );
+	for ( let v = 0; v < nv; v ++ ) {
+
+		const x = m.p[ v * 3 ], y = m.p[ v * 3 + 1 ], z = m.p[ v * 3 + 2 ];
+		const hd = F.house( x, y, z );
+		turf[ v ] = smoothstep( - 0.07, 0.07, hd - F.turf( x, y, z ) );
+		above[ v ] = y - F.eave( x );
+
+	}
+
+	return { p: m.p, n: m.n, idx: Uint32Array.from( m.idx ), turf, above };
 
 }

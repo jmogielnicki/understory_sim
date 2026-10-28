@@ -42,12 +42,16 @@ export const VIEWS = {
 	mimiTop: { p: [ 322, 22, - 322 ], yaw: 0, pitch: - 1.2, time: 13.0 },
 	pondTop: { p: [ 238, 45, - 300 ], yaw: 0, pitch: - 1.35, time: 13.0 },
 	mimiKitchen: { p: [ 327.0, 1.6, - 339.6 ], agl: true, yaw: - 1.3, pitch: 0.02, time: 16.5 },
-	awningHome: { p: [ 290, 1.7, - 322 ], agl: true, yaw: 0.05, pitch: 0.08, time: 16.0 },
+	awningHome: { p: [ 281, 1.7, - 322 ], agl: true, yaw: 0.05, pitch: 0.08, time: 16.0 },
+	// up a stair between homes of the first row, to the rows above
+	stairs: { p: [ 362, 1.7, - 326 ], agl: true, yaw: 0.05, pitch: 0.2, time: 16.0 },
 	hamletTop: { p: [ - 640, 70, 330 ], yaw: 1.57, pitch: - 1.1, time: 13.0 },
 	festivalDusk: { p: [ 352, 1.7, - 262 ], agl: true, yaw: 0.25, pitch: 0.1, time: 20.0 },
 	skyFlowers: { p: [ 400.5, 1.7, - 222 ], agl: true, yaw: 0.05, pitch: 0.12, time: 16.0 },
 	skyFlowersHamlet: { p: [ - 480, 2.2, 340 ], yaw: 1.6, pitch: 0.08, time: 16.0 },
 	skyFlowersDusk: { p: [ 400.5, 1.7, - 222 ], agl: true, yaw: 0.05, pitch: 0.12, time: 20.2 },
+	crowd: { p: [ 348, 1.65, - 300 ], agl: true, yaw: Math.PI + 0.05, pitch: 0.02, time: 16.5 },
+	crowdClose: { p: [ 360, 1.6, - 293.5 ], agl: true, yaw: Math.PI * 0.8, pitch: - 0.02, time: 16.5 },
 	mimiGarden: { p: [ 309, 2.2, - 318 ], agl: true, yaw: - 0.35, pitch: - 0.08, time: 16.0 },
 	mimiArch: { p: [ 333.5, 1.6, - 327.5 ], agl: true, yaw: 0.15, pitch: 0.12, time: 16.0 },
 	// the neighbourhood as in reference/neighborhood-v2.png: from the hillside west of the rows, over the
@@ -87,8 +91,8 @@ export const VIEWS = {
 	westGardens: { p: [ 299, 3.2, - 259 ], agl: true, yaw: 1.13, pitch: - 0.14, time: 16.0 },
 	// the meadow on the slope between rows 1 and 2, looking east along it with the sun behind
 	meadow: { p: [ 330, 1.5, - 357 ], agl: true, yaw: - 1.45, pitch: - 0.12, time: 16.0 },
-	// the top row of hillside A from the walk behind row 3
-	row4: { p: [ 380, 1.7, - 427 ], agl: true, yaw: 0.1, pitch: 0.08, time: 15.5 },
+	// the upper rows of hillside A from the walk in front of row 4
+	row4: { p: [ 376, 1.7, - 410 ], agl: true, yaw: 0.25, pitch: 0.14, time: 15.5 },
 	// hillside B's upper rows from the gardens' side
 	hillB: { p: [ 488, 2.0, - 352 ], agl: true, yaw: - 1.7, pitch: 0.06, time: 16.0 },
 	// a loon (the first of the wildlife's), seen from a few metres off on the water: p is the offset from it

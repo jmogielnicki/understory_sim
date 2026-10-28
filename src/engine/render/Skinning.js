@@ -215,42 +215,51 @@ export class SkinnedModel {
 	async _buildMeshes( materialOptions ) {
 
 		const g = this.gltf;
-		// textures (shared between materials that use the same image)
-		const texCache = new Map();
+		// textures (shared between materials that use the same image, and between every model made from this
+		// gltf: a crowd of copies uploads them once)
+		const texCache = g._skinTextures || ( g._skinTextures = new Map() );
 		const tex = async ( info, srgb ) => {
 
 			if ( ! info ) return null;
 			const src = g.textures[ info.index ].source;
 			const key = src + ( srgb ? 's' : 'l' );
-			if ( ! texCache.has( key ) ) {
+			if ( ! texCache.has( key ) ) texCache.set( key, ( async () => {
 
 				const im = g.images[ src ];
 				const px = await decodeImage( im.bytes, im.mimeType );
 				const t = new Texture( { label: 'char' + src, width: px.width, height: px.height, format: srgb ? 'rgba8unorm-srgb' : 'rgba8unorm', data: px.data, mips: true, usage: [ 'sample', 'copyDst' ], sampler: 'anisoRepeat' } );
 				t.getGPU();
 				generateMipmaps( t );
-				texCache.set( key, t );
+				return t;
 
-			}
+			} )() );
 
-			return texCache.get( key );
+			return await texCache.get( key );
 
 		};
 
 		const meshNode = g.nodes.findIndex( ( n ) => n.mesh !== undefined && n.skin !== undefined );
 		const prims = g.meshes[ g.nodes[ meshNode ].mesh ];
 		const matCache = new Map();
+		// geometry, likewise shared by every copy (the joints live in each model's own buffer)
+		const geoCache = g._skinGeometries || ( g._skinGeometries = new Map() );
 		for ( const p of prims ) {
 
-			const geo = new BufferGeometry();
-			const A = p.attributes;
-			geo.setAttribute( 'position', new BufferAttribute( A.POSITION.array, 3 ) );
-			if ( A.NORMAL ) geo.setAttribute( 'normal', new BufferAttribute( A.NORMAL.array, 3 ) );
-			if ( A.TEXCOORD_0 ) geo.setAttribute( 'uv', new BufferAttribute( toFloat( A.TEXCOORD_0 ), 2 ) );
-			geo.setAttribute( 'skinIndex', new BufferAttribute( Uint32Array.from( A.JOINTS_0.array ), 4 ) );
-			geo.setAttribute( 'skinWeight', new BufferAttribute( normalizeWeights( toFloat( A.WEIGHTS_0 ) ), 4 ) );
-			if ( p.indices ) geo.setIndex( new BufferAttribute( p.indices instanceof Uint32Array || p.indices instanceof Uint16Array ? p.indices : Uint32Array.from( p.indices ), 1 ) );
-			geo.computeBoundingSphere();
+			let geo = geoCache.get( p );
+			if ( ! geo ) {
+
+				geo = new BufferGeometry();
+				geoCache.set( p, geo );
+				const A = p.attributes;
+				geo.setAttribute( 'position', new BufferAttribute( A.POSITION.array, 3 ) );
+				if ( A.NORMAL ) geo.setAttribute( 'normal', new BufferAttribute( A.NORMAL.array, 3 ) );
+				if ( A.TEXCOORD_0 ) geo.setAttribute( 'uv', new BufferAttribute( toFloat( A.TEXCOORD_0 ), 2 ) );
+				geo.setAttribute( 'skinIndex', new BufferAttribute( Uint32Array.from( A.JOINTS_0.array ), 4 ) );
+				geo.setAttribute( 'skinWeight', new BufferAttribute( normalizeWeights( toFloat( A.WEIGHTS_0 ) ), 4 ) );
+				if ( p.indices ) geo.setIndex( new BufferAttribute( p.indices instanceof Uint32Array || p.indices instanceof Uint16Array ? p.indices : Uint32Array.from( p.indices ), 1 ) );
+				geo.computeBoundingSphere();
+
+			}
 
 			let mat = matCache.get( p.material );
 			if ( ! mat ) {

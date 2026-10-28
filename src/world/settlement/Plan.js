@@ -18,56 +18,102 @@
 // ROWS: the homes along each contour shelf (low to high per hillside); a walk runs in front of each row's
 //   terraces and stairs climb between the homes to the row above (see rowPaths below).
 export const HOMES = [
-	// ---- hillside A, row 1 (~14 m above the lake), just above the green. A1b is Mimi's house.
-	{ id: 'A1a', x: 291, z: - 335, yaw: 0.06, len: 13, depth: 9, loggia: null, terrace: 5, porch: 'awning' },
-	{ id: 'A1b', name: 'Mimi', x: 324, z: - 338, yaw: - 0.02, len: 18, depth: 10, loggia: 'right', loggiaSpan: 6.6, loggiaRise: 4.7, wall: 3.3, roofRise: 2.4, terrace: 6.2, seam: true, porch: 'pergola', garden: true, skylights: 1, smoke: true, roundHigh: true },
-	{ id: 'A1c', x: 352, z: - 340, yaw: 0.04, len: 14, depth: 9, loggia: null, terrace: 4.5, seam: true },
-	{ id: 'A1d', x: 378, z: - 342, yaw: - 0.08, len: 14.8, depth: 9.5, loggia: 'right', terrace: 5 , garden: 9 },
-	{ id: 'A1e', x: 405, z: - 343, yaw: - 0.18, len: 12.5, depth: 8.5, loggia: null, terrace: 4.5 },
-	// ---- hillside A, row 2 (~22 m), staggered over row 1
-	{ id: 'A2a', x: 311, z: - 372, yaw: 0.05, len: 15, depth: 10, loggia: 'left', terrace: 5 },
-	{ id: 'A2b', x: 338, z: - 374, yaw: 0, len: 14.5, depth: 9, loggia: null, terrace: 4.5, seam: true },
-	{ id: 'A2c', x: 365, z: - 376, yaw: - 0.05, len: 15.6, depth: 10, loggia: 'right', terrace: 5.4 , garden: 9 },
-	{ id: 'A2d', x: 393, z: - 378, yaw: - 0.1, len: 13.5, depth: 9, loggia: null, terrace: 4.5 },
-	{ id: 'A2e', x: 420, z: - 381, yaw: - 0.2, len: 12.7, depth: 9, loggia: null, terrace: 4.5, seam: true , garden: 9 },
-	// ---- hillside A, row 3 (~29 m)
-	{ id: 'A3a', x: 325, z: - 410, yaw: 0.04, len: 14.3, depth: 9, loggia: 'right', terrace: 4.5 },
-	{ id: 'A3b', x: 352, z: - 410, yaw: 0, len: 14, depth: 10, loggia: null, terrace: 5, seam: true , garden: 9 },
-	{ id: 'A3c', x: 380, z: - 412, yaw: - 0.04, len: 13.9, depth: 9, loggia: null, terrace: 4.5 },
-	{ id: 'A3d', x: 407, z: - 414, yaw: - 0.1, len: 13, depth: 9.5, loggia: 'left', terrace: 5 , garden: 9 },
-	{ id: 'A3e', x: 434, z: - 418, yaw: - 0.18, len: 13.5, depth: 9, loggia: null, terrace: 4.5 },
-	// ---- hillside A, row 4 (~36-45 m), the top row under the woods
-	{ id: 'A4a', x: 338, z: - 444, yaw: 0, len: 13.5, depth: 9, loggia: null, terrace: 4.5 },
-	{ id: 'A4b', x: 366, z: - 447, yaw: - 0.25, len: 14.1, depth: 9, loggia: 'left', terrace: 4.5, seam: true , garden: 9 },
-	{ id: 'A4c', x: 394, z: - 449, yaw: 0.12, len: 15, depth: 10, loggia: null, terrace: 5 },
-	{ id: 'A4d', x: 422, z: - 451, yaw: - 0.2, len: 14.3, depth: 9, loggia: 'right', terrace: 4.5 , garden: 9 },
-	{ id: 'A4e', x: 448, z: - 454, yaw: - 0.25, len: 12.1, depth: 8.5, loggia: null, terrace: 4.5, seam: true },
+	// (rows laid along the hill's contours by tools/layout/rows.mjs; edit freely)
+	// ---- row A1
+	{ id: 'A1a', x: 279.9, z: - 334.1, yaw: 0.02, len: 15.5, depth: 9, loggia: null, terrace: 4.7 },
+	{ id: 'A1b', name: 'Mimi', x: 324, z: - 338, yaw: - 0.02, len: 18, depth: 10, loggia: 'right', loggiaSpan: 6.6, loggiaRise: 4.7, wall: 3.3, roofRise: 2.4, terrace: 6.2, seam: true, porch: 'pergola', garden: 14, skylights: 1, smoke: true, roundHigh: true, cell: 0.14 },
+	{ id: 'A1c', x: 351.8, z: - 341.1, yaw: - 0.19, len: 14, depth: 9.5, loggia: null, terrace: 5.3, seam: true },
+	{ id: 'A1d', x: 369.8, z: - 335.1, yaw: - 0.06, len: 12.5, depth: 9, loggia: null, terrace: 4.9 },
+	{ id: 'A1e', x: 388.5, z: - 340.5, yaw: 0.06, len: 14, depth: 9, loggia: 'left', terrace: 5.3 },
+	{ id: 'A1f', x: 409.1, z: - 340.9, yaw: - 0.04, len: 13.5, depth: 9.5, loggia: 'left', terrace: 5.1 },
+	{ id: 'A1g', x: 428.8, z: - 337.2, yaw: - 0.23, len: 13, depth: 10, loggia: 'left', terrace: 5.4 },
+	{ id: 'A1h', x: 449, z: - 331.2, yaw: - 0.28, len: 16, depth: 10, loggia: null, terrace: 4.7 },
+	// ---- row A2
+	{ id: 'A2a', x: 294, z: - 364.1, yaw: 0.2, len: 12.5, depth: 10, loggia: null, terrace: 4.7 },
+	{ id: 'A2b', x: 312.8, z: - 370.7, yaw: 0.17, len: 15, depth: 9.5, loggia: null, terrace: 4.7 },
+	{ id: 'A2c', x: 333.4, z: - 374.4, yaw: 0.04, len: 14, depth: 9, loggia: null, terrace: 4.6, seam: true },
+	{ id: 'A2d', x: 352.1, z: - 371.3, yaw: - 0.04, len: 13, depth: 8.5, loggia: null, terrace: 4.9 },
+	{ id: 'A2e', x: 379.8, z: - 369.9, yaw: 0, len: 16, depth: 9.5, loggia: 'left', terrace: 5.2, garden: 10 },
+	{ id: 'A2f', x: 401.6, z: - 372.9, yaw: - 0.02, len: 14.5, depth: 10, loggia: null, terrace: 5.3 },
+	{ id: 'A2g', x: 421.5, z: - 371.2, yaw: - 0.19, len: 14, depth: 9.5, loggia: 'right', terrace: 4.7 },
+	{ id: 'A2h', x: 442.4, z: - 364.3, yaw: - 0.33, len: 15.5, depth: 8.5, loggia: 'right', terrace: 5.3 },
+	{ id: 'A2i', x: 466.7, z: - 352.8, yaw: - 0.4, len: 13.5, depth: 9, loggia: null, terrace: 4.7, garden: 9 },
+	// ---- row A3
+	{ id: 'A3a', x: 305.8, z: - 394.3, yaw: 0.12, len: 15.5, depth: 9.5, loggia: 'right', terrace: 5 },
+	{ id: 'A3b', x: 325.6, z: - 397.5, yaw: 0.05, len: 13, depth: 9, loggia: null, terrace: 4.8, seam: true },
+	{ id: 'A3c', x: 352.5, z: - 396.8, yaw: - 0.02, len: 14.5, depth: 10, loggia: null, terrace: 4.5, garden: 10 },
+	{ id: 'A3d', x: 379.4, z: - 395, yaw: - 0.05, len: 13, depth: 9.5, loggia: 'right', terrace: 4.8, garden: 10 },
+	{ id: 'A3e', x: 399.4, z: - 394.2, yaw: - 0.09, len: 14.5, depth: 10, loggia: null, terrace: 5.2 },
+	{ id: 'A3f', x: 420.3, z: - 392.8, yaw: - 0.18, len: 13.5, depth: 9.5, loggia: 'right', terrace: 4.9 },
+	{ id: 'A3g', x: 439.9, z: - 385.2, yaw: - 0.3, len: 15.5, depth: 9.5, loggia: null, terrace: 4.9 },
+	{ id: 'A3h', x: 460.3, z: - 380.7, yaw: - 0.36, len: 14, depth: 9, loggia: 'left', terrace: 4.6 },
+	// ---- row A4
+	{ id: 'A4a', x: 316.9, z: - 427.7, yaw: - 0.11, len: 14, depth: 9.5, loggia: 'right', terrace: 5 },
+	{ id: 'A4b', x: 336.3, z: - 423.8, yaw: - 0.09, len: 15, depth: 9.5, loggia: 'left', terrace: 5.4 },
+	{ id: 'A4c', x: 357.9, z: - 425.7, yaw: - 0.16, len: 15, depth: 9, loggia: null, terrace: 5.2 },
+	{ id: 'A4d', x: 377.3, z: - 417.6, yaw: - 0.15, len: 14.5, depth: 9.5, loggia: null, terrace: 4.8 },
+	{ id: 'A4e', x: 396.8, z: - 415.6, yaw: - 0.05, len: 13, depth: 8.5, loggia: null, terrace: 5.1 },
+	{ id: 'A4f', x: 415.5, z: - 418.7, yaw: - 0.07, len: 13, depth: 9.5, loggia: 'left', terrace: 5.5, seam: true },
+	{ id: 'A4g', x: 441.4, z: - 411.6, yaw: - 0.27, len: 14.5, depth: 9.5, loggia: null, terrace: 5.2, garden: 10 },
+	{ id: 'A4h', x: 461.3, z: - 404.8, yaw: - 0.45, len: 13, depth: 9, loggia: 'right', terrace: 4.8 },
+	{ id: 'A4i', x: 478.6, z: - 393.2, yaw: - 0.53, len: 15, depth: 9, loggia: 'right', terrace: 4.9 },
+	// ---- row A5
+	{ id: 'A5a', x: 325.7, z: - 452.9, yaw: - 0.14, len: 16, depth: 9.5, loggia: null, terrace: 4.8 },
+	{ id: 'A5b', x: 348.3, z: - 449.6, yaw: - 0.22, len: 15.5, depth: 9, loggia: 'right', terrace: 5.4 },
+	{ id: 'A5c', x: 373, z: - 439, yaw: - 0.17, len: 13, depth: 9, loggia: null, terrace: 4.6, seam: true, garden: 9 },
+	{ id: 'A5d', x: 398.5, z: - 437.2, yaw: - 0.11, len: 13, depth: 9.5, loggia: 'left', terrace: 5.1, garden: 9 },
+	{ id: 'A5e', x: 418.3, z: - 436.4, yaw: - 0.14, len: 15, depth: 8.5, loggia: null, terrace: 5.4, seam: true },
+	{ id: 'A5f', x: 437.7, z: - 431.6, yaw: - 0.25, len: 13, depth: 9, loggia: 'right', terrace: 4.8, seam: true },
+	{ id: 'A5g', x: 469.4, z: - 419.4, yaw: - 0.25, len: 13.5, depth: 9.5, loggia: 'left', terrace: 4.8, seam: true, garden: 17 },
+	// ---- row A6
+	{ id: 'A6a', x: 374.1, z: - 455.3, yaw: - 0.18, len: 16, depth: 10, loggia: null, terrace: 4.5, seam: true },
+	{ id: 'A6b', x: 393.3, z: - 457.2, yaw: - 0.12, len: 13, depth: 9.5, loggia: 'right', terrace: 5 },
+	{ id: 'A6c', x: 414.7, z: - 454.6, yaw: - 0.15, len: 16, depth: 9, loggia: 'left', terrace: 4.5 },
+	{ id: 'A6d', x: 443.5, z: - 446.4, yaw: - 0.28, len: 14, depth: 9, loggia: null, terrace: 4.9, garden: 11 },
+	{ id: 'A6e', x: 463.6, z: - 440.2, yaw: - 0.24, len: 13.5, depth: 9, loggia: 'left', terrace: 4.9, seam: true },
+	{ id: 'A6f', x: 483, z: - 435.8, yaw: - 0.19, len: 13, depth: 9, loggia: null, terrace: 5.4 },
+	// ---- row B1
+	{ id: 'B1a', x: 463.9, z: - 302.3, yaw: - 0.73, len: 14, depth: 9.5, loggia: 'left', terrace: 4.7, seam: true },
+	{ id: 'B1b', x: 479, z: - 286.4, yaw: - 0.78, len: 15, depth: 9.5, loggia: 'left', terrace: 4.6 },
+	{ id: 'B1c', x: 493.5, z: - 271.2, yaw: - 0.69, len: 13, depth: 8.5, loggia: 'right', terrace: 4.9 },
+	{ id: 'B1d', x: 508.5, z: - 258.3, yaw: - 0.38, len: 16, depth: 9.5, loggia: 'right', terrace: 4.6 },
+	{ id: 'B1e', x: 536, z: - 258.4, yaw: - 0.05, len: 13.5, depth: 10, loggia: null, terrace: 5.2, seam: true, garden: 9 },
+	// ---- row B2
+	{ id: 'B2a', x: 486.9, z: - 327.9, yaw: - 0.5, len: 15, depth: 9.5, loggia: null, terrace: 5, seam: true },
+	{ id: 'B2b', x: 506.3, z: - 317.3, yaw: - 0.41, len: 15.5, depth: 9.5, loggia: 'right', terrace: 5.4 },
+	{ id: 'B2c', x: 525.5, z: - 309.2, yaw: - 0.3, len: 13, depth: 9, loggia: 'right', terrace: 4.9 },
+	{ id: 'B2d', x: 545.4, z: - 307.5, yaw: - 0.32, len: 15.5, depth: 9, loggia: 'left', terrace: 5.1 },
+	{ id: 'B2e', x: 562.7, z: - 296.4, yaw: - 0.45, len: 15, depth: 9.5, loggia: 'right', terrace: 4.7 },
+	// ---- row B3
+	{ id: 'B3a', x: 507.4, z: - 346.4, yaw: - 0.33, len: 12.5, depth: 8.5, loggia: null, terrace: 4.7, seam: true },
+	{ id: 'B3b', x: 525.4, z: - 340.5, yaw: - 0.17, len: 13, depth: 9, loggia: 'right', terrace: 4.9 },
+	{ id: 'B3c', x: 545.4, z: - 339.6, yaw: - 0.07, len: 15, depth: 8.5, loggia: 'right', terrace: 4.8 },
+	{ id: 'B3d', x: 567.2, z: - 341.3, yaw: - 0.08, len: 15, depth: 8.5, loggia: null, terrace: 4.5 },
+	// ---- row B4
+	{ id: 'B4a', x: 531.8, z: - 365, yaw: - 0.06, len: 15, depth: 8.5, loggia: 'left', terrace: 4.6 },
+	{ id: 'B4b', x: 551.7, z: - 365.1, yaw: 0.05, len: 12.5, depth: 8.5, loggia: null, terrace: 4.8, seam: true },
+	{ id: 'B4c', x: 571.5, z: - 368, yaw: 0.14, len: 13, depth: 9.5, loggia: 'right', terrace: 4.6 },
 	// ---- hillside A west of the stream, facing south-east over the pond
 	{ id: 'AWa', x: 226, z: - 356, yaw: 0.38, len: 14.5, depth: 9, loggia: 'right', terrace: 5, seam: true },
 	{ id: 'AWb', x: 238, z: - 392, yaw: 0.3, len: 13.5, depth: 9.5, loggia: null, terrace: 4.5 , garden: 9 },
 	{ id: 'AWc', x: 262, z: - 428, yaw: - 0.25, len: 14.5, depth: 9, loggia: 'right', terrace: 4.5 },
-	// ---- hillside B, facing south-west over the gardens and the cove
-	{ id: 'B1a', x: 449, z: - 304, yaw: - 0.72, len: 14.5, depth: 9, loggia: 'right', terrace: 5 },
-	{ id: 'B1b', x: 470, z: - 281, yaw: - 0.8, len: 14, depth: 9.5, loggia: null, terrace: 5.4, seam: true },
-	{ id: 'B1c', x: 490, z: - 257, yaw: - 0.9, len: 12.5, depth: 9, loggia: null, terrace: 4.5 , garden: 9 },
-	{ id: 'B2a', x: 490, z: - 331, yaw: - 0.7, len: 14, depth: 9.5, loggia: null, terrace: 5 },
-	{ id: 'B2b', x: 514, z: - 307, yaw: - 0.78, len: 15.5, depth: 9, loggia: 'right', terrace: 4.5, seam: true },
-	{ id: 'B2c', x: 538, z: - 283, yaw: - 0.86, len: 15.2, depth: 10, loggia: 'right', terrace: 5.4 , garden: 9 },
-	{ id: 'B3a', x: 512, z: - 362, yaw: - 0.6, len: 13.5, depth: 9, loggia: null, terrace: 4.5 },
-	{ id: 'B3b', x: 538, z: - 340, yaw: - 0.7, len: 13, depth: 9.5, loggia: 'left', terrace: 5, seam: true },
-	{ id: 'B4a', x: 532, z: - 392, yaw: - 0.45, len: 13.5, depth: 9, loggia: null, terrace: 4.5 },
-	{ id: 'B4b', x: 557, z: - 369, yaw: - 0.55, len: 14.8, depth: 9.5, loggia: 'left', terrace: 5, seam: true },
-	{ id: 'B4c', x: 580, z: - 346, yaw: - 0.7, len: 12.3, depth: 9, loggia: null, terrace: 4.5 },
 ];
 export const ROWS = [
-	[ 'A1a', 'A1b', 'A1c', 'A1d', 'A1e' ], [ 'A2a', 'A2b', 'A2c', 'A2d', 'A2e' ], [ 'A3a', 'A3b', 'A3c', 'A3d', 'A3e' ], [ 'A4a', 'A4b', 'A4c', 'A4d', 'A4e' ],
-	[ 'B1a', 'B1b', 'B1c' ], [ 'B2a', 'B2b', 'B2c' ], [ 'B3a', 'B3b' ], [ 'B4a', 'B4b', 'B4c' ],
+	[ 'A1a', 'A1b', 'A1c', 'A1d', 'A1e', 'A1f', 'A1g', 'A1h' ],
+	[ 'A2a', 'A2b', 'A2c', 'A2d', 'A2e', 'A2f', 'A2g', 'A2h', 'A2i' ],
+	[ 'A3a', 'A3b', 'A3c', 'A3d', 'A3e', 'A3f', 'A3g', 'A3h' ],
+	[ 'A4a', 'A4b', 'A4c', 'A4d', 'A4e', 'A4f', 'A4g', 'A4h', 'A4i' ],
+	[ 'A5a', 'A5b', 'A5c', 'A5d', 'A5e', 'A5f', 'A5g' ],
+	[ 'A6a', 'A6b', 'A6c', 'A6d', 'A6e', 'A6f' ],
+	[ 'B1a', 'B1b', 'B1c', 'B1d', 'B1e' ],
+	[ 'B2a', 'B2b', 'B2c', 'B2d', 'B2e' ],
+	[ 'B3a', 'B3b', 'B3c', 'B3d' ],
+	[ 'B4a', 'B4b', 'B4c' ],
 ];
 // stairs between rows: [ lower, upper ] (indices into ROWS) and the gaps of the lower row they climb through
 // (0 = between its first two homes)
 export const STAIRS = [
-	{ rows: [ 0, 1 ], gaps: [ 1, 3 ] }, { rows: [ 1, 2 ], gaps: [ 0, 2 ] }, { rows: [ 2, 3 ], gaps: [ 1, 3 ] },
-	{ rows: [ 4, 5 ], gaps: [ 0 ] }, { rows: [ 5, 6 ], gaps: [ 0 ] }, { rows: [ 6, 7 ], gaps: [ 0 ] },
+	{ rows: [ 0, 1 ], gaps: [ 2, 4 ] }, { rows: [ 1, 2 ], gaps: [ 2, 5 ] }, { rows: [ 2, 3 ], gaps: [ 3, 4 ] }, { rows: [ 3, 4 ], gaps: [ 2, 6 ] }, { rows: [ 4, 5 ], gaps: [ 0, 4 ] }, { rows: [ 6, 7 ], gaps: [ 2 ] }, { rows: [ 7, 8 ], gaps: [ 2 ] }, { rows: [ 8, 9 ], gaps: [ 1 ] },
 ];
 
 // Sky flowers (SkyFlowers.js): the village's solar collectors, tall white flowers over the trees (reference/
@@ -98,7 +144,12 @@ export const FESTIVAL = {
 	// strings: pairs of anchors (index into poles, or 'o' + index into oaks)
 	strings: [ [ 0, 1 ], [ 1, 2 ], [ 2, 3 ], [ 3, 4 ], [ 4, 5 ], [ 5, 0 ], [ 'o0', 0 ], [ 'o1', 1 ], [ 'o1', 2 ], [ 'o2', 3 ], [ 'o3', 4 ], [ 'o3', 5 ], [ 0, 3 ], [ 1, 4 ] ],
 	tables: [ [ 340, - 283, 0.12 ], [ 357, - 285, 0.08 ], [ 348, - 277, 0.1 ], [ 330, - 280, 0.15 ] ],
+	// the crowd (Crowd.js): circles of people talking, [ x, z, how many ]
+	circles: [ [ 338, - 289, 3 ], [ 352, - 280.5, 2 ], [ 364, - 288.5, 4 ], [ 325.5, - 275, 3 ], [ 345, - 270.5, 2 ], [ 371, - 281, 3 ], [ 333, - 293.5, 2 ], [ 357.5, - 293, 2 ],
+		[ 341.5, - 276.5, 3 ], [ 366, - 276, 3 ], [ 318, - 285, 2 ], [ 380, - 286, 2 ] ],
 };
+// people standing on the terraces of homes: [ home id, x along the front, out from it, turn (rad) ]
+export const RESIDENTS = [ [ 'A1b', 2.4, 2.8, 0.3 ], [ 'A2c', - 1.5, 2.2, - 0.2 ], [ 'B1a', 1.0, 2.5, 0.1 ] ];
 export const PLAY = [
 	{ kind: 'logFrame', x: 318, z: - 312, yaw: 0.3 },
 	{ kind: 'balanceLog', x: 342, z: - 316, yaw: - 0.4, len: 7 },
@@ -164,12 +215,13 @@ const MANUAL_PATHS = [
 	// from the west bridge down past the gardens to the shore
 	{ w: 1.25, pts: [ [ 258, - 287 ], [ 276, - 287 ], [ 292, - 279 ], [ 300, - 262 ] ] },
 	// west of the stream: the pond, the homes there, up to the second and third rows across the bridges
-	{ w: 1.25, pts: [ [ 258, - 287 ], [ 240, - 290 ], [ 219, - 298 ], [ 208, - 316 ], [ 213, - 336 ], [ 232, - 347 ], [ 252, - 352 ], [ 269, - 356 ], [ 286, - 362 ], [ 302, - 365.5 ] ] },
-	{ w: 1.15, pts: [ [ 213, - 336 ], [ 206, - 358 ], [ 218, - 377 ], [ 236, - 384 ], [ 262, - 396 ], [ 289, - 405 ], [ 316, - 403.5 ] ] },
+	// (toWalk: the path ends at the start of that row's walk, see rowPaths)
+	{ w: 1.25, toWalk: 1, pts: [ [ 258, - 287 ], [ 240, - 290 ], [ 219, - 298 ], [ 208, - 316 ], [ 213, - 336 ], [ 232, - 347 ], [ 252, - 352 ], [ 269, - 356 ] ] },
+	{ w: 1.15, toWalk: 2, pts: [ [ 213, - 336 ], [ 206, - 358 ], [ 218, - 377 ], [ 236, - 384 ], [ 262, - 396 ], [ 289, - 405 ] ] },
 	{ w: 1.15, pts: [ [ 262, - 396 ], [ 260, - 410 ], [ 261, - 421 ] ] },
 	// the green to the gardens, and on to hillside B's first and second rows
 	{ w: 1.35, pts: [ [ 392, - 276 ], [ 404, - 286 ], [ 418, - 300 ], [ 436, - 312 ] ] },
-	{ w: 1.25, pts: [ [ 412, - 296 ], [ 424, - 306 ], [ 436, - 312 ], [ 450, - 322 ], [ 470, - 330 ] ] },
+	{ w: 1.25, toWalk: 7, pts: [ [ 412, - 296 ], [ 424, - 306 ], [ 436, - 312 ], [ 450, - 322 ] ] },
 	// hillside B's first row down to the shore path
 	{ w: 1.25, pts: [ [ 487, - 244 ], [ 494, - 230 ], [ 498, - 214 ] ] },
 	// the dock
@@ -220,12 +272,18 @@ function rowPaths() {
 
 	const walks = ROWS.map( rowWalk );
 	const out = [];
-	// the first row of hillside A has the green's top path for its walk
-	walks.forEach( ( w, i ) => {
+	walks.forEach( ( w, i ) => out.push( { w: 1.3, pts: w, row: i } ) );
+	// the manual paths that lead to a row's walk end at its start
+	for ( const p of MANUAL_PATHS ) if ( p.toWalk !== undefined ) p.pts.push( walks[ p.toWalk ][ 0 ] );
+	// stairs up from the green's top path to the first row
+	for ( const g of GREEN_STAIRS ) {
 
-		if ( i !== 0 ) out.push( { w: 1.3, pts: w, row: i } );
+		const w = walks[ 0 ];
+		const ax = ( w[ g * 2 + 1 ][ 0 ] + w[ g * 2 + 2 ][ 0 ] ) / 2, az = ( w[ g * 2 + 1 ][ 1 ] + w[ g * 2 + 2 ][ 1 ] ) / 2;
+		const lo = nearestOn( MANUAL_PATHS[ 1 ].pts, ax, az );
+		out.push( { w: 1.2, stair: true, pts: [ lo, [ ( ax + lo[ 0 ] ) / 2, ( az + lo[ 1 ] ) / 2 ], [ ax, az ] ] } );
 
-	} );
+	}
 
 	for ( const st of STAIRS ) {
 
@@ -246,7 +304,10 @@ function rowPaths() {
 
 }
 
-export const PATHS = [ ...MANUAL_PATHS, ...rowPaths() ];
+// gaps of the first row with stairs down to the green
+const GREEN_STAIRS = [ 2, 4 ];
+
+export const PATHS = [ ...rowPaths(), ...MANUAL_PATHS ];
 
 // Glacial erratics: big lichened granite boulders left among the homes and the meadows (x, z, radius)
 export const ERRATICS = [

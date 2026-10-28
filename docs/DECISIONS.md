@@ -24,12 +24,17 @@ Each is easy to reverse; the file or setting is named.
   free-standing rounded homes instead of vaults cut into the hill, and a village with no tall halls.
 - **How the homes are modelled.** Each shell is a blend of soft shapes (body, roof shoulder, the open arch's
   barrel, the planted cap, the openings) written as distance functions (`HomeShape.js`) and meshed once at load
-  with surface nets (`Sdf.js`, 15 cm cells). This gives the painting's rounded, hand-plastered forms with no
-  hand-built seams, and every home still varies and sits on its own terrace. Chosen over Blender (the author
-  agreed). Cost: ~2.6 s at load for all 40 shells; no measurable change in GPU frame time.
-- **Size.** 34 homes in four rows on the north hillside (A), three west of the stream, four short rows on the
-  east hillside (B), six more in the hamlet across the water (coarser meshes: they are only seen from afar).
-  Positions kept from the first layout; the reference packs homes closer, which is easy to try in `Plan.js`.
+  with surface nets (`Sdf.js`; 18 cm cells, Mimi's 14 cm). This gives the painting's rounded, hand-plastered
+  forms with no hand-built seams, and every home still varies and sits on its own terrace. Chosen over Blender
+  (the author agreed). The shells are meshed in parallel Web Workers from the start of loading (`Shells.js`),
+  so they are ready before the village is built; each home's shape comes from its own seed (its id).
+- **Spacing (2026-10-28, the author's request: match the neighbourhood painting).** 64 homes in terraced rows
+  on the two hillsides (six rows on A, four on B), plus three west of the stream and six in the hamlet. The rows
+  follow contours of the smoothed ground about 5.2 m of height apart (~20 m), so each row's terrace stands just
+  above the roofs of the row below; homes 5.5-7.5 m apart along a row, now and then a ~13 m gap with a kitchen
+  garden; each home faces square to its row. Laid out by `tools/layout/rows.mjs` (rerun it to re-lay the rows,
+  or edit `HOMES` by hand). Mimi's house is pinned where it was. The east part of row 1 stands ~2.5 m higher
+  than her end (the ground rises there). Trees among the rows at half the clearing's density.
 - **Homes.** A long low body (12-18 m along the front, 8.5-10 m deep) of warm lime plaster with rounded ends,
   walls ~2.8-3.1 m swelling into a domed roof under a thick, lumpy planted cap that overhangs ~0.5 m like a lip
   (leaves, clover, small white and violet flowers; stems trail down the plaster below it). The back half is
@@ -56,10 +61,16 @@ Each is easy to reverse; the file or setting is named.
 - **The festival ground.** The green's lower half: four big open-grown oaks, six tall timber poles with strings
   of paper lanterns (red, orange, yellow, cream, teal, rose) and cloth pennants swagged between them and into
   the oaks, four long trestle tables with benches, jugs and bowls (`FESTIVAL` in `Plan.js`, `Festival.js`). The
-  lanterns glow after dusk. The painting's crowd of people is not attempted (there are no people yet).
+  lanterns glow after dusk.
+- **People.** ~34 people: twelve circles talking on the festival ground (one speaking at a time, the others
+  listening, looking round, now and then shrugging) and three on the terraces of homes, who wave when you come
+  up (Mimi is one, in her arch). They are Tidewater's two Rocketbox characters (Joe and Marta, MIT licence),
+  copied, so the crowd repeats two faces and outfits; more Rocketbox characters would vary it. They don't walk
+  or sit: the models carry only standing clips. Copies share textures and geometry; animated within 70 m.
+  `?noPeople` leaves them out. The style is more realistic than the paintings: worth a look.
 - **Walks and stairs.** A walk runs along the front of each row's terraces (generated from `ROWS`), and long
-  straight stone stairs climb between homes to the row above (`STAIRS`), as in the neighbourhood image. The
-  green's top path is the first row's walk.
+  straight stone stairs climb between homes to the row above (`STAIRS`), as in the neighbourhood image; two
+  stairs climb from the green's top path to row 1, and the paths from the bridges join the rows' walks.
 - **Chimney smoke.** A faint wisp from about one chimney in seven, always Mimi's (the painting has one). The
   bible rules out routine combustion; I read these as bread ovens and the odd hearth fire, not heating or
   power. Easy to remove (`smoke` per home, `Smoke.js`).
@@ -163,5 +174,7 @@ On this Mac (headless Chrome), 2560 x 1267: about 19-23 ms of GPU time per frame
 (the forest view is the heaviest); dynamic resolution takes it from there. The new homes left the total
 unchanged (189.9 ms over the nine views, against 190.1 before); lavender, boulders, sky flowers, smoke and
 the stair lanterns added ~2 % more (measured against the earlier commit in the same session, since the
-machine's own timings drift by ~3 % between runs). Building the home shells adds ~2.6 s to load.
+machine's own timings drift by ~3 % between runs). The denser layout and the people added about 4 % more
+(measured while the machine was heavily loaded by other work, so rough); the shells are 2.3M triangles.
+Building the village (with the shells meshed ahead in workers) takes ~2.5 s of the load under that load.
 Measure with `node tools/shots/shoot.mjs --bench`.

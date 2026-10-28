@@ -25,7 +25,7 @@ app.init( ( p, text, until ) => ui.setLoading( p, text, until ) ).then( async ()
 	if ( app.qs.has( 'bench' ) ) {
 
 		window.__bench = new ( await import( './core/Bench.js' ) ).Bench( app );
-		if ( app.qs.has( 'auto' ) ) window.__job = window.__bench.auto( app.qs.get( 'auto' ), { runs: Number( app.qs.get( 'runs' ) ) || 1, url: app.qs.get( 'collector' ) || undefined } );
+		if ( app.qs.has( 'auto' ) ) window.__job = window.__bench.auto( app.qs.get( 'auto' ), { runs: Number( app.qs.get( 'runs' ) ) || 1, url: app.qs.get( 'collector' ) || undefined, views: app.qs.get( 'benchViews' ) ? app.qs.get( 'benchViews' ).split( ',' ) : null } );
 		// ?bench&shots=view1,view2[&tag=name][&dt=seconds][&seq=n&every=frames]: reference shots of the named views only (core/DebugViews.js; dt > 0: the clock runs, e.g. for the eased lens flare)
 		// &wdbg=N: the water shader's debug view (WaterMaterial debugMode) in the shots; &size=WxH: the shot size; &collector=url: where the shots are uploaded
 		if ( app.qs.has( 'wdbg' ) && app.waterMaterial ) app.waterMaterial.debugMode.value = Number( app.qs.get( 'wdbg' ) );

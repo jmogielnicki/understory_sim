@@ -12,6 +12,7 @@ import { buildFestival } from './settlement/Festival.js';
 import { buildHomeGarden } from './settlement/HomeGarden.js';
 import { Lavender } from './settlement/Lavender.js';
 import { Smoke } from './settlement/Smoke.js';
+import { Crowd, circleSpots } from './settlement/Crowd.js';
 import { buildSteps, buildPavedPath, buildPathLights, buildBridge, buildPergola, buildGarden, buildPlay, buildDock } from './settlement/Landscape.js';
 import { waterMeshes } from './settlement/Water.js';
 import { Drapes } from './settlement/Drapes.js';
@@ -19,6 +20,8 @@ import { createStoneMaterial, createGlazingMaterial, createGlowMaterial, createS
 import { buildSkyFlower } from './settlement/SkyFlowers.js';
 import { buildBoats } from './settlement/Boats.js';
 import * as PLAN from './settlement/Plan.js';
+
+const qs = ( k ) => typeof location !== 'undefined' && new URLSearchParams( location.search ).has( k );
 
 // The village of earth homes on the north shore of the cove (see settlement/Plan.js for the layout and
 // docs/REFERENCE.md for the look). Built in two stages:
@@ -30,9 +33,27 @@ import * as PLAN from './settlement/Plan.js';
 //
 // The interface the rest of the world uses is the old Village's: group, lights (getLightSources),
 // footprints (getFootprints: keep-out circles for plants and rocks), buildings, update().
+// (x, z) within r of another home's house or terrace (the homes stand a few metres apart: what one sets
+// beside itself must not land on its neighbour)
+function onHome( self, x, z, r ) {
+
+	for ( const q of [ ...PLAN.HOMES, ...PLAN.HAMLET ] ) {
+
+		if ( q === self || Math.abs( q.x - x ) > 30 || Math.abs( q.z - z ) > 30 ) continue;
+		const c = Math.cos( q.yaw ), s = Math.sin( q.yaw ), dx = x - q.x, dz = z - q.z;
+		const lx = dx * c - dz * s, lz = dx * s + dz * c;
+		if ( Math.abs( lx ) < q.len / 2 + 1 + r && lz > - q.depth - r && lz < q.terrace + 0.5 + r ) return true;
+
+	}
+
+	return false;
+
+}
+
 export class Settlement {
 
-	constructor( { scene, terrain, colliders } ) {
+	// shells: Map id -> a home's shell meshed ahead (Shells.js); the homes not in it mesh themselves
+	constructor( { scene, terrain, colliders, shells = null } ) {
 
 		const t0 = performance.now();
 		this.terrain = terrain;
@@ -93,7 +114,7 @@ export class Settlement {
 		let shellTris = 0;
 		for ( const { h, g } of this.homes ) {
 
-			const r = buildHome( B, h, g, rand, ground, drapes, this.plantings, lavender, smoke, ( x, z, rr ) => terrain.pathDistance( x, z ) > rr + 0.4 );
+			const r = buildHome( B, h, g, rand, ground, drapes, this.plantings, lavender, smoke, ( x, z, rr ) => terrain.pathDistance( x, z ) > rr + 0.4 && ! onHome( h, x, z, rr ), shells && shells.get( h.id ) );
 			shellTris += r.shape.triangles;
 			for ( const c of r.colliders ) colliders.addBox( c.center, c.half, c.yaw, { tag: 'home' } );
 			for ( const l of r.lights ) this.lights.push( { position: l.position, color: l.kind === 'fire' ? new Color( 1.0, 0.5, 0.2 ) : new Color( 1.0, 0.66, 0.36 ), intensity: l.kind === 'window' ? 1.8 : 1.0, kind: l.kind === 'window' ? 'window' : 'lantern' } );
@@ -106,8 +127,8 @@ export class Settlement {
 
 		}
 
-		// small fruit trees in the gaps between homes that neither stairs nor gardens use, a little behind the
-		// line of their fronts
+		// a small fruit tree in some gaps between homes that neither stairs nor gardens use: in the gap's middle,
+		// set back between the houses' rounded ends
 		PLAN.ROWS.forEach( ( row, r ) => {
 
 			const used = new Set();
@@ -115,15 +136,14 @@ export class Settlement {
 			for ( let i = 0; i < row.length - 1; i ++ ) {
 
 				const a = PLAN.HOMES.find( ( q ) => q.id === row[ i ] ), b = PLAN.HOMES.find( ( q ) => q.id === row[ i + 1 ] );
-				if ( used.has( i ) || b.garden ) continue;
-				for ( let k = 0; k < 2; k ++ ) {
-
-					const t = 0.4 + k * 0.2 + ( rand.next() - 0.5 ) * 0.08;
-					const back = - 2 - rand.next() * 4;
-					const x = a.x + ( b.x - a.x ) * t + Math.sin( a.yaw ) * back, z = a.z + ( b.z - a.z ) * t + Math.cos( a.yaw ) * back;
-					this.plantings.push( { x, z, y: ground( x, z ) - 0.1, s: 0.42 + rand.next() * 0.12, kind: 'tree' } );
-
-				}
+				if ( used.has( i ) || b.garden || rand.next() < 0.35 ) continue;
+				// the right end of a and the left end of b along their fronts
+				const ax = a.x + Math.cos( a.yaw ) * a.len / 2, az = a.z - Math.sin( a.yaw ) * a.len / 2;
+				const bx = b.x - Math.cos( b.yaw ) * b.len / 2, bz = b.z + Math.sin( b.yaw ) * b.len / 2;
+				if ( Math.hypot( bx - ax, bz - az ) < 4.5 ) continue;
+				const yaw = ( a.yaw + b.yaw ) / 2, back = - 2.5 - rand.next() * 2.5;
+				const x = ( ax + bx ) / 2 + Math.sin( yaw ) * back, z = ( az + bz ) / 2 + Math.cos( yaw ) * back;
+				this.plantings.push( { x, z, y: ground( x, z ) - 0.1, s: 0.4 + rand.next() * 0.1, kind: 'tree' } );
 
 			}
 
@@ -268,8 +288,29 @@ export class Settlement {
 		const sm = smoke.mesh();
 		if ( sm ) this.group.add( sm );
 		for ( const m of waterMeshes( this.stream, PLAN.POND, rand ) ) this.group.add( m );
+		// people: circles talking on the festival ground, a few on the terraces (loaded in the background;
+		// `ready` resolves when they stand)
+		{
+
+			const spots = [];
+			PLAN.FESTIVAL.circles.forEach( ( [ x, z, n ], i ) => spots.push( ...circleSpots( x, z, n, i, ground, rand ) ) );
+			for ( const [ id, lx, lz, turn ] of PLAN.RESIDENTS ) {
+
+				const e = this.homes.find( ( q ) => q.h.id === id );
+				if ( ! e ) continue;
+				const { h, g } = e, c = Math.cos( h.yaw ), s = Math.sin( h.yaw );
+				spots.push( { x: h.x + lx * c + lz * s, y: g.floorY, z: h.z - lx * s + lz * c, yaw: h.yaw + turn } );
+
+			}
+
+			for ( const p of spots ) colliders.addCylinder( p.x, p.z, 0.28, p.y, p.y + 1.8, { tag: 'person' } );
+			this.crowd = qs( 'noPeople' ) ? null : new Crowd( spots, rand );
+			if ( this.crowd ) this.group.add( this.crowd.group );
+			this.ready = this.crowd ? this.crowd.ready : Promise.resolve();
+
+		}
 		scene.add( this.group );
-		this.timings = { grading: Math.round( t1 - t0 ), build: Math.round( performance.now() - t1 ), steps, shellTris, drapeVerts: drapes.batch.vcount, plantings: this.plantings.length };
+		this.timings = { grading: Math.round( t1 - t0 ), build: Math.round( performance.now() - t1 ), steps, shellTris, shellsAhead: shells ? shells.size : 0, drapeVerts: drapes.batch.vcount, plantings: this.plantings.length };
 
 	}
 
@@ -353,6 +394,10 @@ export class Settlement {
 
 	}
 
-	update() {}
+	update( dt, camera ) {
+
+		if ( this.crowd && camera ) this.crowd.update( dt, camera );
+
+	}
 
 }
